@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Audio from Server</title>
+</head>
+<body>
+    <h1>Audio Playback</h1>
+    <p>Click the button to play audio from the server:</p>
+    <button id="play-audio">Play Audio</button>
+    <audio id="audio-player" controls></audio>
+
+    <script>
+document.getElementById('play-audio').addEventListener('click', async () => {
+    const audioPlayer = document.getElementById('audio-player');
+    const SERVER_URL = "https://server-20zy.onrender.com/audio"; // Your server URL
+
+    try {
+        // Fetch audio from the server
+        const response = await fetch(SERVER_URL);
+
+        // Check if the response is OK
+        if (!response.ok) {
+            throw new Error(`Failed to fetch audio: ${response.statusText}`);
+        }
+
+        // Check the Content-Type header for debugging
+        const contentType = response.headers.get('Content-Type');
+        console.log('Content-Type:', contentType);
+
+        // Convert the audio response to a blob and create a URL
+        const audioBlob = await response.blob();
+
+        // Check if the blob size is reasonable
+        console.log('Audio Blob Size:', audioBlob.size);
+        console.log('data: ',audioBlob.text())
+        const audioURL = URL.createObjectURL(audioBlob);
+
+        // Set the audio player source and play
+        audioPlayer.src = audioURL;
+        audioPlayer.play();
+    } catch (error) {
+        console.error('Error playing audio:', error);
+        alert('Failed to play audio. Check console for details.');
+    }
+});
+
+    </script>
+</body>
+</html>

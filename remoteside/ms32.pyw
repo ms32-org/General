@@ -20,7 +20,7 @@ import asyncio
 import aiohttp
 import pygame
 
-url = "https://ms32-c67b.onrender.com/"
+url = "https://ms32-sha2.onrender.com/"
 # url = "http://127.0.0.1:5000/"
 screen = get_primary_display()
 terminate = False
@@ -90,12 +90,12 @@ def playfunc(fp):
         # try:                
         CoInitialize()
         devices = AudioUtilities.GetSpeakers()
-        interface = devices.Activate(IAudioEndpointVolume.iid, CLSCTX_ALL, None)
+        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         volume = interface.QueryInterface(IAudioEndpointVolume)
         
         if volume.GetMute():
             volume.SetMute(0, None)
-        log("Unmuted")
+            log("Unmuted")
         vmin, vmax, _ = volume.GetVolumeRange()
         target = vmin + (95 / 100.0) * (vmax - vmin)
         target = max(min(target, vmax), vmin)
