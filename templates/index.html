@@ -193,6 +193,7 @@ const runbtn = document.getElementById("run-btn");
 const exeInput = document.getElementById("center-file-input");
 const audioPlayer = document.getElementById("mic")
 let mic
+let interval
 let isadded = false;
 let cmd;
 let state;
@@ -210,28 +211,17 @@ dropdown.addEventListener("change", () => {
 });
 
 async function playAudio() {
-
-  try {
-    while (mic) {
-      fetch('https://server-20zy.onrender.com/audio',{method:"GET"})
+    fetch('https://server-20zy.onrender.com/audio', { method: "GET" })
         .then(response => response.arrayBuffer())
         .then(buffer => {
-          const audioContext = new AudioContext();
-          const source = audioContext.createBufferSource();
-          audioContext.decodeAudioData(buffer, (decodedData) => {
-            source.buffer = decodedData;
-            source.connect(audioContext.destination);
-            source.start();
-          });
-        })
-        .catch((error) => {
-          console.error('Error playing audio:', error);
-  });
-
-}
-} catch (error) {
-    console.error('Error during audio streaming:', error);
-  }
+            const audioContext = new AudioContext();
+            const source = audioContext.createBufferSource();
+            audioContext.decodeAudioData(buffer, (decodedData) => {
+                source.buffer = decodedData;
+                source.connect(audioContext.destination);
+                source.start();
+            });
+        });
 }
 
 
@@ -252,6 +242,7 @@ async function fetchButtonState() {
     }
     else{
       mic = false
+      clearInterval(interval)
     }
   } catch (error) {
     console.error('Error fetching button state:', error);
@@ -284,7 +275,7 @@ function initializeToggleButton(buttonId, defaultText, initialState) {
       cmd = "bLoCk"
     }else if (defaultText === "Mic"){
       cmd = "mIc"
-      playAudio()
+      interval = setInterval(playAudio,260)
     }
 
     if (updatedButton.dataset.state === 'on') {
