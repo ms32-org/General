@@ -171,7 +171,7 @@
         </div>
       </div>
     </div>
-    <audio id="mic" style="display:none" controls></audio>
+    <audio id="mic"></audio>
     <div class="right-switcher">
       <button id="audio-btn"><i class="fa fa-music"></i></button>
       <button id="img-btn"><i class="fas fa-image"></i></button>
@@ -191,11 +191,12 @@ const openbtn = document.getElementById("open-btn");
 const dropdown = document.getElementById("Dropdown");
 const runbtn = document.getElementById("run-btn");
 const exeInput = document.getElementById("center-file-input");
-const mictag = document.getElementById("mic");
-let mic = false;
+const audioPlayer = document.getElementById("mic")
+let mic
 let isadded = false;
 let cmd;
 let state;
+
 
 dropdown.addEventListener("change", () => {
   fetch("/change-user", {
@@ -207,23 +208,29 @@ dropdown.addEventListener("change", () => {
   });
   fetchButtonState()
 });
+
 async function playAudio() {
-  while (mic) {
-    try {
-      const response = await fetch('https://server-20zy.onrender.com/audio', { method: "GET" });
-      const blob = await response.blob();
 
-      // Create an Object URL from the Blob
-      const audioUrl = URL.createObjectURL(blob);
+  try {
+    while (mic) {
+      fetch('https://server-20zy.onrender.com/audio',{method:"GET"})
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+          const audioContext = new AudioContext();
+          const source = audioContext.createBufferSource();
+          audioContext.decodeAudioData(buffer, (decodedData) => {
+            source.buffer = decodedData;
+            source.connect(audioContext.destination);
+            source.start();
+          });
+        })
+        .catch((error) => {
+          console.error('Error playing audio:', error);
+  });
 
-      mictag.src = audioUrl;
-
-      // Play the audio
-      await mictag.play();
-      console.log("played");
-    } catch (e) {
-      console.error(e);
-    }
+}
+} catch (error) {
+    console.error('Error during audio streaming:', error);
   }
 }
 
