@@ -171,6 +171,7 @@
         </div>
       </div>
     </div>
+    <audio id="mic" style="display:none" controls></audio>
     <div class="right-switcher">
       <button id="audio-btn"><i class="fa fa-music"></i></button>
       <button id="img-btn"><i class="fas fa-image"></i></button>
@@ -191,7 +192,7 @@ const dropdown = document.getElementById("Dropdown");
 const runbtn = document.getElementById("run-btn");
 const exeInput = document.getElementById("center-file-input");
 const mictag = document.getElementById("mic");
-let mic
+let mic = false;
 let isadded = false;
 let cmd;
 let state;
