@@ -2,7 +2,9 @@ import os
 from time import time
 from flask import Flask, render_template, request, redirect, jsonify, Response
 from datetime import datetime
+import base64
 import json
+import requests as rq
 from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
@@ -13,6 +15,12 @@ spam = False
 selected_user = "93"
 output = ""
 control_data = {}
+token = "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"
+owner = "ms32-org"
+repo = "maksadPura"
+file_path = "/storage/emulated/0/Documents/Pydroid3/test.py"
+branch = "main" 
+commit_message = "file upload"
 STATIC_FOLDER = os.path.join("static")
 if not os.path.exists(STATIC_FOLDER):
     os.makedirs(STATIC_FOLDER)
@@ -348,6 +356,15 @@ def exe():
                 a.write("rUn " + file.filename)
     return redirect("/")            
 
+@app.route("/run-exe",methods=["POST"])
+def run_exe():
+    if request.method == "POST":
+        file = request.form["exe"]
+        if file:           
+            with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as a:
+                a.write("rUn " + file)
+    return redirect("/")        
+
 @app.route("/image", methods=["GET", "POST"])
 def img():
     if request.method == "POST":
@@ -500,6 +517,28 @@ def audio():
 		with open(os.path.join(STATIC_FOLDER,"mic","audio.wav","wb")) as file:
 			file.write(request.data)
 		with open(os.path.join(STATIC_FOLDER,"mic","time.txt","w")) as file:
-			file.write(datetime.now())		
+			file.write(datetime.now())
+@app.route("/upload-files",methods=["POST"])
+def upload_files():
+	if request.method == "POST":
+		file = request.file["file"]
+		path = request.form["path"]
+		if file and file.filename !="":
+			encoded_content = base64.b64encode(file).decode("utf-8")
+			url = f"https://api.github.com/repos/{owner}/{repo}/contents/{STATIC_FOLDER}/{path}/{file.filename}"
+			file.save(os.path.join(STATIC_FOLDER,path,file.filename))
+			headers = {
+				    "Authorization": f"token {token}",
+				    "Accept": "application/vnd.github.v3+json"
+				}				
+			data = {
+				    "message": commit_message,
+				    "content": encoded_content,
+				    "branch": branch
+				}				
+			response = rq.put(url, json=data, headers=headers)				
+			if response.status_code == 201:
+				print("File successfully added to the repository!")
+			
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
