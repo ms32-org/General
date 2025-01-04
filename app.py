@@ -243,7 +243,6 @@ def schedule():
         task = {
             "id": len(data["tasks"]),
             "cmd": cmd,
-            "time": current_time,
             "execution_time": execution_time.strftime("%d-%m-%Y %H:%M")
         }
         data["tasks"].append(task)
