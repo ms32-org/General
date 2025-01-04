@@ -521,7 +521,7 @@ def audio():
 @app.route("/upload-files",methods=["POST", "GET"])
 def upload_files():
 	if request.method == "POST":
-		file = request.file["file"]
+		file = request.files["file"]
 		path = request.form["path"]
 		if file and file.filename !="":
 			encoded_content = base64.b64encode(file).decode("utf-8")
