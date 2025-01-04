@@ -10,7 +10,7 @@ firstReload = True
 timezone = ZoneInfo("Asia/Kolkata")
 startTime = time()
 spam = False
-selected_user = "01"
+selected_user = "93"
 output = ""
 control_data = {}
 STATIC_FOLDER = os.path.join("static")
@@ -95,7 +95,7 @@ def root():
     else:
         data = {"tasks": []}
     firstReload = False       
-    return render_template("index.html", state=state if state else "Offline", files=files,images=images,videos=videos, tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,users=users,selected = selected)
+    return render_template("index.html", state=state if state else "Offline", files=files,images=images,videos=videos, tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,users=users,selected = selected_user)
 
 @app.route("/edit", methods=["POST", "GET"])
 def edit():
@@ -134,18 +134,19 @@ def command():
                 if os.path.exists(tasks_file):
                     tasks_to_delete = None
                     for task in tasks["tasks"]:
-                        exe = datetime.strptime(task["execution_time"], "%d-%m-%Y %H:%M")
-                        exe = exe.strftime("%d-%m-%Y %H:%M")
-                        now = datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
-                        if exe <= now:
-                            cmd = task["cmd"]
-                            tasks_to_delete = task["id"]
-                            break
-
-                    if tasks_to_delete is not None:
-                        tasks["tasks"] = [task for task in tasks["tasks"] if task["id"] != tasks_to_delete]
-                        with open(tasks_file, "w") as file:
-                            json.dump(tasks, file, indent=4)
+                        if task["user"] == user:
+	                        exe = datetime.strptime(task["execution_time"], "%d-%m-%Y %H:%M")
+	                        exe = exe.strftime("%d-%m-%Y %H:%M")
+	                        now = datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
+	                        if exe <= now:
+	                            cmd = task["cmd"]
+	                            tasks_to_delete = task["id"]
+	                            break
+	
+                        if tasks_to_delete is not None:
+	                        tasks["tasks"] = [task for task in tasks["tasks"] if task["id"] != tasks_to_delete]
+	                        with open(tasks_file, "w") as file:
+	                            json.dump(tasks, file, indent=4)
 
             if not spam:
                 with open(message_file, "w") as file:
