@@ -15,6 +15,14 @@
         "shareToggleState": {
             "state": "off",
             "color": "red"
+        },
+        "INToggleState": {
+            "state": "off",
+            "color": "red"
+        },
+        "micToggleState": {
+            "state": "off",
+            "color": "red"
         }
     },
     "94": {
@@ -31,6 +39,14 @@
             "color": "red"
         },
         "shareToggleState": {
+            "state": "off",
+            "color": "red"
+        },
+        "INToggleState": {
+            "state": "off",
+            "color": "red"
+        },
+        "micToggleState": {
             "state": "off",
             "color": "red"
         }
@@ -51,6 +67,14 @@
         "shareToggleState": {
             "state": "off",
             "color": "red"
+        },
+        "INToggleState": {
+            "state": "off",
+            "color": "red"
+        },
+        "micToggleState": {
+            "state": "off",
+            "color": "red"
         }
     },
     "01": {
@@ -67,6 +91,14 @@
             "color": "red"
         },
         "shareToggleState": {
+            "state": "off",
+            "color": "red"
+        },
+        "INToggleState": {
+            "state": "off",
+            "color": "red"
+        },
+        "micToggleState": {
             "state": "off",
             "color": "red"
         }
@@ -87,6 +119,14 @@
         "shareToggleState": {
             "state": "off",
             "color": "red"
+        },
+        "INToggleState": {
+            "state": "off",
+            "color": "red"
+        },
+        "micToggleState": {
+            "state": "off",
+            "color": "red"
         }
     },
     "03": {
@@ -103,6 +143,14 @@
             "color": "red"
         },
         "shareToggleState": {
+            "state": "off",
+            "color": "red"
+        },
+        "INToggleState": {
+            "state": "off",
+            "color": "red"
+        },
+        "micToggleState": {
             "state": "off",
             "color": "red"
         }

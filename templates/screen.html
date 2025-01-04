@@ -17,9 +17,38 @@
         width: 100%;
         height: 100%;
       }
+
+      .toolbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px;
+        z-index: 1000;
+        transition: top 0.3s;
+      }
+      .toolbar.hidden {
+        top: -50px; /* Hide the toolbar above the viewport */
+      }
+      .toolbar button {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
+    <div class="toolbar hidden">
+      <button id="fullscreen-btn">Toggle Fullscreen</button>
+      <button id="screenshot-btn">Screenshot</button>
+      <button id="toggle-control-btn">Toggle Control</button>
+    </div>
     <canvas id="screen" class="full-screen-image"></canvas>
   </body>
   <script>
@@ -78,14 +107,10 @@
 
     window.addEventListener("keydown", (e) => {
       if (!controlTrue) return; // Check controlTrue before executing
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "f") {
-        document.documentElement.requestFullscreen();
+      if (e.key.length === 1) {
+        keys.add(e.keyCode);
       } else {
-        if (e.key.length === 1) {
-          keys.add(e.keyCode);
-        } else {
-          keys.add(e.key);
-        }
+        keys.add(e.key);
       }
     });
 
@@ -149,5 +174,46 @@
     canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
     setInterval(video, 150);
+
+    document.getElementById("fullscreen-btn").addEventListener("click", () => {
+      toggleFullscreen();
+    });
+
+    document.getElementById("screenshot-btn").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "screenshot.png";
+      link.click();
+    });
+
+    document
+      .getElementById("toggle-control-btn")
+      .addEventListener("click", () => {
+        controlTrue = !controlTrue;
+        alert(`Control mode: ${controlTrue ? "Enabled" : "Disabled"}`);
+      });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    let toolbar = document.querySelector(".toolbar");
+    let timeout;
+
+    document.addEventListener("mousemove", (e) => {
+      if (e.clientY < 50) {
+        toolbar.classList.remove("hidden");
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          toolbar.classList.add("hidden");
+        }, 2000);
+      }
+    });
   </script>
 </html>
