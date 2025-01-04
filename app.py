@@ -115,45 +115,66 @@ def command():
     global startTime
     global selected_user
     global spam
-    cmd = None
-    taskCmd = None
-    if request.method == "POST":
-        user = request.get_json().get("user") 
-        message_file = os.path.join(STATIC_FOLDER, "message.txt")
-        tasks_file = os.path.join(STATIC_FOLDER, "tasks.json")
+    message_file = os.path.join(STATIC_FOLDER, "message.txt")
+    tasks_file = os.path.join(STATIC_FOLDER, "tasks.json")
+    
+    with open(tasks_file, "r") as file:
+        tasks = json.load(file)
 
-        with open(message_file, "r") as file:
-                cmd = file.read()
-                
+    if request.method == "POST":
+        user = request.get_json().get("user")
+
         if selected_user == user:
             startTime = time()
-            if cmd !="":
-                 if not spam:
-                     with open(message_file, "w") as file:
-                     	file.write("")	            
-                 return cmd
-            
-        with open(tasks_file, "r") as file:
-        	tasks = json.load(file)  
+            cmd = ""
+            if os.path.exists(message_file):
+                with open(message_file, "r") as file:
+                    cmd = file.read()
+            if cmd == "":
+                if os.path.exists(tasks_file):
+                    tasks_to_delete = None
+                    for task in tasks["tasks"]:
+                        exe = datetime.strptime(task["execution_time"], "%d-%m-%Y %H:%M")
+                        exe = exe.strftime("%d-%m-%Y %H:%M")
+                        now = datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
+                        if exe <= now:
+                            cmd = task["cmd"]
+                            tasks_to_delete = task["id"]
+                            break
 
-        tasks_to_delete = None
-        for task in tasks["tasks"]:
+                    if tasks_to_delete is not None:
+                        tasks["tasks"] = [task for task in tasks["tasks"] if task["id"] != tasks_to_delete]
+                        with open(tasks_file, "w") as file:
+                            json.dump(tasks, file, indent=4)
+
+            if not spam:
+                with open(message_file, "w") as file:
+                    file.write("")
+
+            return cmd if cmd else "none"
+
+        else:
+            tasks_to_delete = None
+            taskcmd = None
+            for task in tasks["tasks"]:
                 if task["user"] == user:
                     exe = datetime.strptime(task["execution_time"], "%d-%m-%Y %H:%M")
-                    now = datetime.now(timezone)
+                    exe = exe.strftime("%d-%m-%Y %H:%M")
+                    now = datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
                     if exe <= now:
-                        taskCmd = task["cmd"]
-                        tasks_to_delete = task["id"]  
+                        taskcmd = task["cmd"]
+                        tasks_to_delete = task["id"]
                         break
 
-        if tasks_to_delete:
+            if tasks_to_delete is not None:
                 tasks["tasks"] = [task for task in tasks["tasks"] if task["id"] != tasks_to_delete]
                 with open(tasks_file, "w") as file:
                     json.dump(tasks, file, indent=4)
 
-        if taskCmd:
-            return taskCmd
+            return taskcmd if taskcmd else "none"
+
     return "none"
+
 
 @app.route("/play", methods=["POST", "GET"])
 def play():
