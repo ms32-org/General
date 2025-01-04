@@ -93,14 +93,13 @@
       <button id="mic-toggle" style="background-color:{{mc}}">Mic: {{ms}}</button>
     </div>
 
-    <div class="left-sidebar">
+    <div class="sidebar hidden" id="schedule-sidebar">
       <div class="sidebar-header">Schedule Task</div>
       <div class="sidebar-content">
         {% for task in tasks["tasks"] %}
         <div class="task-item">
           <div class="task-details">
             <span><span class="green-label">Task:</span> {{task["cmd"]}}</span>
-            <span><span class="green-label">Created On:</span> {{task["time"]}}</span>
             <span><span class="green-label">Execution At:</span> {{task["execution_time"]}}</span>
           </div>
           <form action="/delete-task" method="POST" class="task-actions">
@@ -176,6 +175,7 @@
       <button id="audio-btn"><i class="fa fa-music"></i></button>
       <button id="img-btn"><i class="fas fa-image"></i></button>
       <button id="vid-btn"><i class="fas fa-video"></i></button>
+      <button id="sch-btn"><i class=" fas fa-sharp-duotone fa-solid fa-clipboard-list"></i></button>    
     </div>
   </div>
 <script>
@@ -520,17 +520,21 @@ setInterval(update, 1000);
     const audioBtn = document.getElementById("audio-btn");
     const imgBtn = document.getElementById("img-btn");
     const vidBtn = document.getElementById("vid-btn");
+    const schBtn = document.getElementById("sch-btn");
     const audioSidebar = document.getElementById("audio-sidebar");
     const imgSidebar = document.getElementById("img-sidebar");
     const vidSidebar = document.getElementById("vid-sidebar");
+    const schSidebar = document.getElementById("schedule-sidebar");
 
     function hideAllSidebars() {
       audioSidebar.classList.add("hidden");
       imgSidebar.classList.add("hidden");
       vidSidebar.classList.add("hidden");
+      schSidebar.classList.add("hidden");
       audioBtn.classList.remove("active");
       imgBtn.classList.remove("active");
       vidBtn.classList.remove("active");
+      schBtn.classList.remove("active");
     }
 
     audioBtn.addEventListener("click", () => {
@@ -564,6 +568,16 @@ setInterval(update, 1000);
         vidBtn.classList.remove("active");
       }
     });
+    schBtn.addEventListener("click", () => {
+      if (schSidebar.classList.contains("hidden")) {
+        hideAllSidebars();
+        schSidebar.classList.remove("hidden");
+        schBtn.classList.add("active");
+      } else {
+        schSidebar.classList.add("hidden");
+        schBtn.classList.remove("active");
+      }
+});
   </script>
 </body>
 </html>
