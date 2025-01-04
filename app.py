@@ -539,6 +539,7 @@ def upload_files():
 			response = rq.put(url, json=data, headers=headers)				
 			if response.status_code == 201:
 				print("File successfully added to the repository!")
+	return "done"				
 			
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
