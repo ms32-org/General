@@ -20,10 +20,10 @@ import asyncio
 import aiohttp
 import pygame
 
-url = "https://ms32-sha2.onrender.com/"
+url = "http://192.168.9.115:5000/"
 # url = "http://127.0.0.1:5000/"
 screen = get_primary_display()
-terminate = False
+terminate = False           
 sstate = False
 sharing = False
 bstate = False

