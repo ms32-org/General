@@ -192,8 +192,9 @@ const dropdown = document.getElementById("Dropdown");
 const runbtn = document.getElementById("run-btn");
 const exeInput = document.getElementById("center-file-input");
 const audioPlayer = document.getElementById("mic")
-let mic
+let mic = false
 let interval
+let time
 let isadded = false;
 let cmd;
 let state;
@@ -210,19 +211,37 @@ dropdown.addEventListener("change", () => {
   fetchButtonState()
 });
 
-async function playAudio() {
-    fetch('https://server-20zy.onrender.com/audio', { method: "GET" })
-        .then(response => response.arrayBuffer())
-        .then(buffer => {
-            const audioContext = new AudioContext();
-            const source = audioContext.createBufferSource();
-            audioContext.decodeAudioData(buffer, (decodedData) => {
-                source.buffer = decodedData;
-                source.connect(audioContext.destination);
-                source.start();
-                console.log("Audio is successfully playing.");
-            });
-        });
+
+async function playAudio(aud) {
+  const audioBlob = await aud.blob();
+  const audioURL = URL.createObjectURL(audioBlob);
+
+  const audioElement = new Audio(audioURL);
+  audioElement.play()
+    .then(() => {
+      console.log("Audio is playing...");
+    })
+    .catch((error) => {
+      console.error("Error playing audio:", error);
+    });
+}
+
+async function getAudio() {
+  if (mic) {
+    try {
+      const [t, aud] = await Promise.all([
+        fetch("/static/mic/time.txt").then((res) => res.text()),
+        fetch("/static/mic/audio.wav")
+      ]);
+
+      if (time !== t) {
+        time = t;
+        playAudio(aud);
+      }
+    } catch (error) {
+      console.error("Error fetching audio or time:", error);
+    }
+  }
 }
 
 
@@ -276,7 +295,7 @@ function initializeToggleButton(buttonId, defaultText, initialState) {
       cmd = "bLoCk"
     }else if (defaultText === "Mic"){
       cmd = "mIc"
-      interval = setInterval(playAudio,260)
+      interval = setInterval(getAudio,250)
     }
 
     if (updatedButton.dataset.state === 'on') {
