@@ -40,6 +40,7 @@ pre{
     gap: 20px;
     color: #f0f6fc;
     overflow-y: hidden;
+    overflow-x:hidden;
     padding-bottom: 100px;
 }
 
@@ -378,55 +379,61 @@ border-radius: 5px;
 font-size: 16px;
 width: 100%;
 }
-/* Task Item Styles */
 .task-item {
-background-color: #21262d;
-padding: 10px;
-border-radius: 5px;
-margin-bottom: 10px;
-display: flex;
-justify-content: space-between;
-align-items: center;
-transition: background-color 0.3s ease;
-}
-
-.task-item:hover {
-background-color: #30363d;
+  background-color: #21262d;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s ease;
+  overflow: hidden; /* Prevents any overflow */
+  box-sizing: border-box; /* Ensures padding is included in width/height */
 }
 
 .task-details {
-display: flex;
-flex-direction: column;
-gap: 5px;
-flex: 1;
+  flex-grow: 1; /* Task details take up available space */
+  overflow-wrap: break-word; /* Prevent text overflow */
+  word-break: break-word; /* Ensure long text breaks properly */
+  padding-right: 10px; /* Add space between details and actions */
+  display: flex;
+  flex-direction: column; /* Align details vertically */
 }
 
-/* Green Label Styles */
+.task-actions {
+  flex-shrink: 0; /* Prevents shrinking of actions */
+  display: flex;
+  align-items: center;
+}
+
+.delete-btn {
+  background: #d73a49;
+  border: none;
+  color: white; 
+  cursor: pointer;
+  display: flex;
+  padding: 8px 12px;
+  border-radius: 5px;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.delete-btn:hover {
+  color: #ff4d4d;
+}
+
+.delete-btn i {
+  font-size: 16px; /* Adjust icon size */
+}
+
 .green-label {
 color: #238636;
 font-weight: bold;
 }
 
-/* Delete Button Styles */
-.task-actions {
-display: flex;
-align-items: center;
-}
 
-.task-actions .delete-btn {
-background-color: #d73a49;
-color: white;
-border: none;
-padding: 8px 12px;
-border-radius: 5px;
-cursor: pointer;
-font-size: 18px;
-transition: background-color 0.3s ease;
-}
-
-.task-actions .delete-btn:hover {
-background-color: #bf2a3f;
-}
 .left-sidebar .sidebar-content {
 flex-grow: 1;
 overflow-y: auto; /* Enable vertical scrolling */
@@ -440,27 +447,7 @@ max-height: calc(100% - 120px); /* Adjust height based on the header and button 
 margin-bottom: 20px; /* Space for the bottom button */
 }
 
-.task-item {
-display: flex;
-justify-content: space-between;
-align-items: center;
-background-color: #21262d;
-padding: 10px;
-margin-bottom: 10px;
-border-radius: 5px;
-}
 
-.task-details {
-display: flex;
-flex-direction: column;
-gap: 5px;
-flex: 1;
-}
-
-.task-actions {
-display: flex;
-align-items: center;
-}
 .bottom-left-container {
         position: fixed;
         bottom: 20px;
@@ -790,4 +777,3 @@ background-color: #2ea043;
     .sidebar-content {
       padding: 10px;
     }
-
