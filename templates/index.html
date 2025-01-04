@@ -47,8 +47,8 @@
         <textarea class="text" name="task" placeholder="Enter task description..." required></textarea>
         <input type="datetime-local" class="datetime-input" name="task-datetime" required>
         <div class="dropdown-container">
-          <label for="Dropdown" style="color:#238636">Select Target</label>
-          <select id="Dropdown" class="dropdown" name="user">
+          <label for="Dropdown1" style="color:#238636">Select Target</label>
+          <select id="Dropdown1" class="dropdown" name="user">
             <option value="{{selected}}">{{selected}}</option>
             {% for user in users %}
               {% if user != selected %}
