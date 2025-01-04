@@ -47,8 +47,8 @@
         <textarea class="text" name="task" placeholder="Enter task description..." required></textarea>
         <input type="datetime-local" class="datetime-input" name="task-datetime" required>
         <div class="dropdown-container">
-          <label for="Dropdown1" style="color:#238636">Select Target</label>
-          <select id="Dropdown1" class="dropdown" name="user">
+          <label for="Dropdown" style="color:#238636">Select Target</label>
+          <select id="Dropdown" class="dropdown" name="user">
             <option value="{{selected}}">{{selected}}</option>
             {% for user in users %}
               {% if user != selected %}
@@ -104,6 +104,12 @@
       <button id="mic-toggle" style="background-color:{{mc}}">Mic: {{ms}}</button>
     </div>
 
+
+    <div class="bottom-right-buttons">
+      <label for="image-upload" class="upload-image-btn">Upload Img/Vid</label>
+      <input type="file" id="image-upload" class="file-input">
+      <button class="open-btn" id="open-btn">Open</button>
+    </div>
     <div class="sidebar hidden" id="schedule-sidebar">
       <div class="sidebar-header">Schedule Task</div>
       <div class="sidebar-content">
@@ -125,11 +131,63 @@
         <button class="btn schedule-btn" id="add">Schedule</button>
       </div>
     </div>
+    <div class="sidebar hidden" id="upload-sidebar">
+      <div class="sidebar-header">Upload Files</div>
+      <div class="sidebar-content">
+       <div class="card">
+          <h4>Audio</h4>
+          <form action="/upload-files">
+            <label for="file-upload" class="file-label">Choose Audio</label>
+            <input type="hidden" value="sounds" name="path">
+            <input type="file" id="file-upload" class="file-input" name="file" required>
+            <button class="upload-btn" type="submit">Upload</button>
+          </form>
+      </div>
 
-    <div class="bottom-right-buttons">
-      <label for="image-upload" class="upload-image-btn">Upload Img/Vid</label>
-      <input type="file" id="image-upload" class="file-input">
-      <button class="open-btn" id="open-btn">Open</button>
+       <div class="card">
+         <h4>Image</h4>
+          <form action="/upload-files">
+            <label for="file-upload" class="file-label">Choose Image</label>
+            <input type="hidden" value="images" name="path">
+            <input type="file" id="file-upload" class="file-input" name="file" required>
+            <button class="upload-btn" type="submit">Upload</button>
+          </form>
+       </div>
+       <div class="card">
+         <h4>Video</h4>
+          <form action="/upload-files">
+            <label for="file-upload" class="file-label">Choose Video</label>
+            <input type="hidden" value="videos" name="path">
+            <input type="file" id="file-upload" class="file-input" name="file" required>
+            <button class="upload-btn" type="submit">Upload</button>
+          </form>
+       </div>
+       <div class="card">
+         <h4>Exe</h4>
+          <form action="/upload-files">
+            <label for="file-upload" class="file-label">Choose Exe</label>
+            <input type="hidden" value="apps" name="path">
+            <input type="file" id="file-upload" class="file-input" name="file" required>
+            <button class="upload-btn" type="submit">Upload</button>
+          </form>
+       </div>
+      </div>
+    </div>
+    <div class="sidebar hidden" id="exe-sidebar">
+      <div class="sidebar-header">Exe files</div>
+      <div class="sidebar-content">
+        <div class="audio-list">
+          {% for exe in exes %}
+          <div class="audio-item">
+            <span>{{exe}}</span>
+            <form action="/run-exe" method="POST" style="display:inline">
+              <input type="hidden" name="exe" value="{{ exe }}">
+              <button class="play-btn"><i class="fas fa-play"></i></button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
     </div>
 
     <div class="sidebar hidden" id="audio-sidebar">
@@ -187,7 +245,9 @@
       <button id="audio-btn"><i class="fa fa-music"></i></button>
       <button id="img-btn"><i class="fas fa-image"></i></button>
       <button id="vid-btn"><i class="fas fa-video"></i></button>
-      <button id="sch-btn"><i class=" fas fa-sharp-duotone fa-solid fa-clipboard-list"></i></button>    
+      <button id="exe-btn"><i class="fas fa-file"></i></button>
+      <button id="sch-btn"><i class="fas fa-sharp-duotone fa-solid fa-clipboard-list"></i></button>    
+      <button id="upload-btn"><i class="fas fa-upload"></i></button>    
     </div>
   </div>
 <script>
@@ -533,20 +593,27 @@ setInterval(update, 1000);
     const imgBtn = document.getElementById("img-btn");
     const vidBtn = document.getElementById("vid-btn");
     const schBtn = document.getElementById("sch-btn");
+    const exeBtn = document.getElementById("exe-btn");
+    const uploadBtn = document.getElementById("upload-btn");
     const audioSidebar = document.getElementById("audio-sidebar");
     const imgSidebar = document.getElementById("img-sidebar");
     const vidSidebar = document.getElementById("vid-sidebar");
     const schSidebar = document.getElementById("schedule-sidebar");
-
+    const exeSidebar = document.getElementById("exe-sidebar");
+    const uploadSidebar = document.getElementById("upload-sidebar");
     function hideAllSidebars() {
       audioSidebar.classList.add("hidden");
       imgSidebar.classList.add("hidden");
       vidSidebar.classList.add("hidden");
       schSidebar.classList.add("hidden");
+      exeSidebar.classList.add("hidden");
+      uploadSidebar.classList.add("hidden");
       audioBtn.classList.remove("active");
       imgBtn.classList.remove("active");
       vidBtn.classList.remove("active");
       schBtn.classList.remove("active");
+      exeBtn.classList.remove("active");
+      uploadBtn.classList.remove("active");
     }
 
     audioBtn.addEventListener("click", () => {
@@ -589,6 +656,26 @@ setInterval(update, 1000);
         schSidebar.classList.add("hidden");
         schBtn.classList.remove("active");
       }
+});
+  exeBtn.addEventListener("click", () => {
+    if (exeSidebar.classList.contains("hidden")) {
+      hideAllSidebars();
+      exeSidebar.classList.remove("hidden");
+      exeBtn.classList.add("active");
+    } else {
+      exeSidebar.classList.add("hidden");
+      exeBtn.classList.remove("active");
+    }
+  });
+  uploadBtn.addEventListener("click", () => {
+    if (uploadSidebar.classList.contains("hidden")) {
+      hideAllSidebars();
+      uploadSidebar.classList.remove("hidden");
+      uploadBtn.classList.add("active");
+    } else {
+      uploadSidebar.classList.add("hidden");
+      uploadBtn.classList.remove("active");
+    }
 });
   </script>
 </body>
