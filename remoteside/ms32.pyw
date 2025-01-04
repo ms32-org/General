@@ -325,12 +325,12 @@ def showerr(num):
         log(f"deployed {num} errors",terminal=True)
     except Exception as e:
         log(f"showerr thread error:\t{e}",state="WARN")
+
 def block_touch(event):
     global bstate
     if not bstate:
         return None
     return "break"
-
 def block():
     root = tk.Tk()
 
@@ -345,8 +345,7 @@ def block():
         root.update()
     root.quit() 
     root.destroy()
-    root = None
-    
+    root = None  
 def block_main():
     global bstate
     global bmstate
@@ -364,6 +363,7 @@ def block_main():
         bstate = True
         bsig = True
         print("lock")        
+
 async def share(url):
     global sharing
     log("Sharing screen now",terminal=True)

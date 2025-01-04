@@ -3,11 +3,11 @@ import wave
 import io
 import requests
 
-CHUNK = 1024  # Number of audio frames per buffer
-FORMAT = pyaudio.paInt16  # Audio format (16-bit PCM)
-CHANNELS = 1  # Mono audio
-RATE = 44100  # Sampling rate (44.1 kHz)
-SERVER_URL = "https://server-20zy.onrender.com/audio"  #button nhi dab rha h tum try cewsa
+CHUNK = 1024  
+FORMAT = pyaudio.paInt16  
+CHANNELS = 1  
+RATE = 44100  
+SERVER_URL = "http://127.0.0.1:5000/audio" 
 
 def send_audio():
     audio = pyaudio.PyAudio()
