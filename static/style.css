@@ -19,7 +19,6 @@ body {
     font-size: 36px;
     margin-top: 20px;
     color: #196b28; /* Green color */
-    
     letter-spacing: 2px;
 }
 pre{
@@ -31,11 +30,11 @@ pre{
     position: fixed;
     top: 0;
     right: 0;
-    width: 300px;
+    width: 280px;
     height: 100%;
     background-color: #161b22;
     box-shadow: -5px 0 10px rgba(0, 0, 0, 0.7);
-    padding: 20px;
+    padding: 2px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -49,6 +48,7 @@ pre{
     text-align: center;
     border-bottom: 2px solid #c9d1d9;
     padding-bottom: 10px;
+    margin:20px;
     margin-bottom: 20px;
 }
 
@@ -179,10 +179,6 @@ left: 320px; /* Same as the width of the left sidebar */
 font-size: 24px;
 color: red;
 }
-
-
-
-
 /* File Upload Label & Button */
 .file-label-green {
     background-color: #238636;
@@ -198,7 +194,6 @@ color: red;
 .file-label-green:hover {
     background-color: #2ea043;
 }
-
 /* Make Audio List Scrollable and fill available space */
 .audio-list {
     max-height: calc(100% - 120px); /* Adjust based on other elements height */
@@ -206,7 +201,6 @@ color: red;
     margin-bottom: 20px;
     flex-grow: 1;
 }
-
 /* Keep the sidebar content fixed */
 .sidebar-content {
     display: flex;
@@ -264,7 +258,7 @@ width: 100%;
 position: fixed;
 top: 0;
 left: 0; /* Position to the left side */
-width: 300px;
+width: 280px;
 height: 100%;
 background-color: #161b22;
 box-shadow: 5px 0 10px rgba(0, 0, 0, 0.7);
@@ -589,7 +583,7 @@ display: none;
 .right-toggle-buttons {
     position: fixed; /* Keeps the buttons fixed on the screen */
     top: 10%; /* Adjust to control vertical positioning */
-    right: 315px; /* Adjust for horizontal distance from the right edge */
+    right: 350px; /* Adjust for horizontal distance from the right edge */
     display: flex;
     flex-direction: column;
     gap: 10px; /* Space between buttons */
@@ -742,3 +736,58 @@ background-color: #2ea043;
 
     margin-top: 65px;
 }
+    .right-switcher {
+      width: 50px;
+      background-color: #333;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 10px;
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100%;
+    }
+
+    .right-switcher button {
+      width: 40px;
+      height: 40px;
+      margin: 10px 0;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    .right-switcher button.active {
+      background-color: #555;
+      border-radius: 5px;
+    }
+
+    .right-switcher button:hover {
+      background-color: #444;
+      border-radius: 5px;
+    }
+
+    .sidebar {
+      width: 280px;
+      color: white;
+      overflow-y: hidden;
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease-in-out;
+      position: fixed;
+      right: 50px;
+      top: 0;
+      height: 100%;
+    }
+
+    .sidebar.hidden {
+      transform: translateX(100%);
+    }
+
+    .sidebar-content {
+      padding: 10px;
+    }
+
