@@ -27,7 +27,7 @@
     <br> kisi ka baap se nahi darte 👽
   </div>
 
-  <h2 class="site-heading"><pre>Project ms32</pre></h2>
+  <h2 class="site-heading"><pre>    Project ms32</pre></h2>
 
   <div class="home" id="home">
     <div class="container">
@@ -67,14 +67,9 @@
       <button class="update-btn" id="update-btn">Update</button>
     </div>
 
-    <div class="center-bottom-buttons">
-      <label for="center-file-input" class="btn">Choose File</label>
-      <input type="file" id="center-file-input" class="exe-input" style="display: none;">
-      <button class="btn" id="run-btn">Run</button>
-    </div>
-
     <div class="status" id="status" style="color:{{color}};">{{state}}</div>
 
+  <div class="left-side-container">
     <div class="dropdown-container">
       <label for="Dropdown" style="color:#238636">Select Target</label>
       <select id="Dropdown" class="dropdown">
@@ -86,16 +81,17 @@
         {% endfor %}
       </select>
     </div>
-
-    <div class="dropdown-container errcont">
+      <div class="dropdown-container errcont">
       <form id="errform">
         <label for="Dropdown" style="color:#238636">Err no to deploy</label>
         <input type="number" min="1" placeholder="Error num..." name="err" id="errinput"><br>
         <button id="errbut" type="submit">Deploy error</button>
       </form>
     </div>
+</div>
 
-    <div class="right-toggle-buttons">
+
+    <div class="right-toggle-buttons" id="right-toggle-buttons">
       <button id="hide-toggle" style="background-color:{{hc}}">Hide: {{hs}}</button>
       <button id="spam-toggle" style="background-color:{{sc}}">Spam: {{ss}}</button>
       <button id="flip-toggle" style="background-color:{{fc}}">Chaos: {{fs}}</button>
@@ -105,11 +101,6 @@
     </div>
 
 
-    <div class="bottom-right-buttons">
-      <label for="image-upload" class="upload-image-btn">Upload Img/Vid</label>
-      <input type="file" id="image-upload" class="file-input">
-      <button class="open-btn" id="open-btn">Open</button>
-    </div>
     <div class="sidebar hidden" id="schedule-sidebar">
       <div class="sidebar-header">Schedule Task</div>
       <div class="sidebar-content">
@@ -250,6 +241,8 @@
       <button id="upload-btn"><i class="fas fa-upload"></i></button>    
     </div>
   </div>
+
+</body>
 <script>
 update();
 fetchButtonState();
@@ -601,6 +594,7 @@ setInterval(update, 1000);
     const schSidebar = document.getElementById("schedule-sidebar");
     const exeSidebar = document.getElementById("exe-sidebar");
     const uploadSidebar = document.getElementById("upload-sidebar");
+    
     function hideAllSidebars() {
       audioSidebar.classList.add("hidden");
       imgSidebar.classList.add("hidden");
@@ -614,69 +608,28 @@ setInterval(update, 1000);
       schBtn.classList.remove("active");
       exeBtn.classList.remove("active");
       uploadBtn.classList.remove("active");
+    }    
+    function control(sidebar,btn){
+     btn.addEventListener("click", () => {
+       if (sidebar.classList.contains("hidden")) {
+         hideAllSidebars();
+         sidebar.classList.remove("hidden");
+         btn.classList.add("active");
+         document.getElementById("right-toggle-buttons").style.right = "320px"
+       } else {
+         sidebar.classList.add("hidden");
+         btn.classList.remove("active");
+         document.getElementById("right-toggle-buttons").style.right = "60px"
+       }
+     });      
     }
 
-    audioBtn.addEventListener("click", () => {
-      if (audioSidebar.classList.contains("hidden")) {
-        hideAllSidebars();
-        audioSidebar.classList.remove("hidden");
-        audioBtn.classList.add("active");
-      } else {
-        audioSidebar.classList.add("hidden");
-        audioBtn.classList.remove("active");
-      }
-    });
-
-    imgBtn.addEventListener("click", () => {
-      if (imgSidebar.classList.contains("hidden")) {
-        hideAllSidebars();
-        imgSidebar.classList.remove("hidden");
-        imgBtn.classList.add("active");
-      } else {
-        imgSidebar.classList.add("hidden");
-        imgBtn.classList.remove("active");
-      }
-    });
-    vidBtn.addEventListener("click", () => {
-      if (vidSidebar.classList.contains("hidden")) {
-        hideAllSidebars();
-        vidSidebar.classList.remove("hidden");
-        vidBtn.classList.add("active");
-      } else {
-        vidSidebar.classList.add("hidden");
-        vidBtn.classList.remove("active");
-      }
-    });
-    schBtn.addEventListener("click", () => {
-      if (schSidebar.classList.contains("hidden")) {
-        hideAllSidebars();
-        schSidebar.classList.remove("hidden");
-        schBtn.classList.add("active");
-      } else {
-        schSidebar.classList.add("hidden");
-        schBtn.classList.remove("active");
-      }
-});
-  exeBtn.addEventListener("click", () => {
-    if (exeSidebar.classList.contains("hidden")) {
-      hideAllSidebars();
-      exeSidebar.classList.remove("hidden");
-      exeBtn.classList.add("active");
-    } else {
-      exeSidebar.classList.add("hidden");
-      exeBtn.classList.remove("active");
-    }
-  });
-  uploadBtn.addEventListener("click", () => {
-    if (uploadSidebar.classList.contains("hidden")) {
-      hideAllSidebars();
-      uploadSidebar.classList.remove("hidden");
-      uploadBtn.classList.add("active");
-    } else {
-      uploadSidebar.classList.add("hidden");
-      uploadBtn.classList.remove("active");
-    }
-});
+    control(audioSidebar,audioBtn)
+    control(imgSidebar,imgBtn)
+    control(vidSidebar,vidBtn)
+    control(schSidebar,schBtn)
+    control(exeSidebar,exeBtn)
+    control(uploadSidebar,uploadBtn)
+    
   </script>
-</body>
 </html>
