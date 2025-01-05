@@ -238,7 +238,9 @@
       <button id="vid-btn"><i class="fas fa-video"></i></button>
       <button id="exe-btn"><i class="fas fa-file"></i></button>
       <button id="sch-btn"><i class="fas fa-sharp-duotone fa-solid fa-clipboard-list"></i></button>    
-      <button id="upload-btn"><i class="fas fa-upload"></i></button>    
+      <button id="upload-btn"><i class="fas fa-upload"></i></button>
+      <button id="terminal-btn"><i class="fas fa-terminal"></i></button>
+      <button id="screen-btn"><i class="fas fa-tv"></i></button>   
     </div>
   </div>
 
@@ -489,6 +491,8 @@ setInterval(update, 1000);
     const schBtn = document.getElementById("sch-btn");
     const exeBtn = document.getElementById("exe-btn");
     const uploadBtn = document.getElementById("upload-btn");
+    const terminalBtn = document.getElementById("terminal-btn");
+    const screenBtn = document.getElementById("screen-btn");
     const audioSidebar = document.getElementById("audio-sidebar");
     const imgSidebar = document.getElementById("img-sidebar");
     const vidSidebar = document.getElementById("vid-sidebar");
@@ -531,6 +535,11 @@ setInterval(update, 1000);
     control(schSidebar,schBtn)
     control(exeSidebar,exeBtn)
     control(uploadSidebar,uploadBtn)
-    
+    terminalBtn.addEventListener("click",()=>{
+      window.open("/terminal","_blank")
+    })
+    screenBtn.addEventListener("click", () => {
+      window.open("/screen", "_blank")
+    })
   </script>
 </html>
