@@ -154,10 +154,10 @@ def command():
 	                            tasks_to_delete = task["id"]
 	                            break
 	
-                        if tasks_to_delete is not None:
-	                        tasks["tasks"] = [task for task in tasks["tasks"] if task["id"] != tasks_to_delete]
-	                        with open(tasks_file, "w") as file:
-	                            json.dump(tasks, file, indent=4)
+                    if tasks_to_delete is not None:
+                         tasks["tasks"] = [task for task in tasks["tasks"] if task["id"] != tasks_to_delete]
+                         with open(tasks_file, "w") as file:
+                         	json.dump(tasks, file, indent=4)
 
             if not spam:
                 with open(message_file, "w") as file:
