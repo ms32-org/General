@@ -520,7 +520,7 @@ def audio():
 	if request.method == "POST":
 		with open(os.path.join(STATIC_FOLDER,"mic","audio.wav"),"wb") as file:
 			file.write(request.data)
-			return Response("data: play\n\n", mimetype='text/event-stream') if request.method == "GET" else "stored"
+	return Response("data: play\n\n", mimetype='text/event-stream') if request.method == "GET" else "stored"
 		
 @app.route("/upload-files",methods=["POST", "GET"])
 def upload_files():
