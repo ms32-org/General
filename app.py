@@ -147,18 +147,18 @@ def command():
                     tasks_to_delete = None
                     for task in tasks["tasks"]:
                         if task["user"] == user:
-	                        exe = datetime.strptime(task["execution_time"], "%d-%m-%Y %H:%M")
-	                        exe = exe.strftime("%d-%m-%Y %H:%M")
-	                        now = datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
-	                        if exe <= now:
-	                            cmd = task["cmd"]
-	                            tasks_to_delete = task["id"]
-	                            break
-	
+                            exe = datetime.strptime(task["execution_time"], "%d-%m-%Y %H:%M")
+                            exe = exe.strftime("%d-%m-%Y %H:%M")
+                            now = datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
+                            if exe <= now:
+                                cmd = task["cmd"]
+                                tasks_to_delete = task["id"]
+                                break
+    
                     if tasks_to_delete is not None:
                          tasks["tasks"] = [task for task in tasks["tasks"] if task["id"] != tasks_to_delete]
                          with open(tasks_file, "w") as file:
-                         	json.dump(tasks, file, indent=4)
+                            json.dump(tasks, file, indent=4)
 
             if not spam:
                 with open(message_file, "w") as file:
