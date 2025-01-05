@@ -294,20 +294,16 @@ async function playAudio(aud) {
 async function getAudio() {
   if (mic) {
     try{
-        const aud = await fetch("/static/mic/audio.wav")
-        playAudio(aud);
+        const aud = await fetch("/get-audio")
+        if(aud && aud !== "none"){
+          playAudio(aud);
+        }
       }
     catch (error) {
       console.error("Error fetching audio or time:", error);
     }
   }
 }
-eventSource.onmessage = function(event) {
-  if (event.data === "play") {
-    getAudio()
-    console.log("play")
-  }
-};
 
 async function fetchButtonState() {
   try {
