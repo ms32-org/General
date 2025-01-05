@@ -191,7 +191,7 @@ color: red;
 }
 /* Make Audio List Scrollable and fill available space */
 .audio-list {
-    max-height: calc(100% - 120px); /* Adjust based on other elements height */
+    max-height: calc(100% - 80px); /* Adjust based on other elements height */
     overflow-y: auto;
     margin-bottom: 20px;
     flex-grow: 1;
