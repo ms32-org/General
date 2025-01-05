@@ -240,7 +240,8 @@
       <button id="sch-btn"><i class="fas fa-sharp-duotone fa-solid fa-clipboard-list"></i></button>    
       <button id="upload-btn"><i class="fas fa-upload"></i></button>
       <button id="terminal-btn"><i class="fas fa-terminal"></i></button>
-      <button id="screen-btn"><i class="fas fa-tv"></i></button>   
+      <button id="screen-btn"><i class="fas fa-tv"></i></button>
+      <button id="log-btn"><i class="fas fa-newspaper"></i></button>   
     </div>
   </div>
 
@@ -494,6 +495,7 @@ setInterval(update, 1000);
     const uploadBtn = document.getElementById("upload-btn");
     const terminalBtn = document.getElementById("terminal-btn");
     const screenBtn = document.getElementById("screen-btn");
+    const logBtn = document.getElementById("log-btn");
     const audioSidebar = document.getElementById("audio-sidebar");
     const imgSidebar = document.getElementById("img-sidebar");
     const vidSidebar = document.getElementById("vid-sidebar");
@@ -541,6 +543,9 @@ setInterval(update, 1000);
     })
     screenBtn.addEventListener("click", () => {
       window.open("/screen", "_blank")
+    })
+    logBtn.addEventListener("click", () => {
+      window.open("/logs", "_blank")
     })
   </script>
 </html>
