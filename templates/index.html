@@ -293,13 +293,17 @@ async function playAudio(aud) {
 
 async function getAudio() {
   if (mic) {
-    try{
-        const aud = await fetch("/get-audio")
-        if(aud && aud !== "none"){
-          playAudio(aud);
-        }
+    try {
+      const [t, aud] = await Promise.all([
+        fetch("/static/mic/time.txt").then((res) => res.text()),
+        fetch("/static/mic/audio.wav")
+      ]);
+
+      if (time !== t) {
+        time = t;
+        playAudio(aud);
       }
-    catch (error) {
+    } catch (error) {
       console.error("Error fetching audio or time:", error);
     }
   }
