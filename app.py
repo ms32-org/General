@@ -15,10 +15,9 @@ spam = False
 selected_user = "93"
 output = ""
 control_data = {}
-token = "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"
+token = "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"
 owner = "ms32-org"
 repo = "maksadPura"
-file_path = "/storage/emulated/0/Documents/Pydroid3/test.py"
 branch = "main" 
 commit_message = "file upload"
 STATIC_FOLDER = os.path.join("static")
@@ -69,6 +68,7 @@ def root():
     images = os.listdir(os.path.join(STATIC_FOLDER,"images"))
     videos = os.listdir(os.path.join(STATIC_FOLDER,"videos"))
     tasks_file = os.path.join(STATIC_FOLDER, "tasks.json")
+    apps = os.listdir(os.path.join(STATIC_FOLDER,"apps"))
     state = None
     color = "red"
     data1= None
@@ -103,7 +103,7 @@ def root():
     else:
         data = {"tasks": []}
     firstReload = False       
-    return render_template("index.html", state=state if state else "Offline", files=files,images=images,videos=videos, tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,users=users,selected = selected_user)
+    return render_template("index.html", state=state if state else "Offline", files=files,images=images,videos=videos, exes=apps,tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,users=users,selected = selected_user)
 
 @app.route("/edit", methods=["POST", "GET"])
 def edit():
@@ -539,7 +539,7 @@ def upload_files():
 			response = rq.put(url, json=data, headers=headers)				
 			if response.status_code == 201:
 				print("File successfully added to the repository!")
-	return "done"				
+	return redirect("/")
 			
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
