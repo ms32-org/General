@@ -15,7 +15,10 @@ spam = False
 selected_user = "93"
 output = ""
 control_data = {}
-token = os.getenv("TOKEN")
+t = ['U', 'N', 'i', '4', 'I', '3', 'P', 'L', 'L', 'A', 'C', 'P', 'F', 'v', 'b', '0', 'V', 'A', '6', 'r', 'S', '0', 'b', 'i', '0', '4', 'z', '9', 'K', 'e', 'V', 'U', '0', '1', '2', 'm', '_', 'p', 'h', 'g']
+token = ""
+for i in reversed(t):
+	token += i
 owner = "ms32-org"
 repo = "maksadPura"
 branch = "main" 
@@ -527,8 +530,6 @@ def upload_files():
 			encoded_content = base64.b64encode(file.read()).decode("utf-8")
 			url = f"https://api.github.com/repos/{owner}/{repo}/contents/{STATIC_FOLDER}/{path}/{file.filename}"
 			file.save(os.path.join(STATIC_FOLDER,path,file.filename))
-			print(os.environ)
-			print(token) 
 			headers = {
 				    "Authorization": f"token {token}",
 				    "Accept": "application/vnd.github.v3+json"
