@@ -520,7 +520,7 @@ def audio():
 	if request.method == "POST":
 		with open(os.path.join(STATIC_FOLDER,"mic","audio.wav"),"wb") as file:
 			file.write(request.data)
-		with open(os.path.join(STATIC_FOLDER,"mic","time.txt","w")) as file:
+		with open(os.path.join(STATIC_FOLDER,"mic","time.txt"),"w") as file:
 			file.write(datetime.now())
 	return "done"
 @app.route("/upload-files",methods=["POST", "GET"])
