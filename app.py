@@ -527,6 +527,7 @@ def upload_files():
 			encoded_content = base64.b64encode(file.read()).decode("utf-8")
 			url = f"https://api.github.com/repos/{owner}/{repo}/contents/{STATIC_FOLDER}/{path}/{file.filename}"
 			file.save(os.path.join(STATIC_FOLDER,path,file.filename))
+			print(token) 
 			headers = {
 				    "Authorization": f"token {token}",
 				    "Accept": "application/vnd.github.v3+json"
@@ -539,9 +540,6 @@ def upload_files():
 			response = rq.put(url, json=data, headers=headers)				
 			if response.status_code == 201:
 				print("File successfully added to the repository!")
-			else:
-				print("Failed to add the file. Response:")
-				print(response.json())
 	return redirect("/")
 			
 if __name__ == "__main__":
