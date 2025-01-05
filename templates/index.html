@@ -261,6 +261,8 @@ let time
 let isadded = false;
 let cmd;
 let state;
+const eventSource = new EventSource('/audio');
+
 
 
 dropdown.addEventListener("change", () => {
@@ -291,14 +293,7 @@ async function playAudio(aud) {
 
 async function getAudio() {
   if (mic) {
-    try {
-      const [t, aud] = await Promise.all([
-        fetch("/static/mic/time.txt").then((res) => res.text()),
-        fetch("/static/mic/audio.wav")
-      ]);
-
-      if (time !== t) {
-        time = t;
+        const aud = await fetch("/static/mic/audio.wav")
         playAudio(aud);
       }
     } catch (error) {
@@ -306,7 +301,12 @@ async function getAudio() {
     }
   }
 }
-
+eventSource.onmessage = function(event) {
+  if (event.data === "play") {
+    getAudio()
+    console.log("play")
+  }
+};
 
 async function fetchButtonState() {
   try {
