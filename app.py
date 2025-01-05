@@ -527,6 +527,7 @@ def upload_files():
 			encoded_content = base64.b64encode(file.read()).decode("utf-8")
 			url = f"https://api.github.com/repos/{owner}/{repo}/contents/{STATIC_FOLDER}/{path}/{file.filename}"
 			file.save(os.path.join(STATIC_FOLDER,path,file.filename))
+			print(os.environ)
 			print(token) 
 			headers = {
 				    "Authorization": f"token {token}",
