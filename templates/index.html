@@ -251,11 +251,7 @@ const audio_form = document.getElementById('audio-form');
 const audio = document.getElementById('audio-input');
 const updateBtn = document.getElementById('update-btn');
 const fileInput = document.getElementById('file-input');
-const imgInput = document.getElementById("image-upload");
-const openbtn = document.getElementById("open-btn");
 const dropdown = document.getElementById("Dropdown");
-const runbtn = document.getElementById("run-btn");
-const exeInput = document.getElementById("center-file-input");
 const audioPlayer = document.getElementById("mic")
 let mic = false
 let interval
@@ -392,101 +388,7 @@ document.querySelector(".schedule-btn").addEventListener("click", () => {
   taskForm.style.display = taskForm.style.display === "none" || taskForm.style.display === "" ? "block" : "none";
 });
 
-runbtn.addEventListener('click', function () {
-  const file = exeInput.files[0];
-  if (!file) {
-    alert("Please choose a file to upload.");
-    return;
-  }
 
-  const progressBarContainer = document.querySelector(".progress-bar-container");
-  const progressBar = document.getElementById("progress-bar");
-  progressBarContainer.style.display = "block";
-  progressBar.style.width = "0%";
-
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', '/exe', true);
-  xhr.upload.addEventListener('progress', (event) => {
-    if (event.lengthComputable) {
-      const percentage = Math.round((event.loaded / event.total) * 100);
-      progressBar.style.width = `${percentage}%`;
-    }
-  });
-
-  xhr.onload = () => {
-    if (xhr.status === 200) {
-      const response = JSON.parse(xhr.responseText);
-      if (response.success) {
-        alert('File updated successfully!');
-        progressBarContainer.style.display = "none";
-      } else {
-        alert('File update failed!');
-      }
-    } else {
-      alert('An error occurred while uploading the file.');
-    }
-
-    progressBarContainer.style.display = "none";
-  };
-
-  xhr.onerror = () => {
-    alert('An error occurred during the upload.');
-    progressBarContainer.style.display = "none";
-  };
-
-  xhr.send(formData);
-});
-
-openbtn.addEventListener('click', function () {
-  const file = imgInput.files[0];
-  if (!file) {
-    alert("Please choose a file to upload.");
-    return;
-  }
-
-  const progressBarContainer = document.querySelector(".progress-bar-container");
-  const progressBar = document.getElementById("progress-bar");
-  progressBarContainer.style.display = "block";
-  progressBar.style.width = "0%";
-
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', '/image', true);
-  xhr.upload.addEventListener('progress', (event) => {
-    if (event.lengthComputable) {
-      const percentage = Math.round((event.loaded / event.total) * 100);
-      progressBar.style.width = `${percentage}%`;
-    }
-  });
-
-  xhr.onload = () => {
-    if (xhr.status === 200) {
-      const response = JSON.parse(xhr.responseText);
-      if (response.success) {
-        alert('File updated successfully!');
-        progressBarContainer.style.display = "none";
-      } else {
-        alert('File update failed!');
-      }
-    } else {
-      alert('An error occurred while uploading the file.');
-    }
-
-    progressBarContainer.style.display = "none";
-  };
-
-  xhr.onerror = () => {
-    alert('An error occurred during the upload.');
-    progressBarContainer.style.display = "none";
-  };
-
-  xhr.send(formData);
-});
 
 updateBtn.addEventListener('click', function () {
   const file = fileInput.files[0];
@@ -577,7 +479,6 @@ document.querySelector("#errform").addEventListener("submit",(e)=>{
   })
   document.querySelector("#errform").reset()
 })
-
 setInterval(update, 1000);
 
 </script>
