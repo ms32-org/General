@@ -15,7 +15,7 @@ body {
     height: 100%;
 }
 .site-heading {
-    text-align: center;
+    left: 50%;
     font-size: 36px;
     margin-top: 20px;
     color: #196b28; /* Green color */
@@ -24,8 +24,6 @@ body {
 pre{
     font-family: 'Silkscreen', monospace;
 }
-
-/* Sidebar Styles */
 .sidebar {
     position: fixed;
     top: 0;
@@ -107,7 +105,7 @@ pre{
 .container {
     position: absolute;
     top: 50%;
-    left: 50%;
+    left: 45%;
     transform: translate(-50%, -50%);
     width: 400px;
     text-align: center;
@@ -169,14 +167,10 @@ input.file-input {
     display: none;
 }
 
-/* Bottom Left Position for Buttons */
-
-
-/* Status Style */
 .status {
 position: absolute;
 top: 20px; /* 20px from the top of the container */
-left: 320px; /* Same as the width of the left sidebar */
+left: 10px;
 font-size: 24px;
 color: red;
 }
@@ -323,7 +317,7 @@ margin-left: 320px;
 .bottom-left-buttons {
 position: fixed;
 bottom: 20px;
-left: 320px; /* Align with the left sidebar */
+left: 20px; /* Align with the left sidebar */
 display: flex;
 flex-direction: column;
 gap: 10px;
@@ -449,22 +443,18 @@ margin-bottom: 20px; /* Space for the bottom button */
 
 
 .bottom-left-container {
-        position: fixed;
-        bottom: 20px;
-        left: 220px; /* Align it after the sidebar */
-        display: flex;
-        align-items: center;
-        gap: 10px;
+    position: fixed;
+    bottom: 20px;
+    left: 220px; /* Align it after the sidebar */
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 /* Bottom Left Buttons */
 .bottom-left-buttons {
 position: fixed;
 bottom: 20px;
-left: 320px; /* Align with the left sidebar */
-display: flex;
-flex-direction: column;
-gap: 10px;
-align-items: flex-start; /* Align buttons to the left */
+left: 20px; /* Align with the left sidebar */
 }
 
 /* Style for Buttons */
@@ -516,62 +506,12 @@ display: none;
     overflow-y: auto;
     margin-bottom: 20px;
 }
-
-
-/* Bottom Right Buttons */
-.bottom-right-buttons {
-    position: fixed;
-    bottom: 20px;
-    right: 320px; /* Align with the sidebar */
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-end; /* Align buttons to the right */
-}
-
-/* Button Styles */
-
-.open-btn {
-    color: white;
-    padding: 8px 16px; /* Adjust padding for size */
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    display: inline-block;
-    transition: background-color 0.3s ease;
-    width: 160px; /* Keep consistent width */
-    font-size: 14px; /* Slightly smaller font */
-}
-.open-btn{
-    background-color: #007bff;
-}
-.upload-image-btn {
-    width: 160px; /* Keep consistent width */
-    font-size: 14px; /* Slightly smaller font */
-    background-color: #238636; /* Green */
-    color: white;
-    padding: 10px 20px;
-    border:none;
-    white-space: nowrap;   
-    border-radius: 5px;
-    text-align: center;
-    cursor: pointer;
-    display: inline-block; /* Make it behave like a button */
-}
-
-.upload-image-btn:hover {
-    background-color: #2ea043; /* Lighter green for hover */
-}
-
-/* File Input Hidden */
-.file-input {
-    display: none;
-}
 .right-toggle-buttons {
     position: fixed; /* Keeps the buttons fixed on the screen */
     top: 10%; /* Adjust to control vertical positioning */
-    right: 350px; /* Adjust for horizontal distance from the right edge */
+    right: 60px; /* Adjust for horizontal distance from the right edge */
     display: flex;
+    transition: right 0.3s ease-in-out;
     flex-direction: column;
     gap: 10px; /* Space between buttons */
 }
@@ -593,9 +533,17 @@ display: none;
 #status {
   margin-bottom: 20px; 
 }
+.left-side-container {
+  position: absolute;
+  top: 70px;
+  left: 20px;
+  width: 200px; /* Adjust as needed */
+}
+
 .dropdown-container {
-    margin-top: 20px; 
-  }
+  margin: 10px 0;
+}
+
   
 .dropdown {
 padding: 10px;
@@ -648,36 +596,7 @@ color: #f0f6fc;
   max-width: 350px; /* Optional: Limit the form's width */
   margin: 0 auto; /* Optional: Center the form */
 }
-.center-bottom-buttons {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
 
-.center-bottom-buttons .btn {
-background-color: #238636; /* Default green background */
-color: white;
-padding: 8px 16px; /* Reduced padding for a smaller size */
-border-radius: 5px;
-cursor: pointer;
-text-align: center;
-display: inline-block;
-transition: background-color 0.3s ease;
-width: 150px; /* Same width for both buttons */
-font-size: 14px; /* Slightly smaller font */
-}
-
-/* Hover Effects */
-.center-bottom-buttons .btn :hover {
-background-color: #2ea043;
-}
-#run-btn{
-  background-color: #007bff;
-}
 .progress-bar-container {
     position: fixed;
     top: 0;
