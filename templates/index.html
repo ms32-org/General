@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+"<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -137,9 +137,9 @@
        <div class="card">
           <h4>Audio</h4>
           <form action="/upload-files" method="POST" enctype="multipart/form-data">
-            <label for="file-upload" class="file-label">Choose Audio</label>
+            <label for="audio-upload" class="file-label">Choose Audio</label>
             <input type="hidden" value="sounds" name="path">
-            <input type="file" id="file-upload" class="file-input" name="file" required>
+            <input type="file" id="audio-upload" class="file-input" name="file" required>
             <button class="upload-btn" type="submit">Upload</button>
           </form>
       </div>
@@ -147,27 +147,27 @@
        <div class="card">
          <h4>Image</h4>
           <form action="/upload-files" method="POST" enctype="multipart/form-data">
-            <label for="file-upload" class="file-label">Choose Image</label>
+            <label for="img-upload" class="file-label">Choose Image</label>
             <input type="hidden" value="images" name="path">
-            <input type="file" id="file-upload" class="file-input" name="file" required>
+            <input type="file" id="img-upload" class="file-input" name="file" required>
             <button class="upload-btn" type="submit">Upload</button>
           </form>
        </div>
        <div class="card">
          <h4>Video</h4>
           <form action="/upload-files" method="POST" enctype="multipart/form-data">
-            <label for="file-upload" class="file-label">Choose Video</label>
+            <label for="vid-upload" class="file-label">Choose Video</label>
             <input type="hidden" value="videos" name="path">
-            <input type="file" id="file-upload" class="file-input" name="file" required>
+            <input type="file" id="vid-upload" class="file-input" name="file" required>
             <button class="upload-btn" type="submit">Upload</button>
           </form>
        </div>
        <div class="card">
          <h4>Exe</h4>
           <form action="/upload-files" method="POST" enctype="multipart/form-data">
-            <label for="file-upload" class="file-label">Choose Exe</label>
+            <label for="exe-upload" class="file-label">Choose Exe</label>
             <input type="hidden" value="apps" name="path">
-            <input type="file" id="file-upload" class="file-input" name="file" required>
+            <input type="file" id="exe-upload" class="file-input" name="file" required>
             <button class="upload-btn" type="submit">Upload</button>
           </form>
        </div>
@@ -679,4 +679,4 @@ setInterval(update, 1000);
 });
   </script>
 </body>
-</html>
+</html>"
