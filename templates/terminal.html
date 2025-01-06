@@ -91,18 +91,35 @@ input::placeholder {
     <script>
         const terminal = document.getElementById('terminal');
         const cmdInput = document.getElementById('cmdInput');
-
-        cmdInput.addEventListener('keypress', function (event) {
+        let index = 0
+        let COMMAND = []
+        cmdInput.addEventListener('keydown', function (event) {
+          console.log(event.key)
             if (event.key === 'Enter') {
                 const command = cmdInput.value.trim();
                 if (command) {
                     terminal.innerHTML += `<div class="output">&gt; ${command}</div>`;
                     processCommand(command);
+                    COMMAND.push(command)
+                    index = COMMAND.length
                 }
                 cmdInput.value = '';
                 terminal.scrollTop = terminal.scrollHeight;
+            }else if(event.key === "ArrowUp"){
+              if(index > 0){
+                index--
+                cmdInput.value = COMMAND[index];
+                }
+            }else if (event.key === "ArrowDown") {
+              if (index < COMMAND.length) {
+                index++
+                cmdInput.value = COMMAND[index];
+              }
             }
         });
+        cmdInput.addEventListener("keydown",(event)=>{
+          
+        })
         async function output(){
           let retries = 5
           while(retries >0){
