@@ -325,6 +325,7 @@ async function fetchButtonState() {
     initializeToggleButton('mic-toggle', 'Mic', data.micToggleState.state || 'off');
     if(data.micToggleState.state === "on"){
       mic = true
+      interval = setInterval(getAudio,250)
     }
     else{
       mic = false
