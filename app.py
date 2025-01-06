@@ -456,7 +456,36 @@ def clear():
 @app.route("/screen",methods=["GET","POST"])
 def screen():
 	return render_template("screen.html")    
+@app.route("/control", methods=["GET", "POST"])
+def control():
+    global control_data
+    if request.method == "POST":
+        data = request.get_json()
+        if data["type"] == "key":
+            control_data["type"] = "key"
+            control_data["btn"] = data["button"]
+        elif data["type"] == "click":
+            control_data["type"] = "mouse"
+            control_data["x"] = data["x"]
+            control_data["y"] = data["y"]
+            control_data["mouse"] = data["button"]
+            control_data["width"] = data["width"]
+            control_data["height"] = data["height"]
+        elif data["type"] == "scroll":
+            control_data["type"] = "scroll"
+            control_data["deltaY"] = data["deltaY"]
+        elif data["type"] == "dbclick":
+            control_data["type"] = "dbclick"
+            control_data["x"] = data["x"]
+            control_data["y"] = data["y"]
+            control_data["width"] = data["width"]
+            control_data["height"] = data["height"]
+        return "done"
 
+    if request.method == "GET":
+        data1 = control_data
+        control_data = {}      
+        return jsonify(data1)
 @app.route("/terminal",methods=["GET", "POST"])
 def terminal():
     global output
