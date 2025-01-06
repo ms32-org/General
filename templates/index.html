@@ -360,6 +360,7 @@ function initializeToggleButton(buttonId, defaultText, initialState) {
       cmd = "bLoCk"
     }else if (defaultText === "Mic"){
       cmd = "mIc"
+      mic = !mic
       interval = setInterval(getAudio,250)
     }
 
