@@ -295,20 +295,21 @@ async function playAudio(aud) {
 async function getAudio() {
   if (mic) {
     try {
-      const [t, aud] = await Promise.all([
-        fetch("/static/mic/time.txt").then((res) => res.text()),
-        fetch("/static/mic/audio.wav")
-      ]);
-
-      if (time !== t) {
-        time = t;
-        playAudio(aud);
+      const audio = new Audio("/get-audio");
+      if (audio) {
+        try {
+          await audio.play();
+          console.log("Audio playing...");
+        } catch {
+          console.log("Not valid audio");
+        }
       }
     } catch (error) {
-      console.error("Error fetching audio or time:", error);
+      console.error("Error fetching audio or playing it:", error);
     }
   }
 }
+
 
 async function fetchButtonState() {
   try {
@@ -361,7 +362,11 @@ function initializeToggleButton(buttonId, defaultText, initialState) {
     }else if (defaultText === "Mic"){
       cmd = "mIc"
       mic = !mic
-      interval = setInterval(getAudio,250)
+      if(!mic){
+        clearInterval(interval)
+      }else{
+        interval = setInterval(getAudio,250)
+      }
     }
 
     if (updatedButton.dataset.state === 'on') {
