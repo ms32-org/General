@@ -430,7 +430,7 @@ font-weight: bold;
 
 .left-sidebar .sidebar-content {
 flex-grow: 1;
-overflow-y: auto; /* Enable vertical scrolling */
+overflow-y: scroll; /* Enable vertical scrolling */
 max-height: calc(100% - 120px); /* Adjust height as needed */
 margin-bottom: 20px;
 }
