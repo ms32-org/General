@@ -430,7 +430,7 @@ font-weight: bold;
 
 .left-sidebar .sidebar-content {
 flex-grow: 1;
-overflow-y: scroll; /* Enable vertical scrolling */
+overflow-y: auto; /* Enable vertical scrolling */
 max-height: calc(100% - 120px); /* Adjust height as needed */
 margin-bottom: 20px;
 }
@@ -738,3 +738,14 @@ color: #f0f6fc;
 .upload-btn:hover {
   background-color: #45a049;
 }
+.task-item {
+  width: 100%;
+  height: auto;
+  padding: 10px;
+  margin: 5px 0;
+}
+.task-item {
+  flex: 1 1 auto;
+  min-width: 200px;
+}
+
