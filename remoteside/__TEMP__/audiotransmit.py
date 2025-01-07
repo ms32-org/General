@@ -5,7 +5,7 @@ import asyncio
 import ssl
 from aiohttp import ClientSession
 
-CHUNK = 1024*6  # Number of audio frames per buffer
+CHUNK = 1024*5  # Number of audio frames per buffer
 FORMAT = pyaudio.paInt16  # Audio format (16-bit PCM)
 CHANNELS = 1  # Mono audio
 RATE = 44100  # Sampling rate (44.1 kHz)
