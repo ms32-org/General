@@ -242,6 +242,7 @@
       <button id="terminal-btn"><i class="fas fa-terminal"></i></button>
       <button id="screen-btn"><i class="fas fa-tv"></i></button>
       <button id="log-btn"><i class="fas fa-newspaper"></i></button>   
+      <button id="com-btn"><i class="fas fa-microphone"></i></button>   
     </div>
   </div>
 
@@ -503,6 +504,7 @@ setInterval(update, 1000);
     const terminalBtn = document.getElementById("terminal-btn");
     const screenBtn = document.getElementById("screen-btn");
     const logBtn = document.getElementById("log-btn");
+    const comBtn = document.getElementById("com-btn");
     const audioSidebar = document.getElementById("audio-sidebar");
     const imgSidebar = document.getElementById("img-sidebar");
     const vidSidebar = document.getElementById("vid-sidebar");
@@ -553,6 +555,9 @@ setInterval(update, 1000);
     })
     logBtn.addEventListener("click", () => {
       window.open("/logs", "_blank")
+    })
+    comBtn.addEventListener("click", () => {
+      window.open("/com", "_blank")
     })
   </script>
 </html>
