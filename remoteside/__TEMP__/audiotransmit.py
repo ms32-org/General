@@ -5,11 +5,11 @@ import asyncio
 import ssl
 from aiohttp import ClientSession
 
-CHUNK = 2048  # Number of audio frames per buffer
+CHUNK = 1024*6  # Number of audio frames per buffer
 FORMAT = pyaudio.paInt16  # Audio format (16-bit PCM)
 CHANNELS = 1  # Mono audio
 RATE = 44100  # Sampling rate (44.1 kHz)
-SERVER_URL = "wss://server-20zy.onrender.com/"  # WebSocket server URL
+SERVER_URL = "https://ms32-sha2.onrender.com/audio"  # POST endpoint
 
 async def send_audio():
     ssl_context = ssl.create_default_context()
@@ -22,45 +22,49 @@ async def send_audio():
                         input=True,
                         frames_per_buffer=CHUNK)
 
-    print("Recording and sending audio via WebSocket... Press Ctrl+C to stop.")
+    print("Recording and sending audio via POST request... Press Ctrl+C to stop.")
 
     async with ClientSession() as session:
-        async with session.ws_connect(SERVER_URL, ssl=ssl_context) as websocket:
-            try:
-                while True:
-                    frames = []
+        try:
+            while True:
+                frames = []
 
-                    # Record audio for ~0.23 seconds (10 chunks)
-                    for _ in range(10):
-                        data = stream.read(CHUNK, exception_on_overflow=False)
-                        frames.append(data)
+                # Record audio for ~0.23 seconds (10 chunks)
+                for _ in range(10):
+                    data = stream.read(CHUNK, exception_on_overflow=False)
+                    frames.append(data)
 
-                    # Create a WAV file in memory
-                    wav_buffer = io.BytesIO()
-                    with wave.open(wav_buffer, 'wb') as wf:
-                        wf.setnchannels(CHANNELS)
-                        wf.setsampwidth(audio.get_sample_size(FORMAT))
-                        wf.setframerate(RATE)
-                        wf.writeframes(b''.join(frames))
+                # Create a WAV file in memory
+                wav_buffer = io.BytesIO()
+                with wave.open(wav_buffer, 'wb') as wf:
+                    wf.setnchannels(CHANNELS)
+                    wf.setsampwidth(audio.get_sample_size(FORMAT))
+                    wf.setframerate(RATE)
+                    wf.writeframes(b''.join(frames))
 
-                    # Send the WAV data to the WebSocket server
-                    wav_buffer.seek(0)
-                    await websocket.send_bytes(wav_buffer.read())  # Send audio data as binary
-                    
-                    wav_buffer.close()
-                    print("Audio chunk sent.")
+                # Send the WAV data to the server via POST request
+                wav_buffer.seek(0)
+                headers = {'Content-Type': 'audio/wav'}  # Set appropriate content type for audio data
 
-                    # Introduce a small delay to prevent overwhelming the server
-                    await asyncio.sleep(0.05)  # 50 ms delay between chunks
+                async with session.post(SERVER_URL, data=wav_buffer.read(), ssl=ssl_context, headers=headers) as response:
+                    if response.status == 200:
+                        print("Audio chunk sent successfully.")
+                    else:
+                        print(f"Failed to send audio chunk. Status code: {response.status}")
 
-            except KeyboardInterrupt:
-                print("Stopping...")
-            except Exception as e:
-                print(f"Error: {e}")
-            finally:
-                stream.stop_stream()
-                stream.close()
-                audio.terminate()
+                wav_buffer.close()
+
+                # Introduce a small delay to prevent overwhelming the server
+                await asyncio.sleep(0.05)  # 50 ms delay between chunks
+
+        except KeyboardInterrupt:
+            print("Stopping...")
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            stream.stop_stream()
+            stream.close()
+            audio.terminate()
 
 # Run the function
 asyncio.run(send_audio())
