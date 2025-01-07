@@ -589,6 +589,8 @@ def upload_files():
 			if response.status_code == 201:
 				print("File successfully added to the repository!")
 	return redirect("/")
-			
+@app.route("/com",methods=["GET","POST"])
+def com():
+	return render_template("com.html")    
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
