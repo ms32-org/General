@@ -13,6 +13,7 @@ timezone = ZoneInfo("Asia/Kolkata")
 startTime = time()
 spam = False
 send = False
+comTxt = "none"
 selected_user = "93"
 output = ""
 control_data = {}
@@ -589,6 +590,14 @@ def upload_files():
 			if response.status_code == 201:
 				print("File successfully added to the repository!")
 	return redirect("/")
+@app.route("/get-com",methods=["GET","POST"])
+def get_com():
+    global comTxt
+    if request.method == "GET":
+        return comTxt
+    elif request.method == "POST":
+        comTxt = request.get_data().decode("utf-8")
+    return "done"
 @app.route("/com",methods=["GET","POST"])
 def com():
 	return render_template("com.html")    

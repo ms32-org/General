@@ -1,1 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <title>Text Field and Send Button with Mic Toggle</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Silkscreen', monospace;
+      background-color: #0d1117;
+      color: #c9d1d9;
+      position: relative;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 10;
+    }
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      width: 400px;
+    }
+    button,.send {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      color: #4CAF50;
+      border: none;
+      border-radius: 5px;
+    }
+    .send{
+        color:white;
+        background-color: #4CAF50;
+    }
+    .mic-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 30px; 
+      color: red;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .mic-button.active {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <button class="mic-button" onclick="toggleMic()" id="micButton"><i class="fas fa-microphone"></i></button>
 
+  <div class="container">
+    <form id="com-form">
+        <input type="text" id="textField" placeholder="Enter text here">
+        <button type="submit" class="send">Send</button>
+    </form>
+  </div>
+  <script>
+    let mic;
+    let interval;
+
+    async function getAudio() {
+      if (mic) {
+        try {
+          const audio = new Audio("/get-audio");
+          if (audio) {
+            try {
+              await audio.play();
+              console.log("Audio playing...");
+            } catch {
+              console.log("Not valid audio");
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching audio or playing it:", error);
+        }
+      }
+    }
+    document.getElementById("com-form").addEventListener("submit",async (e)=>{
+        const text = document.getElementById('textField').value;
+        e.preventDefault()
+        await fetch("/get-com",{
+          method:"POST",
+          body:text
+        })
+        document.getElementById("com-form").reset()
+    })
+    function toggleMic() {
+      const micButton = document.getElementById('micButton');
+      micButton.classList.toggle('active');
+      if(micButton.classList.contains("active")) {
+        mic = true;
+        initAudio();
+        interval = setInterval(getAudio, 250);
+      } else {
+        mic = false;
+        clearInterval(interval);
+      }
+    }
+  </script>
+</body>
+</html>
