@@ -594,7 +594,9 @@ def upload_files():
 def get_com():
     global comTxt
     if request.method == "GET":
-        return comTxt
+        c = comTxt
+        comTxt = "none"
+        return c
     elif request.method == "POST":
         comTxt = request.get_data().decode("utf-8")
     return "done"
