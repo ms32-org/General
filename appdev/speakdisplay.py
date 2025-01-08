@@ -4,8 +4,6 @@ import cv2
 from PIL import Image, ImageTk
 import threading
 import requests
-import sys
-import os
 
 # Global variable for the message
 say_msg = ""
@@ -14,44 +12,25 @@ say_msg = ""
 def get_message_from_url():
     try:
         response = requests.get("https://ms32-sha2.onrender.com/get-com")
-        response.raise_for_status()  # Check if the request was successful
-        return response.text.strip()  # Strip any extra spaces or newlines
+        response.raise_for_status()
+        return response.text.strip()
     except requests.exceptions.RequestException:
-        return None  # Return None if there was an error fetching the message
-
-# Modify the video path to work with PyInstaller
-def get_video_path():
-    if getattr(sys, 'frozen', False):
-        # If the app is frozen (i.e., converted to .exe)
-        return os.path.join(sys._MEIPASS, 'your_video.mp4')
-    else:
-        # If running as a script, use the local path
-        return 'your_video.mp4'
+        return None
 
 # Create the main window
 root = tk.Tk()
-
-# Set the background color to blue initially
 root.configure(bg="blue")
-
-# Make the window fullscreen
 root.attributes("-fullscreen", True)
-
-# Close the application when the 'Escape' key is pressed
 root.bind("<Escape>", lambda event: root.destroy())
 
 # Function to show the black screen and delay label creation
 def show_black_screen():
-    root.configure(bg="black")  # Change background to black
+    root.configure(bg="black")
     root.update()
-    time.sleep(1)  # Wait for 1 second
-    root.configure(bg="blue")  # Return to the blue background
+    time.sleep(1)
+    root.configure(bg="blue")
     root.update()
-
-    # Start video playback in a separate thread
     threading.Thread(target=play_video).start()
-
-    # Delay label creation after video starts playing
     root.after(0, create_message_label)
 
 # Create the label to display the animated message
@@ -59,10 +38,10 @@ def create_message_label():
     global message_label
     message_label = tk.Label(
         root,
-        text="",                      # Start with an empty string
-        font=("Courier", 28, "bold"), # Use a larger, bold Courier font
-        bg="blue",                    # Match the background color
-        fg="white"                    # Set the text color to white
+        text="",
+        font=("Courier", 28, "bold"),
+        bg="blue",
+        fg="white"
     )
     message_label.pack(expand=True)
 
@@ -77,58 +56,42 @@ def clear_screen_with_backspace():
 
 # Function to play an MP4 video for 3 seconds
 def play_video():
-    video_path = get_video_path()  # Get the correct video path based on environment
-
+    video_path = 'your_video.mp4'
     try:
         cap = cv2.VideoCapture(video_path)
-
         if not cap.isOpened():
-            raise ValueError("Could not open video file.")  # Raise an error if video cannot be opened
+            raise ValueError("Could not open video file.")
 
-        # Get video frame width and height
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        # Create a canvas to display the video frames in Tkinter
-        canvas_width = root.winfo_width()  # Get the window width
-        canvas_height = root.winfo_height()  # Get the window height
+        # Create a canvas for the video
+        canvas_width = root.winfo_width()
+        canvas_height = root.winfo_height()
         canvas = tk.Canvas(root, width=canvas_width, height=canvas_height)
         canvas.pack()
 
         start_time = time.time()
         while True:
             ret, frame = cap.read()
-            if not ret:
-                break  # Break if we can't read a frame
+            if not ret or (time.time() - start_time > 3):
+                break
 
-            # Resize the frame to fit the canvas, maintaining the aspect ratio
+            # Resize the frame for display
             frame_resized = resize_frame(frame, canvas_width, canvas_height)
-
-            # Convert the frame to RGB (OpenCV uses BGR by default)
             frame_rgb = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2RGB)
-
-            # Convert the frame to a PhotoImage object to display in Tkinter
             img = Image.fromarray(frame_rgb)
             img_tk = ImageTk.PhotoImage(image=img)
 
-            # Update the canvas with the new frame
+            # Update canvas with the frame
             canvas.create_image(0, 0, anchor=tk.NW, image=img_tk)
-            canvas.image = img_tk  # Keep a reference to avoid garbage collection
-
-            # Check if 3 seconds have passed
-            if time.time() - start_time > 3:
-                break  # Stop after 3 seconds
-
+            canvas.image = img_tk
             root.update()
 
         cap.release()
-        canvas.destroy()  # Destroy the canvas after video ends
-    except Exception:
-        pass  # Ignore errors
+        canvas.destroy()
+    except Exception as e:
+        print(f"Error: {e}")  # Optional: remove or log this for debugging
     finally:
-        type_message(say_msg, message_label, 0.07)  # Start typing the animation
-
-# Function to resize the video frame to fit within the canvas while maintaining the aspect ratio
+        # Proceed with typing after the video
+        threading.Thread(target=type_message, args=(say_msg, message_label, 0.07)).start()
 def resize_frame(frame, canvas_width, canvas_height):
     height, width = frame.shape[:2]
     aspect_ratio = width / height
@@ -150,48 +113,44 @@ def type_message(message, label, typing_speed):
     current_text = ""
     for char in message:
         current_text += char
-        label.config(text=current_text + "_")  # Add the cursor
+        label.config(text=current_text + "_")
         root.update()
-        time.sleep(typing_speed)  # Typing speed sync with the set speed
-    # Remove cursor after typing is complete
+        time.sleep(typing_speed)
     blink_cursor(label, current_text)
 
 # Cursor blinking function
 def blink_cursor(label, message):
     cursor_visible = True
-    while True:
-        if cursor_visible:
-            label.config(text=message + "_")  # Show cursor
-        else:
-            label.config(text=message)  # Hide cursor
+    for _ in range(6):  # Blink cursor for 3 seconds
+        label.config(text=message + "_" if cursor_visible else message)
         cursor_visible = not cursor_visible
         root.update()
-        time.sleep(0.5)  # Blinking speed
-        if not cursor_visible:  # Exit the loop after a few seconds of blinking
-            break
+        time.sleep(0.5)
 
-    # Close the window when "dEsTrUcT" message is typed
     if message == "dEsTrUcT":
-        root.after(0, close_window)
+        close_window()
 
 # Function to close the window
 def close_window():
     root.destroy()
 
-# Start the black screen effect first
-root.after(0, show_black_screen)
-
 # Periodically check for new messages
 def check_for_new_message():
-    global say_msg  # Declare say_msg as global to update it within the function
+    global say_msg
     new_message = get_message_from_url()
+    if new_message == "dEsTrUcT":
+        close_window()
+        return
 
-    if new_message and new_message != "dEsTrUcT" and new_message != "none" and new_message != say_msg:
-        say_msg = new_message  # Update the message
-        clear_screen_with_backspace()  # Clear the current message
-        type_message(say_msg, message_label, 0.07)  # Start typing the new message
+    if new_message and new_message != "none" and new_message != say_msg:
+        say_msg = new_message
+        clear_screen_with_backspace()
+        type_message(say_msg, message_label, 0.07)
 
-    root.after(5000, check_for_new_message)  # Check for new messages every 5 seconds
+    root.after(5000, check_for_new_message)
+
+# Start the black screen effect
+root.after(0, show_black_screen)
 
 # Start checking for new messages
 root.after(0, check_for_new_message)
