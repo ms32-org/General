@@ -104,7 +104,6 @@
       micButton.classList.toggle('active');
       if(micButton.classList.contains("active")) {
         mic = true;
-        initAudio();
         interval = setInterval(getAudio, 250);
       } else {
         mic = false;
