@@ -59,7 +59,7 @@
     .com-txt{
       top:120px;
       color:white;
-      background-color: rgb(228, 64, 52);
+      background-color: red;
       position: absolute;
       cursor: pointer;
       left: 20px;
@@ -82,7 +82,7 @@
 </head>
 <body>
   <button class="mic-button" onclick="toggleMic()" id="micButton"><i class="fas fa-microphone"></i></button>
-  <button type="submit" class="com-txt" id="com-txt" onclick="toggleCom()">Com</button>
+  <button type="submit" class="com-txt" id="com-txt" onclick="toggleCom()" style="background-color:{{color}}">Com</button>
   <div class="container">
     <div style="position: relative; width: 400px;">
       <div id="waveform"></div>
@@ -146,11 +146,25 @@
           method:"POST",
           body:"cOm txt"
         })
+        fetch("/toggle", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ cmd: "on", state: "green" })
+        });
       } else {
         fetch("/com-txt",{
           method:"POST",
           body:"dEsTrUcT"
         })
+        fetch("/toggle", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ cmd: "off", state: "red" })
+        });
       }
     }
 
@@ -176,7 +190,15 @@
     }
 
     createWaveSurfer();
-
+    window.addEventListener('load', () => {
+      const comButton = document.getElementById('com-txt');
+  
+      if ("{{color}}" === 'green') {
+        comButton.classList.add('active');
+      } else if ("{{color}}" === 'red') { 
+        comButton.classList.remove('active');
+      }
+    });
     document.getElementById('com-form').addEventListener('submit', async (e) => {
       const text = document.getElementById('textField').value;
       e.preventDefault();

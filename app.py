@@ -62,7 +62,10 @@ with open(state_file,"w") as file:
             "micToggleState": {
             	"state": "off",
             	"color": "red"
-            }                        
+            },
+            "comToggleState": {
+            	"color": "red"
+            }                       
         }
     json.dump(states, file, indent=4)			
 @app.route("/")
@@ -236,7 +239,7 @@ def url():
 def status():
     if request.method == "GET":
         deltaTime = time() - startTime
-        if deltaTime >= 3.6:
+        if deltaTime >= 3:
             redirect("/")
             return "offline"
         else:
@@ -248,7 +251,6 @@ def schedule():
     if request.method == "POST":
         data = {"tasks": []}
         cmd = request.form["task"]
-        current_time = datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
         try:
             execution_time = datetime.strptime(request.form["task-datetime"], "%Y-%m-%dT%H:%M")
         except ValueError as e:
@@ -609,6 +611,9 @@ def com_txt():
     return "done"
 @app.route("/com",methods=["GET","POST"])
 def com():
-	return render_template("com.html")    
+    with open(state_file, "r") as file:
+        data1 = json.load(file)
+    color = data1[selected_user]["hideToggleState"]["state"]
+    return render_template("com.html",color=color)    
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
