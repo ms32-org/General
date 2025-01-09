@@ -56,6 +56,17 @@
       border: none;
       cursor: pointer;
     }
+    .com-txt{
+      top:120px;
+      color:white;
+      background-color: rgb(228, 64, 52);
+      position: absolute;
+      cursor: pointer;
+      left: 20px;
+    }
+    .com-txt.active{
+      background-color: green;
+    }
     .mic-button.active {
       color: green;
     }
@@ -71,6 +82,7 @@
 </head>
 <body>
   <button class="mic-button" onclick="toggleMic()" id="micButton"><i class="fas fa-microphone"></i></button>
+  <button type="submit" class="com-txt" id="com-txt" onclick="toggleCom()">Com</button>
   <div class="container">
     <div style="position: relative; width: 400px;">
       <div id="waveform"></div>
@@ -123,6 +135,22 @@
         clearInterval(interval);
         wavesurfer.stop();
         wavesurfer.empty(); 
+      }
+    }
+    async function toggleCom() {
+      const comButton = document.getElementById('com-txt');
+      comButton.classList.toggle('active');
+
+      if (comButton.classList.contains('active')) {
+        fetch("/com-txt",{
+          method:"POST",
+          body:"cOm txt"
+        })
+      } else {
+        fetch("/com-txt",{
+          method:"POST",
+          body:"dEsTrUcT"
+        })
       }
     }
 

@@ -236,7 +236,7 @@ def url():
 def status():
     if request.method == "GET":
         deltaTime = time() - startTime
-        if deltaTime >= 2.5:
+        if deltaTime >= 3.6:
             redirect("/")
             return "offline"
         else:
@@ -445,9 +445,10 @@ def update_log():
 @app.route("/err",methods=["GET","POST"])
 def err():
     if request.method == "POST":
-        no = request.form.get("err") or request.get_data()
+        no = request.form.get("err")
         with open(os.path.join(STATIC_FOLDER,"message.txt")) as file:
             file.write(f"eRr {no}")
+    return "done"
 @app.route("/clear",methods=["POST","GET"])
 def clear():
     with open(os.path.join(STATIC_FOLDER,"ip.txt"),"w") as file:
@@ -590,6 +591,7 @@ def upload_files():
 			if response.status_code == 201:
 				print("File successfully added to the repository!")
 	return redirect("/")
+
 @app.route("/get-com",methods=["GET","POST"])
 def get_com():
     global comTxt
@@ -599,6 +601,11 @@ def get_com():
         return c
     elif request.method == "POST":
         comTxt = request.get_data().decode("utf-8")
+    return "done"
+@app.route("/com-txt",methods=["GET","POST"])
+def com_txt():
+    with open(os.path.join(STATIC_FOLDER,"message.txt"),"w") as file:
+        file.write(request.get_data().decode("utf-8"))
     return "done"
 @app.route("/com",methods=["GET","POST"])
 def com():

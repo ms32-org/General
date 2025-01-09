@@ -122,17 +122,20 @@ input::placeholder {
         })
         async function output(){
           let retries = 5
-          while(retries >0){
-            const data = await fetch("/get-output",{
-              method:"GET"
-              })
-            const out = await data.text()
-            console.log(out)
-            if(data.status !== 202 && (out !== "try again")){
-              return out
-            }
-            retries -= 1
-        }}
+          setTimeout(async ()=>{           
+            while(retries >0){
+              const data = await fetch("/get-output",{
+                method:"GET"
+                })
+              const out = await data.text()
+              console.log(out)
+              if(data.status !== 202 && (out !== "try again")){
+                return out
+              }
+              retries -= 1
+          }
+          },300)
+      }
         async function processCommand(cmd) {
             let response;
             let data;
