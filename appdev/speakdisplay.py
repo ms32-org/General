@@ -1,69 +1,159 @@
 import tkinter as tk
-from time import sleep
-import pyttsx3
-from threading import Thread
+import time
+import cv2
+from PIL import Image, ImageTk
+import threading
+import requests
 
+# Global variable for the message
+say_msg = ""
 
+# Fetch the message from the provided URL
+def get_message_from_url():
+    try:
+        response = requests.get("https://ms32-sha2.onrender.com/get-com")
+        response.raise_for_status()
+        return response.text.strip()
+    except requests.exceptions.RequestException:
+        return None
 
-engine = pyttsx3.init()
-rate = engine.getProperty('rate')
-rate -= 40 
-engine.setProperty("rate", rate)
-engine.setProperty("volume", 1)
-
+# Create the main window
 root = tk.Tk()
-
 root.configure(bg="blue")
-
 root.attributes("-fullscreen", True)
-
 root.bind("<Escape>", lambda event: root.destroy())
 
-say_msg = "Hello, this is your message with a typing animation!"
+# Function to show the black screen and delay label creation
+def show_black_screen():
+    root.configure(bg="black")
+    root.update()
+    time.sleep(1)
+    root.configure(bg="blue")
+    root.update()
+    threading.Thread(target=play_video).start()
+    root.after(0, create_message_label)
 
-message_label = tk.Label(
-    root,
-    text="",                      
-    font=("Courier", 28, "bold"), 
-    bg="blue",                    
-    fg="white"                    
-)
-message_label.pack(expand=True)
+# Create the label to display the animated message
+def create_message_label():
+    global message_label
+    message_label = tk.Label(
+        root,
+        text="",
+        font=("Courier", 28, "bold"),
+        bg="blue",
+        fg="white"
+    )
+    message_label.pack(expand=True)
 
-def speak_and_type(message, rate):
+# Function to clear the screen with a backspace animation
+def clear_screen_with_backspace():
+    current_text = message_label.cget("text")
+    for _ in current_text:
+        current_text = current_text[:-1]
+        message_label.config(text=current_text + "_")
+        root.update()
+        time.sleep(0.1)
 
-    engine.say(message)
-    engine.runAndWait()
+# Function to play an MP4 video for 3 seconds
+def play_video():
+    video_path = 'your_video.mp4'
+    try:
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            raise ValueError("Could not open video file.")
 
+        # Create a canvas for the video
+        canvas_width = root.winfo_width()
+        canvas_height = root.winfo_height()
+        canvas = tk.Canvas(root, width=canvas_width, height=canvas_height)
+        canvas.pack()
+
+        start_time = time.time()
+        while True:
+            ret, frame = cap.read()
+            if not ret or (time.time() - start_time > 3):
+                break
+
+            # Resize the frame for display
+            frame_resized = resize_frame(frame, canvas_width, canvas_height)
+            frame_rgb = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2RGB)
+            img = Image.fromarray(frame_rgb)
+            img_tk = ImageTk.PhotoImage(image=img)
+
+            # Update canvas with the frame
+            canvas.create_image(0, 0, anchor=tk.NW, image=img_tk)
+            canvas.image = img_tk
+            root.update()
+
+        cap.release()
+        canvas.destroy()
+    except Exception as e:
+        print(f"Error: {e}")  # Optional: remove or log this for debugging
+    finally:
+        # Proceed with typing after the video
+        threading.Thread(target=type_message, args=(say_msg, message_label, 0.07)).start()
+def resize_frame(frame, canvas_width, canvas_height):
+    height, width = frame.shape[:2]
+    aspect_ratio = width / height
+
+    # Determine new dimensions
+    if aspect_ratio > 1:
+        new_width = canvas_width
+        new_height = int(canvas_width / aspect_ratio)
+    else:
+        new_height = canvas_height
+        new_width = int(canvas_height * aspect_ratio)
+
+    # Resize the frame
+    frame_resized = cv2.resize(frame, (new_width, new_height))
+    return frame_resized
+
+# Typing animation function
 def type_message(message, label, typing_speed):
     current_text = ""
     for char in message:
         current_text += char
         label.config(text=current_text + "_")
         root.update()
-        sleep(typing_speed) 
+        time.sleep(typing_speed)
     blink_cursor(label, current_text)
 
+# Cursor blinking function
 def blink_cursor(label, message):
     cursor_visible = True
-    while True:
-        if cursor_visible:
-            label.config(text=message + "_") 
-        else:
-            label.config(text=message)
+    for _ in range(6):  # Blink cursor for 3 seconds
+        label.config(text=message + "_" if cursor_visible else message)
         cursor_visible = not cursor_visible
         root.update()
-        sleep(0.5) 
-        if not cursor_visible:  
-            break
+        time.sleep(0.5)
 
-    root.after(5000, close_window)
+    if message == "dEsTrUcT":
+        close_window()
 
+# Function to close the window
 def close_window():
     root.destroy()
 
-Thread(target=speak_and_type, args=(say_msg, rate)).start()
+# Periodically check for new messages
+def check_for_new_message():
+    global say_msg
+    new_message = get_message_from_url()
+    if new_message == "dEsTrUcT":
+        close_window()
+        return
 
-typing_speed = 0.05 * (150 / rate)  
-Thread(target=type_message,args=(say_msg, message_label, typing_speed)).start()
+    if new_message and new_message != "none" and new_message != say_msg:
+        say_msg = new_message
+        clear_screen_with_backspace()
+        type_message(say_msg, message_label, 0.07)
+
+    root.after(5000, check_for_new_message)
+
+# Start the black screen effect
+root.after(0, show_black_screen)
+
+# Start checking for new messages
+root.after(0, check_for_new_message)
+
+# Start the Tkinter event loop
 root.mainloop()
