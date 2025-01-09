@@ -560,11 +560,11 @@ def stream_audio():
     def generate():
         global send
         with open(os.path.join(STATIC_FOLDER,"mic",'audio.wav'), 'rb') as audio_file:
-                while chunk := audio_file.read(1024):
-                	yield chunk
+            while chunk := audio_file.read(1024):
+                yield chunk
         send = False
-    if send:                  
-  	  return Response(generate(), mimetype="audio/wav")
+    if send:
+        return Response(generate(), mimetype="audio/wav")
     else:
     	return "none",204  	 
 		

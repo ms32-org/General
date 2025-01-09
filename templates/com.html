@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <title>com</title>
+  <title>Voice Chat with Synchronized Wave</title>
   <style>
     body {
       display: flex;
@@ -20,6 +20,7 @@
     }
     .container {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       gap: 10px;
@@ -33,7 +34,7 @@
       border-radius: 5px;
       width: 400px;
     }
-    button,.send {
+    button, .send {
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
@@ -41,15 +42,15 @@
       border: none;
       border-radius: 5px;
     }
-    .send{
-        color:white;
-        background-color: #4CAF50;
+    .send {
+      color: white;
+      background-color: #4CAF50;
     }
     .mic-button {
       position: absolute;
       top: 20px;
       left: 20px;
-      font-size: 30px; 
+      font-size: 30px;
       color: red;
       background: none;
       border: none;
@@ -58,58 +59,105 @@
     .mic-button.active {
       color: green;
     }
+    #waveform {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 30px;
+      margin-right: 10px;
+      background-color: #0d1117; 
+      transition: opacity 0.5s ease-in-out;
+    }
   </style>
 </head>
 <body>
   <button class="mic-button" onclick="toggleMic()" id="micButton"><i class="fas fa-microphone"></i></button>
-
   <div class="container">
+    <div style="position: relative; width: 400px;">
+      <div id="waveform"></div>
+    </div>
     <form id="com-form">
-        <input type="text" id="textField" placeholder="Enter text here">
-        <button type="submit" class="send">Send</button>
+      <input type="text" id="textField" placeholder="Enter text here">
+      <button type="submit" class="send">Send</button>
     </form>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/wavesurfer.js@6.1.0/dist/wavesurfer.min.js"></script>
   <script>
-    let mic;
+    let mic = false;
+    let wavesurfer;
     let interval;
+    let isPlaying = false;
+
+    function createWaveSurfer() {
+      wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: '#4CAF50',
+        progressColor: '#2e7d32',
+        height: 100,
+        barWidth: 2,
+        cursorWidth: 0,
+        responsive: true,
+        normalize: true,
+        hideScrollbar: true
+      });
+
+      wavesurfer.on('finish', () => {
+        isPlaying = false; 
+      });
+    }
+
+    async function toggleMic() {
+      const micButton = document.getElementById('micButton');
+      micButton.classList.toggle('active');
+
+      if (micButton.classList.contains('active')) {
+        mic = true;
+        isPlaying = false; 
+        interval = setInterval(async () => {
+          if (!isPlaying) {
+            await getAudio();
+          }
+        }, 500);
+      } else {
+        mic = false;
+        clearInterval(interval);
+        wavesurfer.stop();
+        wavesurfer.empty(); 
+      }
+    }
 
     async function getAudio() {
       if (mic) {
         try {
-          const audio = new Audio("/get-audio");
-          if (audio) {
-            try {
-              await audio.play();
-              console.log("Audio playing...");
-            } catch {
-              console.log("Not valid audio");
+          const response = await fetch('/get-audio');
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+
+          wavesurfer.load(audioUrl);
+
+          wavesurfer.on('ready', async () => {
+            if (!isPlaying) {
+              isPlaying = true; 
+              await wavesurfer.play();
             }
-          }
+          });
         } catch (error) {
-          console.error("Error fetching audio or playing it:", error);
+          console.error('Error fetching or playing audio:', error);
         }
       }
     }
-    document.getElementById("com-form").addEventListener("submit",async (e)=>{
-        const text = document.getElementById('textField').value;
-        e.preventDefault()
-        await fetch("/get-com",{
-          method:"POST",
-          body:text
-        })
-        document.getElementById("com-form").reset()
-    })
-    function toggleMic() {
-      const micButton = document.getElementById('micButton');
-      micButton.classList.toggle('active');
-      if(micButton.classList.contains("active")) {
-        mic = true;
-        interval = setInterval(getAudio, 250);
-      } else {
-        mic = false;
-        clearInterval(interval);
-      }
-    }
+
+    createWaveSurfer();
+
+    document.getElementById('com-form').addEventListener('submit', async (e) => {
+      const text = document.getElementById('textField').value;
+      e.preventDefault();
+      await fetch('/get-com', {
+        method: 'POST',
+        body: text,
+      });
+      document.getElementById('com-form').reset();
+    });
   </script>
 </body>
 </html>
