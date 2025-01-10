@@ -328,11 +328,13 @@ def toggle():
                 data[selected_user]["INToggleState"]["color"] = color
             elif cmd == "mIc":
                 data[selected_user]["micToggleState"]["state"] = state
-                data[selected_user]["micToggleState"]["color"] = color                                             
+                data[selected_user]["micToggleState"]["color"] = color
+            elif cmd == "cOm":
+            	data[selected_user]["comToggleState"]["color"] = color            	              
             with open(state_file, "w") as file:
                 json.dump(data, file, indent=4)
         
-        if cmd == "hIdE" or cmd == "fLiP" or cmd == "sHaRe" or cmd == "bLoCk" or cmd == "mIc":
+        if cmd == "hIdE" or cmd == "fLiP" or cmd == "sHaRe" or cmd == "bLoCk" or cmd == "mIc" or cmd=="cOm":
             with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
                 file.write(f"{cmd} {state}")
         elif cmd == "sPaM":
@@ -613,7 +615,7 @@ def com_txt():
 def com():
     with open(state_file, "r") as file:
         data1 = json.load(file)
-    color = data1[selected_user]["hideToggleState"]["state"]
+    color = data1[selected_user]["comToggleState"]["state"]
     return render_template("com.html",color=color)    
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
