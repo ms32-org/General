@@ -10,7 +10,7 @@ from keyboard import wait, send
 from requests import get,post
 from time import sleep, time
 from threading import Thread
-from pyautogui import size
+from pyautogui import size, mouseDown, mouseUp
 from shutil import rmtree
 from io import BytesIO
 from mss import mss
@@ -473,6 +473,19 @@ async def control():
                         move(x,y)
                         bsig = False;sleep(0.03)
                         double_click()
+                    elif data["type"] == " drag":
+                    	x1 = data["x1"]*(width/data["width"])
+                    	y1 = data["y1"]*(height/data["height"])
+                    	x2 = data["x2"]*(width/data["width"])
+                    	y2 = data["y2"]*(height/data["height"])
+                    	bsig = False;sleep(0.03)
+                    	move(x1,y1)
+                    	sleep(0.01)
+                    	mouseDown()
+                    	sleep(0.01)
+                    	move(x2,y2)
+                    	sleep(0.01)
+                    	mouseUp                    	                  	                       
                     await asyncio.sleep(0.09)
             except Exception as e:log(f"control thread error:\t{e}")
 def commtxt():
