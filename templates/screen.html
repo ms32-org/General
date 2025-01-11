@@ -62,7 +62,8 @@
     let controlTrue = false; // Variable to control event listeners
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
+    let mousedown = drag = false
+    let mouseX, mouseY
     let lastFrameTime = performance.now();
     let frameCount = 0;
 
@@ -126,12 +127,38 @@
       });
       keys = new Set();
     });
-
-    window.addEventListener("mousedown", (e) => {
-      if (!controlTrue) return; // Check controlTrue before executing
+    window.addEventListener("mousedown",(e)=>{
+      if(!controlTrue) return;
+      mousedown = true
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    })
+    window.addEventListener("dragstart",()=>{
+      drag = true
+    })
+    window.addEventListener("mouseup", (e) => {
+      if (!controlTrue) return; 
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
+      if(drag && mousedown){
+        drag = mousedown = false
+        fetch("/control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "drag",
+          button: e.button,
+          x1:mouseX,
+          y1:mouseY,
+          x2: x,
+          y2: y,
+          width: canvas.width,
+          height: canvas.height,
+      }),
+      }
+    }else{
       fetch("/control", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -144,7 +171,8 @@
           height: canvas.height,
         }),
       });
-    });
+    }
+  });
 
     window.addEventListener("wheel", (e) => {
       if (!controlTrue) return; // Check controlTrue before executing
@@ -215,7 +243,7 @@
         clearTimeout(timeout);
         timeout = setTimeout(() => {
           toolbar.classList.add("hidden");
-        }, 2000);
+        }, 1000);
       }
     });
   </script>
