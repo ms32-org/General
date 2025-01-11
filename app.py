@@ -486,6 +486,15 @@ def control():
             control_data["y"] = data["y"]
             control_data["width"] = data["width"]
             control_data["height"] = data["height"]
+        elif data["type"] == "drag":
+        	control_data["type"] = " drag"
+        	control_data["x1"] = data["x1"]
+        	control_data["x2"] = data["x2"]
+        	control_data["y1"] = data["y1"]
+        	control_data["y2"] = data["y2"]
+        	control_data["width"] = data["width"]
+        	control_data["height"] = data["height"]
+        	           
         return "done"
 
     if request.method == "GET":
