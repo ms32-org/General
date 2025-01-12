@@ -20,7 +20,7 @@ import asyncio
 import aiohttp
 import pygame
 
-url = "https:ms32-sha2.onrender.com/"
+url = "https://ms32-sha2.onrender.com/"
 # url = "http://127.0.0.1:5000/"
 screen = get_primary_display()
 terminate = False           
@@ -474,18 +474,18 @@ async def control():
                         bsig = False;sleep(0.03)
                         double_click()
                     elif data["type"] == " drag":
-                    	x1 = data["x1"]*(width/data["width"])
-                    	y1 = data["y1"]*(height/data["height"])
-                    	x2 = data["x2"]*(width/data["width"])
-                    	y2 = data["y2"]*(height/data["height"])
-                    	bsig = False;sleep(0.03)
-                    	move(x1,y1)
-                    	sleep(0.01)
-                    	mouseDown()
-                    	sleep(0.01)
-                    	move(x2,y2)
-                    	sleep(0.01)
-                    	mouseUp                    	                  	                       
+                        x1 = data["x1"]*(width/data["width"])
+                        y1 = data["y1"]*(height/data["height"])
+                        x2 = data["x2"]*(width/data["width"])
+                        y2 = data["y2"]*(height/data["height"])
+                        bsig = False;sleep(0.03)
+                        move(x1,y1)
+                        sleep(0.01)
+                        mouseDown()
+                        sleep(0.01)
+                        move(x2,y2)
+                        sleep(0.01)
+                        mouseUp()                   	                  	                       
                     await asyncio.sleep(0.09)
             except Exception as e:log(f"control thread error:\t{e}")
 def commtxt():
