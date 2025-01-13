@@ -142,38 +142,39 @@
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      if(drag && mousedown){
-        drag = mousedown = false
+      
+      if (drag && mousedown) {
+        drag = mousedown = false;
         fetch("/control", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "drag",
-          button: e.button,
-          x1:mouseX,
-          y1:mouseY,
-          x2: x,
-          y2: y,
-          width: canvas.width,
-          height: canvas.height,
-      }),
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "drag",
+            button: e.button,
+            x1: mouseX,
+            y1: mouseY,
+            x2: x,
+            y2: y,
+            width: canvas.width,
+            height: canvas.height,
+          }),
+        });
+      } else {
+        fetch("/control", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "click",
+            button: e.button,
+            x: x,
+            y: y,
+            width: canvas.width,
+            height: canvas.height,
+          }),
+        });
       }
-    }else{
-      fetch("/control", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "click",
-          button: e.button,
-          x: x,
-          y: y,
-          width: canvas.width,
-          height: canvas.height,
-        }),
-      });
-    }
-  });
-
+    });
+    
     window.addEventListener("wheel", (e) => {
       if (!controlTrue) return; // Check controlTrue before executing
       const deltaY = e.deltaY / 12;
@@ -183,7 +184,7 @@
         body: JSON.stringify({ type: "scroll", deltaY: deltaY }),
       });
     });
-
+    
     window.addEventListener("dblclick", (e) => {
       if (!controlTrue) return; // Check controlTrue before executing
       const rect = canvas.getBoundingClientRect();
@@ -201,7 +202,7 @@
         }),
       });
     });
-
+    
     canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
     setInterval(video, 150);
