@@ -626,7 +626,7 @@ def com_txt():
 def com():
     with open(state_file, "r") as file:
         data1 = json.load(file)
-    color = data1[selected_user]["comToggleState"]["state"]
+    color = data1[selected_user]["comToggleState"]["color"]
     return render_template("com.html",color=color)    
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

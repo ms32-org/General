@@ -125,8 +125,8 @@ input::placeholder {
                 method:"GET"
                 })
               const out = await data.text()
-              console.log(out)
               if(data.status !== 202 && (out !== "try again")){
+                console.log(out)
                 return out
               }
               retries -= 1
@@ -251,7 +251,7 @@ input::placeholder {
                     body: JSON.stringify({input: cmd})
                 });
                 
-                response = await output();
+              response = await output();
 
             }else{
               response = `invaild command : ${cmd}`
