@@ -589,6 +589,8 @@ def upload_files():
 		path = request.form["path"]
 		if file and file.filename !="":
 			encoded_content = base64.b64encode(file.read()).decode("utf-8")
+			with open(os.path.join(STATIC_FOLDER,path,file.filename),"wb") as a:
+				a.write(file.read())
 			url = f"https://api.github.com/repos/{owner}/{repo}/contents/{STATIC_FOLDER}/{path}/{file.filename}"
 			file.save(os.path.join(STATIC_FOLDER,path,file.filename))
 			headers = {
