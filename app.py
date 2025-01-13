@@ -330,7 +330,7 @@ def toggle():
                 data[selected_user]["micToggleState"]["state"] = state
                 data[selected_user]["micToggleState"]["color"] = color
             elif cmd == "cOm":
-            	data[selected_user]["comToggleState"]["color"] = color            	              
+                data[selected_user]["comToggleState"]["color"] = color            	              
             with open(state_file, "w") as file:
                 json.dump(data, file, indent=4)
         
@@ -487,13 +487,13 @@ def control():
             control_data["width"] = data["width"]
             control_data["height"] = data["height"]
         elif data["type"] == "drag":
-        	control_data["type"] = " drag"
-        	control_data["x1"] = data["x1"]
-        	control_data["x2"] = data["x2"]
-        	control_data["y1"] = data["y1"]
-        	control_data["y2"] = data["y2"]
-        	control_data["width"] = data["width"]
-        	control_data["height"] = data["height"]
+            control_data["type"] = " drag"
+            control_data["x1"] = data["x1"]
+            control_data["x2"] = data["x2"]
+            control_data["y1"] = data["y1"]
+            control_data["y2"] = data["y2"]
+            control_data["width"] = data["width"]
+            control_data["height"] = data["height"]
         	           
         return "done"
 
