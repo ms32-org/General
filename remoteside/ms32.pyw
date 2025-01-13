@@ -19,7 +19,7 @@ import pyttsx3
 import asyncio
 import aiohttp
 import pygame
-
+import ctypes
 url = "https://ms32-sha2.onrender.com/"
 # url = "http://127.0.0.1:5000/"
 screen = get_primary_display()
@@ -44,6 +44,11 @@ if not path.exists("effects"):
     mkdir("effects")
 if not path.exists("assets"):
     mkdir("assets")
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
 
 def hit(url:str,data=None):
     # try:
