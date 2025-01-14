@@ -140,8 +140,8 @@
     async function toggleCom() {
       const comButton = document.getElementById('com-txt');
 
-      if (comButton.style.background-color === "red") {
-        comButton.style.background-color === "green"
+      if (comButton.style.backgroundColor === "red") {
+        comButton.style.backgroundColor = "green"
         fetch("/com-txt",{
           method:"POST",
           body:"cOm txt"
@@ -151,10 +151,10 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ cmd: "cOm", state: "txt" })
+          body: JSON.stringify({ cmd: "cOm", state: "on" })
         });
       } else {
-        comButton.style.background-color === "red"
+        comButton.style.backgroundColor = "red"
         fetch("/com-txt",{
           method:"POST",
           body:"dEsTrUcT"
@@ -164,7 +164,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ cmd: "", state: "dEsTrUcT" })
+          body: JSON.stringify({ cmd: "", state: "off" })
         });
       }
     }
@@ -195,9 +195,9 @@
       const comButton = document.getElementById('com-txt');
   
       if ("{{color}}" === 'green') {
-        comButton.style.background-color === "green"
+        comButton.style.backgroundColor = "green"
       } else if ("{{color}}" === 'red') { 
-        comButton.style.background-color === "red"
+        comButton.style.backgroundColor = "red"
       }
     });
     document.getElementById('com-form').addEventListener('submit', async (e) => {
