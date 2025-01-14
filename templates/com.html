@@ -139,9 +139,9 @@
     }
     async function toggleCom() {
       const comButton = document.getElementById('com-txt');
-      comButton.classList.toggle('active');
 
-      if (comButton.classList.contains('active')) {
+      if (comButton.style.background-color === "red") {
+        comButton.style.background-color === "green"
         fetch("/com-txt",{
           method:"POST",
           body:"cOm txt"
@@ -154,6 +154,7 @@
           body: JSON.stringify({ cmd: "cOm", state: "txt" })
         });
       } else {
+        comButton.style.background-color === "red"
         fetch("/com-txt",{
           method:"POST",
           body:"dEsTrUcT"
@@ -194,9 +195,9 @@
       const comButton = document.getElementById('com-txt');
   
       if ("{{color}}" === 'green') {
-        comButton.classList.add('active');
+        comButton.style.background-color === "green"
       } else if ("{{color}}" === 'red') { 
-        comButton.classList.remove('active');
+        comButton.style.background-color === "red"
       }
     });
     document.getElementById('com-form').addEventListener('submit', async (e) => {
