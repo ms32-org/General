@@ -151,7 +151,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ cmd: "on", state: "green" })
+          body: JSON.stringify({ cmd: "cOm", state: "on" })
         });
       } else {
         fetch("/com-txt",{
@@ -163,7 +163,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ cmd: "off", state: "red" })
+          body: JSON.stringify({ cmd: "cOm", state: "off" })
         });
       }
     }
