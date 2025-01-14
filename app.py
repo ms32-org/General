@@ -333,12 +333,12 @@ def toggle():
                 data[selected_user]["comToggleState"]["color"] = color            	              
             with open(state_file, "w") as file:
                 json.dump(data, file, indent=4)
-        
-        if cmd == "hIdE" or cmd == "fLiP" or cmd == "sHaRe" or cmd == "bLoCk" or cmd == "mIc" or cmd=="cOm":
-            with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
-                file.write(f"{cmd} {state}")
-        elif cmd == "sPaM":
+                           
+        if cmd == "sPaM":
             spam = True if state == "on" else False
+        else:
+        	with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
+        		file.write(f"{cmd} {state}")           
     return redirect("/")
 
 @app.route("/change-user", methods=["POST"])
