@@ -336,9 +336,9 @@ def toggle():
                            
         if cmd == "sPaM":
             spam = True if state == "on" else False
-	elif cmd != "cOm":
-        	with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
-        		file.write(f"{cmd} {state}")           
+        elif cmd != "cOm":
+            with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
+            	file.write(f"{cmd} {state}")           
     return redirect("/")
 
 @app.route("/change-user", methods=["POST"])
