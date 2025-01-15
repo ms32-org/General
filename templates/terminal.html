@@ -244,15 +244,18 @@ input::placeholder {
             else if(cmd.startsWith("cmd")){
               cmd = cmd.replace("cmd ","")
               terminal.innerHTML += `<div class="output">waiting for output.....<div>`;
-                fetch("/terminal", {
+                const data = await fetch("/terminal", {
                     method: "POST",
                     headers: {
                     'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({input: cmd})
                 });
-                await delay(500)
-                response = await output();
+                if(data.status == 200){
+                  response = await data.text()
+                }else{
+                  response = "unable to get output.."
+                }
                 terminal.removeChild(terminal.children[terminal.children.length - 1]);
 
             }else{
