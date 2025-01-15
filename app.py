@@ -338,7 +338,7 @@ def toggle():
             spam = True if state == "on" else False
         elif cmd != "cOm":
             with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
-            	file.write(f"{cmd} {state}")           
+                file.write(f"{cmd} {state}")          
     return redirect("/")
 
 @app.route("/change-user", methods=["POST"])
@@ -449,7 +449,7 @@ def update_log():
 @app.route("/err",methods=["GET","POST"])
 def err():
     if request.method == "POST":
-        no = request.form.get("err")
+        no = request.get_data().decode("utf-8")
         with open(os.path.join(STATIC_FOLDER,"message.txt")) as file:
             file.write(f"eRr {no}")
     return "done"

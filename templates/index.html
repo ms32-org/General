@@ -483,11 +483,10 @@ async function update() {
 }
 document.querySelector("#errform").addEventListener("submit",(e)=>{
   e.preventDefault()
-  const form = e.target
-  const formData = new FormData(form)
+  const no = document.getElementById("errinput").value
   fetch("/err",{
     method:"POST",
-    body:formData
+    body:no
   })
   document.querySelector("#errform").reset()
 })
