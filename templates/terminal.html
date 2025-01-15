@@ -118,14 +118,16 @@ input::placeholder {
               }
             }
         });
+        function delay(ms) {
+          return new Promise(resolve => setTimeout(resolve, ms));
+      }
         async function output(){
-          let retries = 5
+          let retries = 15
           while(retries >0){
             const data = await fetch("/get-output",{
               method:"GET"
               })
             const out = await data.text()
-            console.log(out)
             if(data.status !== 202 && (out !== "try again")){
               return out
             }
@@ -241,6 +243,7 @@ input::placeholder {
             }
             else if(cmd.startsWith("cmd")){
               cmd = cmd.replace("cmd ","")
+              terminal.innerHTML += `<div class="output">waiting for output.....<div>`;
                 fetch("/terminal", {
                     method: "POST",
                     headers: {
@@ -248,14 +251,18 @@ input::placeholder {
                     },
                     body: JSON.stringify({input: cmd})
                 });
-                
+                await delay(500)
                 response = await output();
+                terminal.removeChild(terminal.children[terminal.children.length - 1]);
 
             }else{
               response = `invaild command : ${cmd}`
             }
 
-            terminal.innerHTML += `<div class="output">>> ${response.replace(/\n/g, '<br>')}</div>`;
+            if (response && response.includes('\n')) {
+              response = response.replace(/\n/g, '<br>');
+          }
+            terminal.innerHTML += `<div class="output">>> ${response}</div>`;          
             terminal.scrollTop = terminal.scrollHeight;
         }
     </script>
