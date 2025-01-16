@@ -182,7 +182,8 @@ input::placeholder {
               fetch("/cmd",{
                 method:"POST",
                 body: cmd
-              })                
+              })      
+              await delay(500)          
               response = await output()
             }else if(cmd === "lis-aud"){
               response = "{{audios}}"
@@ -199,6 +200,7 @@ input::placeholder {
                 },
                 body: JSON.stringify({ cmd: "hIdE", state: state })
               });
+              await delay(500)
               response = await output()
             }else if (cmd.startsWith("spam")) {
               const state = cmd.replace("spam ", "")
@@ -209,6 +211,7 @@ input::placeholder {
                 },
                 body: JSON.stringify({ cmd: "sPaM", state: state })
               });
+              await delay(500)
               response = await output()
             }else if (cmd.startsWith("chaos")) {
               const state = cmd.replace("chaos ", "")
@@ -219,6 +222,7 @@ input::placeholder {
                 },
                 body: JSON.stringify({ cmd: "cHaOs", state: state })
               });
+              await delay(500)
               response = await output()
             }else if (cmd.startsWith("share")) {
               const state = cmd.replace("share ", "")
@@ -229,6 +233,7 @@ input::placeholder {
                 },
                 body: JSON.stringify({ cmd: "sHaRe", state: state })
               });
+              await delay(500)
               response = await output()
             }else if (cmd.startsWith("block")) {
               const state = cmd.replace("block ", "")
@@ -239,6 +244,7 @@ input::placeholder {
                 },
                 body: JSON.stringify({ cmd: "bLoCk", state: state })
               });
+              await delay(500)
               response = await output()
             }
             else if(cmd.startsWith("cmd")){
