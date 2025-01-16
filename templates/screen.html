@@ -67,14 +67,6 @@
     let lastFrameTime = performance.now();
     let frameCount = 0;
 
-    socket.onclose = () => {
-      alert("WebSocket connection closed.");
-    };
-
-    socket.onerror = (error) => {
-      alert("WebSocket error:", error);
-    };
-
     async function video() {
       const response = await fetch(
         "https://server-20zy.onrender.com/screenshot",
