@@ -338,7 +338,7 @@ def toggle():
             spam = True if state == "on" else False
         elif cmd != "cOm":
             with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
-            	file.write(f"{cmd} {state}")           
+                file.write(f"{cmd} {state}")          
     return redirect("/")
 
 @app.route("/change-user", methods=["POST"])
@@ -449,7 +449,7 @@ def update_log():
 @app.route("/err",methods=["GET","POST"])
 def err():
     if request.method == "POST":
-        no = request.form.get("err")
+        no = request.get_data().decode("utf-8")
         with open(os.path.join(STATIC_FOLDER,"message.txt")) as file:
             file.write(f"eRr {no}")
     return "done"
@@ -518,26 +518,26 @@ def terminal():
                 with open(os.path.join(STATIC_FOLDER,"message.txt"),"w") as file:
                     cmd1 = cmd["input"]
                     file.write(f"cMd {cmd1}")
-	            
+
         elif "output" in cmd:
             if cmd["output"]:
-                output = cmd["output"]
-                print("---------output stored-----------")		    
+                output = cmd["output"]    
             
     return "done"
     
 @app.route("/get-output",methods=["GET","POST"])
 def get_output():
-	global output
-	if request.method == "GET":
-		if output:
-			shaktimaan = output
-			output = None
-			with open(os.path.join(STATIC_FOLDER,"debug.txt"),"w") as file:
-				file.write(f"output {shaktimaan}")
-			return shaktimaan
-		else:
-			return "try again",202	              
+    global output	
+    if request.method == "GET":
+        if output:	
+            shaktimaan = output
+            output = None	
+            with open(os.path.join(STATIC_FOLDER,"debug.txt"),"w") as file:
+                file.write(f"output {shaktimaan}")
+            print(shaktimaan)
+            return shaktimaan
+        else:
+            return "try again",202	              
 @app.route("/cmd",methods=["POST","GET"])
 def cmd():
 	if request.method == "POST":
