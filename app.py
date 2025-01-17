@@ -592,7 +592,7 @@ def upload_files():
 			with open(os.path.join(STATIC_FOLDER,path,file.filename),"wb") as a:
 				a.write(file.read())
 			url = f"https://api.github.com/repos/{owner}/{repo}/contents/{STATIC_FOLDER}/{path}/{file.filename}"
-			file.save(os.path.join(STATIC_FOLDER,path,file.filename))
+			# file.save(os.path.join(STATIC_FOLDER,path,file.filename))
 			headers = {
 				    "Authorization": f"token {token}",
 				    "Accept": "application/vnd.github.v3+json"
