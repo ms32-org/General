@@ -58,17 +58,36 @@
     const canvas = document.getElementById("screen");
     const ctx = canvas.getContext("2d");
     let keys = new Set();
-    let controlTrue = true;
+    let controlTrue = false;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     let mousedown = drag = false
     let mouseX, mouseY
     let lastFrameTime = performance.now();
     let frameCount = 0;
-    let url = "https://server-ktcy.onrender.com/screenshot";
+    let url = "https://server-20zy.onrender.com/screenshot";
+    const res = async () => {
+      let url = "https://server-20zy.onrender.com/screenshot";
+    
+      try {
+        const response = await fetch(url, { method: "GET" });
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Fetched data:", data);
+      } catch (error) {
+        console.error("Fetch error:", error.message);
+        url = "https://server-ktcy.onrender.com/screenshot";
+        console.log("Retrying with new URL:", url);
+      }
+    };
+    
+    res();
+    
     async function video() {
       const response = await fetch(
-        url,
+        "https://server-20zy.onrender.com/screenshot",
         { method: "GET" }
       );
 
@@ -198,5 +217,45 @@
 
     setInterval(video, 150);
 
+    document.getElementById("fullscreen-btn").addEventListener("click", () => {
+      toggleFullscreen();
+    });
+
+    document.getElementById("screenshot-btn").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "screenshot.png";
+      link.click();
+    });
+
+    document
+      .getElementById("toggle-control-btn")
+      .addEventListener("click", () => {
+        controlTrue = !controlTrue;
+        alert(`Control mode: ${controlTrue ? "Enabled" : "Disabled"}`);
+      });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    let toolbar = document.querySelector(".toolbar");
+    let timeout;
+
+    document.addEventListener("mousemove", (e) => {
+      if (e.clientY < 50) {
+        toolbar.classList.remove("hidden");
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          toolbar.classList.add("hidden");
+        }, 1000);
+      }
+    });
   </script>
 </html>
