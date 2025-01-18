@@ -30,7 +30,7 @@ sharing = False
 bstate = False
 bmstate = False
 bsig  = False
-user = "91"
+user = "03"
 width, height = size()
 try:
     pygame.mixer.init()
@@ -50,7 +50,6 @@ def is_admin():
         return ctypes.windll.shell32.IsUserAnAdmin()
     except:
         return False
-
 def hit(url:str,data=None):
     # try:
         if not terminate:
