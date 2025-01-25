@@ -106,6 +106,7 @@
       <div class="sidebar-content">
         {% for task in tasks["tasks"] %}
         <div class="task-item">
+        <div class="task-item-content">
           <div class="task-details">
             <span><span class="green-label">Task:</span> {{task["cmd"]}}</span>
             <span><span class="green-label">Execution At:</span> {{task["execution_time"]}}</span>
@@ -116,6 +117,8 @@
             <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
           </form>
         </div>
+      </div>
+
         {% endfor %}
       </div>
       <div class="bottom-fixed">
