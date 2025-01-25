@@ -405,7 +405,6 @@ def logs():
     data = None
     with open(os.path.join(STATIC_FOLDER,"logs.json"), "r") as file:
         data = json.load(file)
-    prevlog = len(data["logs"])
     return render_template("logs.html",logs=data)
               
 
