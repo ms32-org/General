@@ -448,7 +448,9 @@ def update_log():
 @app.route("/clear-logs",methods=["POST","GET"])	
 def clear_logs():
 	logfile = os.path.join(STATIC_FOLDER, "logs.json")
-	data = '{"logs":[]}'
+	data = {
+		"logs":[]
+	}
 	with open(logfile, "w") as file:
             json.dump(data, file, indent=4)	
 	return "done"           
