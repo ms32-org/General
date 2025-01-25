@@ -8,55 +8,76 @@
 </head>
 <style>
   body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 0;
-}
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
 
-.container {
-  width: 80%;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-}
+  .container {
+    width: 80%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    position: relative;
+  }
 
-h1 {
-  text-align: center;
-  color: #333;
-}
+  h1 {
+    text-align: center;
+    color: #333;
+  }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
 
-th,
-td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
+  th,
+  td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
 
-th {
-  background-color: #f2f2f2;
-}
+  th {
+    background-color: #f2f2f2;
+  }
 
-tr:hover {
-  background-color: #f9f9f9;
-}
+  tr:hover {
+    background-color: #f9f9f9;
+  }
 
-td {
-  font-size: 14px;
-  color: #555;
-}
+  td {
+    font-size: 14px;
+    color: #555;
+  }
+
+  /* Style for the Clear Logs button */
+  .clear-log-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    background-color: #ff6347;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .clear-log-btn:hover {
+    background-color: #ff4500;
+  }
 </style>
+
 <body>
     <div class="container">
         <h1>Log Page</h1>
+        <button class="clear-log-btn" onclick="clearLogs()">Clear Logs</button>
         <table id="logTable">
             <thead>
                 <tr>
@@ -84,14 +105,15 @@ td {
             </tbody>
         </table>
     </div>
+
 <script>
   async function update(){
     const response = await fetch("/update-log",{method:"GET"})
     const logs = await response.json()
     const logsTableBody = document.querySelector("#logTable tbody");
     let color;
-    logsTableBody.innerHTML= ""
-    logs.logs.forEach((log)=>{
+    logsTableBody.innerHTML = "";
+    logs.logs.forEach((log) => {
       if(log.output.includes("SUCESS") || log.output.includes("ONLINE")){
         color = "green"
       }
@@ -101,17 +123,26 @@ td {
       else{
         color = "orange";
       }
-    
-    logsTableBody.innerHTML += `
+
+      logsTableBody.innerHTML += `
         <tr>
           <td>${log.no}</td>
           <td>${log.user}</td>
           <td style="color:${color};">${log.output}</td>
           <td>${log.time}</td>
         </tr>
-      `;})
+      `;
+    });
+    logsTableBody.scrollTop = logsTableBody.scrollHeight;
   }
-setInterval(update,1000)
+
+  function clearLogs() {
+    const logsTableBody = document.querySelector("#logTable tbody");
+    logsTableBody.innerHTML = "";
+    fetch("/clear-logs", { method: "POST" });
+  }
+
+  setInterval(update, 1000);
 </script>
 </body>
 </html>
