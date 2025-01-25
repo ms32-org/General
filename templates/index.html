@@ -487,9 +487,9 @@ async function update() {
 document.querySelector("#errform").addEventListener("submit",(e)=>{
   e.preventDefault()
   const no = document.getElementById("errinput").value
-  fetch("/err",{
+  fetch("/cmd",{
     method:"POST",
-    body:no
+    body:`err ${no}`
   })
   document.querySelector("#errform").reset()
 })
