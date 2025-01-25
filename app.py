@@ -405,6 +405,7 @@ def logs():
     data = None
     with open(os.path.join(STATIC_FOLDER,"logs.json"), "r") as file:
         data = json.load(file)
+    prevlog = len(data["logs"])
     return render_template("logs.html",logs=data)
               
 
@@ -447,13 +448,10 @@ def update_log():
 @app.route("/clear-logs",methods=["POST","GET"])	
 def clear_logs():
 	logfile = os.path.join(STATIC_FOLDER, "logs.json")
-	data = """
-	{
-  "logs":[]
-}
-	"""
+	data = {"logs":[]}
 	with open(logfile, "w") as file:
             json.dump(data, file, indent=4)	
+	return "done"           
 @app.route("/err",methods=["GET","POST"])
 def err():
     if request.method == "POST":
