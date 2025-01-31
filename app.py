@@ -635,6 +635,20 @@ def com():
     with open(state_file, "r") as file:
         data1 = json.load(file)
     color = data1[selected_user]["comToggleState"]["color"]
-    return render_template("com.html",color=color)    
+    return render_template("com.html",color=color)   
+    
+@app.route("/edit-file",methods=["POST","GET"])    
+def edit_file():
+	if request.method == "POST":
+		data = request.form["textarea_content"]
+		path = request.form["text_input"]
+		try:
+			with open(path, "w") as file:
+				file.write(data)
+		except:
+			pass
+		return redirect("/")
+	else:
+		return render_template("edit.html")
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
