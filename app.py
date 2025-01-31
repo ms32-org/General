@@ -637,18 +637,30 @@ def com():
     color = data1[selected_user]["comToggleState"]["color"]
     return render_template("com.html",color=color)   
     
-@app.route("/edit-file",methods=["POST","GET"])    
+@app.route("/edit-file", methods=["POST", "GET"])
 def edit_file():
-	if request.method == "POST":
-		data = request.form["textarea_content"]
-		path = request.form["text_input"]
-		try:
-			with open(path, "w") as file:
-				file.write(data)
-		except:
-			pass
-		return redirect("/")
-	else:
-		return render_template("edit.html")
+    if request.method == "POST":
+        data = request.form["textarea_content"]
+        path = request.form["text_input"]
+        
+        print(f"Path: {path}")
+        try:
+            path = os.path.abspath(path)
+            if path.endswith(".json"):
+                json_data = json.loads(data)
+                
+                with open(path, "w") as json_file:
+                    json.dump(json_data, json_file, indent=4)  
+            else:
+                with open(path, "w") as file:
+                    file.write(data)
+            
+            print("File successfully edited!")
+        except Exception as e:
+            print(f"Error: {e}")
+        
+        return redirect("/")
+    else:
+        return render_template("edit.html")
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
