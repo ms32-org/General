@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Screen Sharing</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      canvas.full-screen-image {
+        width: 100%;
+        height: 100%;
+      }
+
+      .toolbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px;
+        z-index: 1000;
+        transition: top 0.3s;
+        pointer-events: none; /* Make toolbar click-through */
+      }
+      .toolbar.hidden {
+        top: -50px; /* Hide the toolbar above the viewport */
+      }
+      .toolbar button {
+        background: none;
+        border: 2px solid white; /* Add clear border */
+        border-radius: 10px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        pointer-events: auto; /* Make buttons clickable */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="toolbar hidden">
+      <button id="fullscreen-btn">Toggle Fullscreen</button>
+      <button id="screenshot-btn">Screenshot</button>
+      <button id="toggle-control-btn">Toggle Control</button>
+    </div>
+    <canvas id="screen" class="full-screen-image"></canvas>
+  </body>
+  <script>
+    const canvas = document.getElementById("screen");
+    const ctx = canvas.getContext("2d");
+    let keys = new Set();
+    let controlTrue = false;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    let mousedown = drag = false
+    let mouseX, mouseY
+    let lastFrameTime = performance.now();
+    let frameCount = 0;
+    let url = "https://server-20zy.onrender.com/screenshot";
+    const res = async () => {
+      let url = "https://server-20zy.onrender.com/screenshot";
+    
+      try {
+        const response = await fetch(url, { method: "GET" });
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Fetched data:", data);
+      } catch (error) {
+        console.error("Fetch error:", error.message);
+        url = "https://server-ktcy.onrender.com/screenshot";
+        console.log("Retrying with new URL:", url);
+      }
+    };
+    
+    res();
+    
+    async function video() {
+      const response = await fetch(
+        "https://server-20zy.onrender.com/screenshot",
+        { method: "GET" }
+      );
+
+      if (response.ok) {
+        const arrayBuffer = await response.arrayBuffer();
+        const blob = new Blob([arrayBuffer], { type: "image/webp" });
+        const imgUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          // Calculate and log FPS
+          frameCount++;
+          const currentTime = performance.now();
+          const elapsedTime = currentTime - lastFrameTime;
+
+          // If 1 second has passed, log the FPS
+          if (elapsedTime >= 1000) {
+            const fps = frameCount / (elapsedTime / 1000);
+            console.log(`FPS: ${fps.toFixed(2)}`);
+            frameCount = 0;
+            lastFrameTime = currentTime;
+          }
+        };
+        img.src = imgUrl;
+      } else {
+        console.error("Failed to fetch screenshot:", response.statusText);
+      }
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (!controlTrue) return; // Check controlTrue before executing
+      if (e.key.length === 1) {
+        keys.add(e.keyCode);
+      } else {
+        keys.add(e.key);
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (!controlTrue) return; // Check controlTrue before executing
+      fetch("/control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "key", button: Array.from(keys) }),
+      });
+      keys = new Set();
+    });
+    window.addEventListener("mousedown",(e)=>{
+      if(!controlTrue) return;
+      mousedown = true
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    })
+    window.addEventListener("dragstart",()=>{
+      drag = true
+    })
+    window.addEventListener("mouseup", (e) => {
+      if (!controlTrue) return; 
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      if (drag && mousedown) {
+        drag = mousedown = false;
+        fetch("/control", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "drag",
+            button: e.button,
+            x1: mouseX,
+            y1: mouseY,
+            x2: x,
+            y2: y,
+            width: canvas.width,
+            height: canvas.height,
+          }),
+        });
+      } else {
+        fetch("/control", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "click",
+            button: e.button,
+            x: x,
+            y: y,
+            width: canvas.width,
+            height: canvas.height,
+          }),
+        });
+      }
+    });
+    
+    window.addEventListener("wheel", (e) => {
+      if (!controlTrue) return; // Check controlTrue before executing
+      const deltaY = e.deltaY / 12;
+      fetch("/control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "scroll", deltaY: deltaY }),
+      });
+    });
+    
+    window.addEventListener("dblclick", (e) => {
+      if (!controlTrue) return; // Check controlTrue before executing
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      fetch("/control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "dbclick",
+          x: x,
+          y: y,
+          width: canvas.width,
+          height: canvas.height,
+        }),
+      });
+    });
+    
+    canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    setInterval(video, 150);
+
+    document.getElementById("fullscreen-btn").addEventListener("click", () => {
+      toggleFullscreen();
+    });
+
+    document.getElementById("screenshot-btn").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "screenshot.png";
+      link.click();
+    });
+
+    document
+      .getElementById("toggle-control-btn")
+      .addEventListener("click", () => {
+        controlTrue = !controlTrue;
+        alert(`Control mode: ${controlTrue ? "Enabled" : "Disabled"}`);
+      });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    let toolbar = document.querySelector(".toolbar");
+    let timeout;
+
+    document.addEventListener("mousemove", (e) => {
+      if (e.clientY < 50) {
+        toolbar.classList.remove("hidden");
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          toolbar.classList.add("hidden");
+        }, 1000);
+      }
+    });
+  </script>
+</html>

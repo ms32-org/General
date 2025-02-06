@@ -106,6 +106,7 @@
       <div class="sidebar-content">
         {% for task in tasks["tasks"] %}
         <div class="task-item">
+        <div class="task-item-content">
           <div class="task-details">
             <span><span class="green-label">Task:</span> {{task["cmd"]}}</span>
             <span><span class="green-label">Execution At:</span> {{task["execution_time"]}}</span>
@@ -116,6 +117,8 @@
             <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
           </form>
         </div>
+      </div>
+
         {% endfor %}
       </div>
       <div class="bottom-fixed">
@@ -483,11 +486,10 @@ async function update() {
 }
 document.querySelector("#errform").addEventListener("submit",(e)=>{
   e.preventDefault()
-  const form = e.target
-  const formData = new FormData(form)
-  fetch("/err",{
+  const no = document.getElementById("errinput").value
+  fetch("/cmd",{
     method:"POST",
-    body:formData
+    body:`err ${no}`
   })
   document.querySelector("#errform").reset()
 })

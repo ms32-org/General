@@ -94,7 +94,7 @@ pre{
 
 /* Change delete button to red */
 .audio-item .delete-btn {
-    background-color: #d73a49;
+    background-color: #D73A49;
 }
 
 .audio-item .delete-btn:hover {
@@ -399,46 +399,6 @@ width: 100%;
   flex-shrink: 0; /* Prevents shrinking of actions */
   display: flex;
   align-items: center;
-}
-
-.delete-btn {
-  background: #d73a49;
-  border: none;
-  color: white; 
-  cursor: pointer;
-  display: flex;
-  padding: 8px 12px;
-  border-radius: 5px;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.3s ease;
-}
-
-.delete-btn:hover {
-  color: #ff4d4d;
-}
-
-.delete-btn i {
-  font-size: 16px; /* Adjust icon size */
-}
-
-.green-label {
-color: #238636;
-font-weight: bold;
-}
-
-
-.left-sidebar .sidebar-content {
-flex-grow: 1;
-overflow-y: auto; /* Enable vertical scrolling */
-max-height: calc(100% - 120px); /* Adjust height as needed */
-margin-bottom: 20px;
-}
-.left-sidebar .sidebar-content {
-flex-grow: 1;
-overflow-y: auto; /* Enable vertical scrolling */
-max-height: calc(100% - 120px); /* Adjust height based on the header and button space */
-margin-bottom: 20px; /* Space for the bottom button */
 }
 
 
@@ -748,4 +708,65 @@ color: #f0f6fc;
   flex: 1 1 auto;
   min-width: 200px;
 }
+/* Style for individual task cards */
+.task-item {
+  display: flex;
+  flex-direction: column;
+  background-color:  #21262d;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  flex-grow: 0;
+  flex-shrink: 0;
+  overflow-wrap: break-word;
+}
 
+/* Wrapper for the task details and the delete button */
+.task-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* Task details section */
+.task-details {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  /* Allow the task details to take available space */
+}
+
+/* Green label style */
+.green-label {
+  color: green;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+/* Delete button style */
+.task-actions {
+  display: flex;
+  align-items: center;
+}
+
+.delete-btn {
+  background-color: transparent;
+  border: none;
+  color: #d73a49;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+}
+
+.delete-btn:hover {
+  color: darkred;
+}
+
+/* For larger screen, increase the sidebar height */
+@media (min-width: 768px) {
+  .sidebar-content {
+    max-height: 500px;
+  }
+}

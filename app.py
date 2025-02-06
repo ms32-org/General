@@ -338,7 +338,7 @@ def toggle():
             spam = True if state == "on" else False
         elif cmd != "cOm":
             with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
-                file.write(f"{cmd} {state}")           
+                file.write(f"{cmd} {state}")          
     return redirect("/")
 
 @app.route("/change-user", methods=["POST"])
@@ -445,11 +445,19 @@ def update_log():
     with open(os.path.join(STATIC_FOLDER,"logs.json"), "r") as file:
         data = json.load(file)
     return jsonify(data)
-	
+@app.route("/clear-logs",methods=["POST","GET"])	
+def clear_logs():
+	logfile = os.path.join(STATIC_FOLDER, "logs.json")
+	data = {
+		"logs":[]
+	}
+	with open(logfile, "w") as file:
+            json.dump(data, file, indent=4)	
+	return "done"           
 @app.route("/err",methods=["GET","POST"])
 def err():
     if request.method == "POST":
-        no = request.form.get("err")
+        no = request.get_data().decode("utf-8")
         with open(os.path.join(STATIC_FOLDER,"message.txt")) as file:
             file.write(f"eRr {no}")
     return "done"
@@ -518,26 +526,26 @@ def terminal():
                 with open(os.path.join(STATIC_FOLDER,"message.txt"),"w") as file:
                     cmd1 = cmd["input"]
                     file.write(f"cMd {cmd1}")
-	            
+
         elif "output" in cmd:
             if cmd["output"]:
-                output = cmd["output"]
-                print("---------output stored-----------")		    
+                output = cmd["output"]    
             
     return "done"
     
 @app.route("/get-output",methods=["GET","POST"])
 def get_output():
-	global output
-	if request.method == "GET":
-		if output:
-			shaktimaan = output
-			output = None
-			with open(os.path.join(STATIC_FOLDER,"debug.txt"),"w") as file:
-				file.write(f"output {shaktimaan}")
-			return shaktimaan
-		else:
-			return "try again",202	              
+    global output	
+    if request.method == "GET":
+        if output:	
+            shaktimaan = output
+            output = None	
+            with open(os.path.join(STATIC_FOLDER,"debug.txt"),"w") as file:
+                file.write(f"output {shaktimaan}")
+            print(shaktimaan)
+            return shaktimaan
+        else:
+            return "try again",202	              
 @app.route("/cmd",methods=["POST","GET"])
 def cmd():
 	if request.method == "POST":
@@ -592,7 +600,7 @@ def upload_files():
 			with open(os.path.join(STATIC_FOLDER,path,file.filename),"wb") as a:
 				a.write(file.read())
 			url = f"https://api.github.com/repos/{owner}/{repo}/contents/{STATIC_FOLDER}/{path}/{file.filename}"
-			file.save(os.path.join(STATIC_FOLDER,path,file.filename))
+			# file.save(os.path.join(STATIC_FOLDER,path,file.filename))
 			headers = {
 				    "Authorization": f"token {token}",
 				    "Accept": "application/vnd.github.v3+json"
@@ -627,6 +635,32 @@ def com():
     with open(state_file, "r") as file:
         data1 = json.load(file)
     color = data1[selected_user]["comToggleState"]["color"]
-    return render_template("com.html",color=color)    
+    return render_template("com.html",color=color)   
+    
+@app.route("/edit-file", methods=["POST", "GET"])
+def edit_file():
+    if request.method == "POST":
+        data = request.form["textarea_content"]
+        path = request.form["text_input"]
+        
+        print(f"Path: {path}")
+        try:
+            path = os.path.abspath(path)
+            if path.endswith(".json"):
+                json_data = json.loads(data)
+                
+                with open(path, "w") as json_file:
+                    json.dump(json_data, json_file, indent=4)  
+            else:
+                with open(path, "w") as file:
+                    file.write(data)
+            
+            print("File successfully edited!")
+        except Exception as e:
+            print(f"Error: {e}")
+        
+        return redirect("/")
+    else:
+        return render_template("edit.html")
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
