@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Manager</title>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        /* Dark Theme */
+        body {
+            font-family: Arial, sans-serif;
+            background: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loading {
+            text-align: center;
+            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .loader {
+            border: 4px solid #333;
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #file-manager {
+            width: 100%;
+            max-width: 100%;
+            background: #1E1E1E;
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        #path {
+            font-size: 14px;
+            color: #BBBBBB;
+            margin-bottom: 10px;
+        }
+
+        #file-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 5px;
+        }
+
+        .folder, .file {
+            display: flex;
+            align-items: center;
+            background: #292929;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .folder:hover, .file:hover {
+            background: #3A3A3A;
+        }
+
+        .folder i, .file i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .actions button {
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.3s;
+            font-size: 14px;
+            min-width: 100px;
+            justify-content: center;
+        }
+
+        .download-btn { background: #28a745; }
+        .edit-btn { background: #007bff; }
+        .delete-btn { background: #dc3545; }
+        .download-btn:hover { background: #218838; }
+        .edit-btn:hover { background: #0069d9; }
+        .delete-btn:hover { background: #c82333; }
+
+        #back-button {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: fit-content;
+        }
+
+        #back-button:hover {
+            background: #e68a00;
+        }
+
+        /* Popup styles */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #252525;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+            width: 300px;
+        }
+
+        .popup p {
+            margin-bottom: 15px;
+        }
+
+        .popup button {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+
+        .popup .confirm-btn { background: #dc3545; color: white; }
+        .popup .confirm-btn:hover { background: #c82333; }
+        .popup .cancel-btn { background: #444; color: white; }
+        .popup .cancel-btn:hover { background: #666; }
+
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div class="loader"></div>
+        <p>Fetching file data, please wait...</p>
+    </div>
+
+    <div id="file-manager">
+        <button id="back-button"><i class="fas fa-arrow-left"></i> Back</button>
+        <div id="path">Current Path: /</div>
+        <div id="file-list"></div>
+    </div>
+
+    <script>
+        let fileData = null;
+        let currentPath = [];
+        let currentData = null;
+
+        async function fetchData() {
+            while (!fileData) {
+                try {
+                    let response = await fetch("/get-file-data");
+                    if (response.ok) {
+                        fileData = await response.json();
+                        document.getElementById("loading").style.display = "none";
+                        document.getElementById("file-manager").style.display = "flex";
+                        currentData = fileData;
+                        renderFileList(currentData);
+                    }
+                } catch (error) {
+                    console.error("Error fetching data, retrying...", error);
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
+                }
+            }
+        }
+
+        function renderFileList(data) {
+            const fileList = document.getElementById("file-list");
+            fileList.innerHTML = "";
+
+            for (const key in data) {
+                if (data[key] === null) {
+                    fileList.innerHTML += `
+                        <div class="file">
+                            <i class="fas fa-file-alt"></i> ${key}
+                            <div class="actions">
+                                <button class="download-btn"><i class="fas fa-download"></i> Download</button>
+                                <button class="edit-btn" onclick="openPopup('edit-popup')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="delete-btn" onclick="openPopup('delete-popup')"><i class="fas fa-trash"></i> Delete</button>
+                            </div>
+                        </div>`;
+                } else {
+                    fileList.innerHTML += `<div class="folder" onclick="openFolder('${key}')">
+                        <i class="fas fa-folder"></i> ${key}
+                    </div>`;
+                }
+            }
+            document.getElementById("path").textContent = "Current Path: /" + currentPath.join("/");
+            document.getElementById("back-button").style.display = currentPath.length ? "block" : "none";
+        }
+
+        function openFolder(folderName) {
+            currentPath.push(folderName);
+            currentData = currentData[folderName];
+            renderFileList(currentData);
+        }
+
+        function goBack() {
+            currentPath.pop();
+            currentData = fileData;
+            for (const folder of currentPath) {
+                currentData = currentData[folder];
+            }
+            renderFileList(currentData);
+        }
+
+        function openPopup(id) {
+            document.getElementById(id).style.display = "block";
+        }
+
+        function closePopup() {
+            document.querySelectorAll(".popup").forEach(popup => popup.style.display = "none");
+        }
+
+        document.getElementById("back-button").onclick = goBack;
+        fetchData();
+    </script>
+</body>
+</html>
