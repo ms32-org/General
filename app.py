@@ -457,7 +457,7 @@ def clear_logs():
 		"logs":[]
 	}
 	with open(logfile, "w") as file:
-		json.dump(data, file, indent=4)	
+            json.dump(data, file, indent=4)	
 	return "done"           
 @app.route("/err",methods=["GET","POST"])
 def err():
@@ -714,6 +714,7 @@ def post_file():
 	
 @app.route("/get-file",methods=["GET","POST"])
 def get_file():
+	global file_content
 	if request.method == "GET":
 		if file_content:
 			file_io = io.BytesIO(file_content)
@@ -733,7 +734,7 @@ def rename_file():
 			file.write(f"rEnAmE {path}|{new_name}")
 	return "done"
 	
-@app.route("/delete-file",methods=["POST","GET"])
+@app.route("delete-file",methods=["POST","GET"])
 def delete_file():
 	if request.method == "POST":
 		data = request.get_json()
