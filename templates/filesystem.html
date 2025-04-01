@@ -519,21 +519,39 @@
         }
 
         async function downloadFile(fileName) {
-            const path = currentPath.join('/') + '/' + fileName;
-            fetch("/req-file",{
-              method:"POST",
-              body:path
-            })
-            let gotFile = false
-            while(!gotFile){
-              const response = await fetch("/get-file",{
-                method:"GET"
-              })
-              if(response.ok){
-                gotFile = true
-              } 
-            }
-        }
+          const path = currentPath.join('/') + '/' + fileName;
+          
+          await fetch("/req-file", {
+              method: "POST",
+              body: path,
+              headers: {
+                  "Content-Type": "text/plain"
+              }
+          });
+          
+          let gotFile = false;
+          let fileBlob = null;
+      
+          while (!gotFile) {
+              const response = await fetch("/get-file", {
+                  method: "GET"
+              });
+      
+              if (response.ok) {
+                  fileBlob = await response.blob();
+                  gotFile = true;
+              }
+          }
+          const url = window.URL.createObjectURL(fileBlob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = fileName; 
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+      }
+      
 
         function openEditPopup(fileName) {
             currentTarget = fileName;
