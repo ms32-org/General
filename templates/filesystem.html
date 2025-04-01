@@ -4,39 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Manager</title>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Dark Theme */
-        body {
-            font-family: Arial, sans-serif;
-            background: #121212;
-            color: white;
+        :root {
+            --bg-dark: #121212;
+            --bg-darker: #1E1E1E;
+            --bg-item: #292929;
+            --bg-item-hover: #3A3A3A;
+            --bg-popup: #252525;
+            --bg-input: #333;
+            --text-primary: #FFFFFF;
+            --text-secondary: #CCCCCC;
+            --accent-blue: #0056b3;
+            --accent-green: #1a6b2d;
+            --accent-yellow: #cc8f00;
+            --accent-red: #a71d2a;
+            --border-radius: 8px;
+            --transition-speed: 0.2s;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
             overflow: hidden;
-            justify-content: center;
-            align-items: center;
         }
 
         #loading {
-            text-align: center;
-            font-size: 18px;
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 1rem;
         }
 
         .loader {
-            border: 4px solid #333;
-            border-top: 4px solid #ffffff;
+            border: 4px solid var(--bg-item);
+            border-top: 4px solid var(--accent-blue);
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin-bottom: 10px;
         }
 
         @keyframes spin {
@@ -45,132 +63,240 @@
         }
 
         #file-manager {
-            width: 100%;
-            max-width: 100%;
-            background: #1E1E1E;
-            display: none;
+            display: flex;
             flex-direction: column;
             height: 100vh;
-            padding: 15px;
-            overflow: hidden;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            background: var(--bg-darker);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--bg-item);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
         }
 
         #path {
-            font-size: 14px;
-            color: #BBBBBB;
-            margin-bottom: 10px;
+            font-family: 'Consolas', monospace;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 0 1rem;
         }
 
         #file-list {
             flex-grow: 1;
             overflow-y: auto;
             overflow-x: hidden;
-            padding-right: 5px;
+            padding-right: 0.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--bg-item) var(--bg-darker);
+        }
+
+        #file-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #file-list::-webkit-scrollbar-track {
+            background: var(--bg-darker);
+        }
+
+        #file-list::-webkit-scrollbar-thumb {
+            background-color: var(--bg-item);
+            border-radius: 4px;
         }
 
         .folder, .file {
             display: flex;
             align-items: center;
-            background: #292929;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 5px;
+            background: var(--bg-item);
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all var(--transition-speed) ease;
             width: 100%;
-            box-sizing: border-box;
         }
 
         .folder:hover, .file:hover {
-            background: #3A3A3A;
+            background: var(--bg-item-hover);
+            transform: translateX(2px);
         }
 
-        .folder i, .file i {
-            margin-right: 10px;
-            font-size: 18px;
+        .folder i {
+            color: var(--accent-blue);
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .file i {
+            color: var(--text-secondary);
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .item-name {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .actions {
-            margin-left: auto;
             display: flex;
-            gap: 8px;
+            gap: 0.5rem;
+            margin-left: 1rem;
         }
 
         .actions button {
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 5px;
-            transition: background 0.3s;
-            font-size: 14px;
-            min-width: 100px;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+            min-width: 90px;
             justify-content: center;
         }
 
-        .download-btn { background: #28a745; }
-        .edit-btn { background: #007bff; }
-        .delete-btn { background: #dc3545; }
-        .download-btn:hover { background: #218838; }
-        .edit-btn:hover { background: #0069d9; }
-        .delete-btn:hover { background: #c82333; }
+        .actions button i {
+            margin-right: 0;
+            font-size: 0.9rem;
+        }
 
-        #back-button {
-            background: #ff9800;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            transition: background 0.3s;
-            font-size: 14px;
+        .download-btn { background: var(--accent-green); color: white; }
+        .edit-btn { background: var(--accent-blue); color: white; }
+        .rename-btn { background: var(--accent-yellow); color: black; }
+        .delete-btn { background: var(--accent-red); color: white; }
+
+        .download-btn:hover { background: #145023; }
+        .edit-btn:hover { background: #004080; }
+        .rename-btn:hover { background: #b37a00; }
+        .delete-btn:hover { background: #8c1621; }
+
+        #back-button, #reload-button {
             display: flex;
             align-items: center;
-            gap: 6px;
-            width: fit-content;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-item);
+            color: var(--text-primary);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
         }
 
-        #back-button:hover {
-            background: #e68a00;
+        #back-button:hover, #reload-button:hover {
+            background: var(--bg-item-hover);
         }
 
-        /* Popup styles */
+        #back-button {
+            display: none;
+        }
+
         .popup {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #252525;
-            padding: 20px;
-            border-radius: 8px;
+            background: var(--bg-popup);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
             display: none;
             text-align: center;
-            width: 300px;
+            width: 350px;
+            max-width: 90%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
         }
 
         .popup p {
-            margin-bottom: 15px;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .popup input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1.5rem;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        .popup-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
         }
 
         .popup button {
+            padding: 0.75rem 1.5rem;
             border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             cursor: pointer;
-            margin: 5px;
-            transition: background 0.3s;
-            font-size: 14px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
         }
 
-        .popup .confirm-btn { background: #dc3545; color: white; }
-        .popup .confirm-btn:hover { background: #c82333; }
-        .popup .cancel-btn { background: #444; color: white; }
-        .popup .cancel-btn:hover { background: #666; }
+        .cancel-btn {
+            background: var(--bg-item);
+            color: var(--text-primary);
+        }
 
+        .cancel-btn:hover {
+            background: var(--bg-item-hover);
+        }
+
+        .file-input-wrapper {
+            width: 100%;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 0.75rem;
+            background: var(--bg-item);
+            color: var(--text-primary);
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .file-input-label:hover {
+            background: var(--bg-item-hover);
+        }
     </style>
 </head>
 <body>
@@ -180,84 +306,314 @@
     </div>
 
     <div id="file-manager">
-        <button id="back-button"><i class="fas fa-arrow-left"></i> Back</button>
-        <div id="path">Current Path: /</div>
+        <div id="controls">
+            <button id="back-button" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <div id="path">Current Path: /</div>
+            <button id="reload-button" onclick="reloadCurrentFolder()">
+                <i class="fas fa-sync-alt"></i> Reload
+            </button>
+        </div>
         <div id="file-list"></div>
     </div>
 
-    <script>
-        let fileData = null;
-        let currentPath = [];
-        let currentData = null;
+    <div id="rename-popup" class="popup">
+        <p>Rename File</p>
+        <input type="text" id="rename-input" placeholder="Enter new name">
+        <div class="popup-buttons">
+            <button id="confirm-rename" class="rename-btn">Rename</button>
+            <button onclick="closePopup('rename-popup')" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
 
-        async function fetchData() {
-            while (!fileData) {
-                try {
-                    let response = await fetch("/get-file-data");
-                    if (response.ok) {
-                        fileData = await response.json();
-                        document.getElementById("loading").style.display = "none";
-                        document.getElementById("file-manager").style.display = "flex";
-                        currentData = fileData;
-                        renderFileList(currentData);
-                    }
-                } catch (error) {
-                    console.error("Error fetching data, retrying...", error);
-                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
-                }
+    <div id="delete-popup" class="popup">
+        <p>Are you sure you want to delete this file?</p>
+        <div class="popup-buttons">
+            <button id="confirm-delete" class="delete-btn">Delete</button>
+            <button onclick="closePopup('delete-popup')" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <div id="edit-popup" class="popup">
+        <p>Edit File</p>
+        <div class="file-input-wrapper">
+            <input type="file" id="edit-file-input" class="file-input">
+            <label for="edit-file-input" class="file-input-label">
+                <i class="fas fa-upload"></i> Choose File
+            </label>
+        </div>
+        <div class="popup-buttons">
+            <button id="confirm-edit" class="edit-btn">Upload</button>
+            <button onclick="closePopup('edit-popup')" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let cache = {}; 
+        let currentPath = [];
+        let currentTarget = "";
+
+        const fileList = document.getElementById('file-list');
+        const pathDisplay = document.getElementById('path');
+        const backButton = document.getElementById('back-button');
+        const renameInput = document.getElementById('rename-input');
+        const editFileInput = document.getElementById('edit-file-input');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData('');
+            
+            document.getElementById('confirm-rename').addEventListener('click', renameFile);
+            document.getElementById('confirm-delete').addEventListener('click', deleteFile);
+            document.getElementById('confirm-edit').addEventListener('click', editFile);
+        });
+
+        async function fetchData(path) {
+            document.getElementById("file-manager").style.display = "none";
+            document.getElementById("loading").style.display = "flex";
+
+            try {
+              await fetch("req-folder",{
+                method:"POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ path: path || "/" })
+              })
+              let notGot = false
+              while(!notGot){
+                const response = await fetch("/get-folder", {
+                    method: "GET",
+                });
+                if (response.ok) {
+                  notGot = true
+                    const data = await response.json();
+                    cache[path || "/"] = data;
+                    renderFileList(data);
+                    updatePathDisplay(path);
+                    backButton.style.display = path !== '/' ? 'flex' : 'none';
+                }}
+            } catch (error) {
+                console.error("Error fetching data:", error);
             }
+
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("file-manager").style.display = "flex";
         }
 
         function renderFileList(data) {
-            const fileList = document.getElementById("file-list");
-            fileList.innerHTML = "";
-
-            for (const key in data) {
-                if (data[key] === null) {
-                    fileList.innerHTML += `
-                        <div class="file">
-                            <i class="fas fa-file-alt"></i> ${key}
-                            <div class="actions">
-                                <button class="download-btn"><i class="fas fa-download"></i> Download</button>
-                                <button class="edit-btn" onclick="openPopup('edit-popup')"><i class="fas fa-edit"></i> Edit</button>
-                                <button class="delete-btn" onclick="openPopup('delete-popup')"><i class="fas fa-trash"></i> Delete</button>
-                            </div>
-                        </div>`;
-                } else {
-                    fileList.innerHTML += `<div class="folder" onclick="openFolder('${key}')">
-                        <i class="fas fa-folder"></i> ${key}
-                    </div>`;
-                }
+            fileList.innerHTML = '';
+            
+            if (data.folders && data.folders.length > 0) {
+                data.folders.forEach(folder => {
+                    const folderElement = createFolderElement(folder);
+                    fileList.appendChild(folderElement);
+                });
             }
-            document.getElementById("path").textContent = "Current Path: /" + currentPath.join("/");
-            document.getElementById("back-button").style.display = currentPath.length ? "block" : "none";
+            
+            if (data.files && data.files.length > 0) {
+                data.files.forEach(file => {
+                    const fileElement = createFileElement(file);
+                    fileList.appendChild(fileElement);
+                });
+            }
         }
 
-        function openFolder(folderName) {
-            currentPath.push(folderName);
-            currentData = currentData[folderName];
-            renderFileList(currentData);
+        function createFolderElement(folderName) {
+            const folder = document.createElement('div');
+            folder.className = 'folder';
+            folder.innerHTML = `
+                <i class="fas fa-folder"></i>
+                <span class="item-name">${folderName}</span>
+            `;
+            
+            folder.addEventListener('click', () => {
+                const newPath = currentPath.join('/') + '/' + folderName;
+                currentPath.push(folderName);
+                if (cache[newPath]) {
+                    renderFileList(cache[newPath]);
+                    updatePathDisplay(newPath);
+                    backButton.style.display = 'flex';
+                } else {
+                    fetchData(newPath);
+                }
+            });
+            
+            return folder;
+        }
+
+        function createFileElement(fileName) {
+            const file = document.createElement('div');
+            file.className = 'file';
+            file.innerHTML = `
+                <i class="fas fa-file"></i>
+                <span class="item-name">${fileName}</span>
+                <div class="actions">
+                    <button class="download-btn" data-file="${fileName}">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button class="edit-btn" data-file="${fileName}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="rename-btn" data-file="${fileName}">
+                        <i class="fas fa-pen"></i> Rename
+                    </button>
+                    <button class="delete-btn" data-file="${fileName}">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            `;
+            
+            const downloadBtn = file.querySelector('.download-btn');
+            const editBtn = file.querySelector('.edit-btn');
+            const renameBtn = file.querySelector('.rename-btn');
+            const deleteBtn = file.querySelector('.delete-btn');
+            
+            downloadBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                downloadFile(fileName);
+            });
+            
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openEditPopup(fileName);
+            });
+            
+            renameBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openRenamePopup(fileName);
+            });
+            
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openDeletePopup(fileName);
+            });
+            
+            return file;
+        }
+
+        function updatePathDisplay(path) {
+            pathDisplay.textContent = `Current Path: ${path}`;
         }
 
         function goBack() {
-            currentPath.pop();
-            currentData = fileData;
-            for (const folder of currentPath) {
-                currentData = currentData[folder];
+            if (currentPath.length > 1) {
+                currentPath.pop();
+                const parentPath = currentPath.join('/');
+                if (cache[parentPath]) {
+                    renderFileList(cache[parentPath]);
+                    updatePathDisplay(parentPath);
+                    backButton.style.display = parentPath !== '/' ? 'flex' : 'none';
+                } else {
+                    fetchData(parentPath);
+                }
             }
-            renderFileList(currentData);
         }
 
-        function openPopup(id) {
-            document.getElementById(id).style.display = "block";
+        function reloadCurrentFolder() {
+            const currentPathStr = currentPath.join('/');
+            fetchData(currentPathStr);
         }
 
-        function closePopup() {
-            document.querySelectorAll(".popup").forEach(popup => popup.style.display = "none");
+        async function downloadFile(fileName) {
+            const path = currentPath.join('/') + '/' + fileName;
+            fetch("/req-file",{
+              method:"POST",
+              body:path
+            })
+            let gotFile = false
+            while(!gotFile){
+              const response = await fetch("/get-file",{
+                method:"GET"
+              })
+              if(response.ok){
+                gotFile = true
+              } 
+            }
         }
 
-        document.getElementById("back-button").onclick = goBack;
-        fetchData();
+        function openEditPopup(fileName) {
+            currentTarget = fileName;
+            editFileInput.value = '';
+            openPopup('edit-popup');
+        }
+
+        function openRenamePopup(fileName) {
+            currentTarget = fileName;
+            renameInput.value = fileName;
+            openPopup('rename-popup');
+        }
+
+        function openDeletePopup(fileName) {
+            currentTarget = fileName;
+            openPopup('delete-popup');
+        }
+
+        function editFile() {
+            const filePath = currentPath.join('/') + '/' + currentTarget;
+            const selectedFile = editFileInput.files[0];
+            
+            if (selectedFile) {
+                console.log(`Editing file: ${filePath} with new file:`, selectedFile);
+                const formData = new FormData();
+                formData.append('path', filePath);
+                formData.append('file', selectedFile);
+                
+                fetch('/edit-file', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        closePopup('edit-popup');
+                        reloadCurrentFolder();
+                    }
+                });
+            } else {
+                alert('Please select a file first');
+            }
+        }
+
+        function renameFile() {
+            const newName = renameInput.value.trim();
+            if (!newName) {
+                alert('Please enter a new name');
+                return;
+            }
+            
+            const path = currentPath.join('/') + '/' + currentTarget;
+            
+            fetch('/rename-file', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path, newName })
+            }).then(response => {
+                if (response.ok) {
+                    closePopup('rename-popup');
+                    reloadCurrentFolder();
+                }
+            });
+        }
+
+        function deleteFile() {
+            const filePath = currentPath.join('/') + '/' + currentTarget;
+            
+            fetch('/delete-file', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: filePath })
+            }).then(response => {
+                if (response.ok) {
+                    closePopup('delete-popup');
+                    reloadCurrentFolder();
+                }
+            });
+        }
+
+        function openPopup(id) { 
+            document.getElementById(id).style.display = 'block'; 
+        }
+        
+        function closePopup(id) { 
+            document.getElementById(id).style.display = 'none'; 
+        }
     </script>
 </body>
 </html>
