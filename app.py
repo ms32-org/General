@@ -457,7 +457,7 @@ def clear_logs():
 		"logs":[]
 	}
 	with open(logfile, "w") as file:
-            json.dump(data, file, indent=4)	
+		json.dump(data, file, indent=4)	
 	return "done"           
 @app.route("/err",methods=["GET","POST"])
 def err():

