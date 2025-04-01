@@ -373,7 +373,7 @@
             document.getElementById("loading").style.display = "flex";
 
             try {
-              await fetch("req-folder",{
+              await fetch("/req-folder",{
                 method:"POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ path: path || "/" })
