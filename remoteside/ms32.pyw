@@ -608,9 +608,20 @@ def main():
             elif "rEnAmE" in cmd:
                 a = cmd.replace("rEnAmE ","")
                 p, name = a.split("|")
-                rename(p,name)
+                if p.startswith("/"):
+                    p = p.replace("/", "")
+                print(p)
+                print(name)
+                name = path.join(path.dirname(p), name)
+                try:
+                    rename(p,name)
+                except Exception as e:
+                    print(e)
+                print("rename")
             elif "dElEtE" in cmd:
                 p = cmd.replace("dElEtE ","")
+                if p.startswith("/"):
+                    p = p.replace("/", "")
                 remove(p)
             elif "gEtFoLdEr" in  cmd:
                 p = cmd.replace("gEtFoLdEr ","")
