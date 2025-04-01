@@ -733,7 +733,7 @@ def rename_file():
 			file.write(f"rEnAmE {path}|{new_name}")
 	return "done"
 	
-@app.route("delete-file",methods=["POST","GET"])
+@app.route("/delete-file",methods=["POST","GET"])
 def delete_file():
 	if request.method == "POST":
 		data = request.get_json()
