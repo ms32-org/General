@@ -394,8 +394,9 @@
                         name: value
                       });
                     }
+                    console.log(items)
                     cache[path || "/"] = items;
-                    renderFileList(data);
+                    renderFileList(items);
                     updatePathDisplay(path);
                     backButton.style.display = path !== '/' ? 'flex' : 'none';
                 }}
