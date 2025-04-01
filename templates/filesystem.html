@@ -606,7 +606,7 @@
             fetch('/rename-file', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path, name })
+                body: JSON.stringify({ path:path, name:name })
             }).then(response => {
                 if (response.ok) {
                     closePopup('rename-popup');
