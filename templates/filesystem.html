@@ -386,7 +386,15 @@
                 if (response.ok) {
                   notGot = true
                     const data = await response.json();
-                    cache[path || "/"] = data;
+                    const items = [];
+
+                    for (const [key, value] of Object.entries(data)) {
+                      items.push({
+                        type: key.startsWith("folder") ? "folder" : "file",
+                        name: value
+                      });
+                    }
+                    cache[path || "/"] = items;
                     renderFileList(data);
                     updatePathDisplay(path);
                     backButton.style.display = path !== '/' ? 'flex' : 'none';
@@ -399,22 +407,18 @@
             document.getElementById("file-manager").style.display = "flex";
         }
 
-        function renderFileList(data) {
-            fileList.innerHTML = '';
-            
-            if (data.folders && data.folders.length > 0) {
-                data.folders.forEach(folder => {
-                    const folderElement = createFolderElement(folder);
-                    fileList.appendChild(folderElement);
-                });
+        function renderFileList(items) {
+          fileList.innerHTML = '';
+          
+          items.forEach(item => {
+            if (item.type === "folder") {
+              const folderElement = createFolderElement(item.name);
+              fileList.appendChild(folderElement);
+            } else {
+              const fileElement = createFileElement(item.name);
+              fileList.appendChild(fileElement);
             }
-            
-            if (data.files && data.files.length > 0) {
-                data.files.forEach(file => {
-                    const fileElement = createFileElement(file);
-                    fileList.appendChild(fileElement);
-                });
-            }
+          });
         }
 
         function createFolderElement(folderName) {
