@@ -595,7 +595,7 @@
         }
 
         function renameFile() {
-            const newName = renameInput.value.trim();
+            const name = renameInput.value.trim();
             if (!newName) {
                 alert('Please enter a new name');
                 return;
@@ -606,7 +606,7 @@
             fetch('/rename-file', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path, newName })
+                body: JSON.stringify({ path, name })
             }).then(response => {
                 if (response.ok) {
                     closePopup('rename-popup');
