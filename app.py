@@ -728,8 +728,8 @@ def get_file():
 def rename_file():
 	if request.method == "POST":
 		data = request.get_json()
-		path = data["path"]
-		new_name = data["name"]
+		path = data.get("path")
+		new_name = data.get("name")
 		with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
 			file.write(f"rEnAmE {path}|{new_name}")
 	return "done"
