@@ -699,7 +699,7 @@ def get_folder():
 						
 @app.route("/req-file",methods=["POST","GET"])
 def req_file():
-	path = request.get_data().decode("uft-8")
+	path = request.get_data().decode("utf-8")
 	with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
 		file.write(f"gEtFiLe {path}")
 	return "done"
