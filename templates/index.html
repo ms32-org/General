@@ -245,7 +245,8 @@
       <button id="terminal-btn"><i class="fas fa-terminal"></i></button>
       <button id="screen-btn"><i class="fas fa-tv"></i></button>
       <button id="log-btn"><i class="fas fa-newspaper"></i></button>   
-      <button id="com-btn"><i class="fas fa-microphone"></i></button>   
+      <button id="com-btn"><i class="fas fa-microphone"></i></button>
+      <button id="file-btn"><i class="fas fa-folder"></i></button>
     </div>
   </div>
 
@@ -507,6 +508,7 @@ setInterval(update, 1000);
     const screenBtn = document.getElementById("screen-btn");
     const logBtn = document.getElementById("log-btn");
     const comBtn = document.getElementById("com-btn");
+    const filebtn = document.getElementById("file-btn")
     const audioSidebar = document.getElementById("audio-sidebar");
     const imgSidebar = document.getElementById("img-sidebar");
     const vidSidebar = document.getElementById("vid-sidebar");
@@ -560,6 +562,9 @@ setInterval(update, 1000);
     })
     comBtn.addEventListener("click", () => {
       window.open("/com", "_blank")
+    })
+    filebtn.addEventListener("click",()=>{
+      window.open(`/filesystem/${document.getElementById("Dropdown").value}`,"_blank")
     })
   </script>
 </html>
