@@ -13,7 +13,6 @@
     margin: 0;
     padding: 0;
   }
-
   .container {
     width: 80%;
     margin: 20px auto;
@@ -22,40 +21,26 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
   }
-
   h1 {
     text-align: center;
     color: #333;
   }
-
   table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
   }
-
-  th,
-  td {
+  th, td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
   }
-
-  th {
-    background-color: #f2f2f2;
-  }
-
-  tr:hover {
-    background-color: #f9f9f9;
-  }
-
-  td {
-    font-size: 14px;
-    color: #555;
-  }
-
-  /* Style for the Clear Logs button */
+  th { background-color: #f2f2f2; }
+  tr:hover { background-color: #f9f9f9; }
+  td { font-size: 14px; color: #555; }
   .clear-log-btn {
     position: absolute;
     top: 20px;
@@ -68,14 +53,10 @@
     cursor: pointer;
     font-size: 14px;
   }
-
-  .clear-log-btn:hover {
-    background-color: #ff4500;
-  }
+  .clear-log-btn:hover { background-color: #ff4500; }
 </style>
-
 <body>
-    <div class="container">
+    <div class="container" id="logContainer">
         <h1>Log Page</h1>
         <button class="clear-log-btn" onclick="clearLogs()">Clear Logs</button>
         <table id="logTable">
@@ -88,61 +69,71 @@
                 </tr>
             </thead>
             <tbody>
-              {% for log in logs["logs"] %}
-                <tr>
-                    <td>{{log["no"]}}</td>
-                    <td>{{log["user"]}}</td>
-                    {% if "SUCESS" in log["output"] or "ONLINE" in log["output"] %}
-                    <td style="color:green;">{{log["output"]}}</td>
-                    {% elif "FATAL" in log["output"] %}
-                    <td style="color:red;">{{log["output"]}}</td>
-                    {% else %}
-                    <td style="color:orange;">{{log["output"]}}</td>
-                    {% endif %}
-                    <td>{{log["time"]}}</td>
-                </tr>
-              {% endfor %}
             </tbody>
         </table>
     </div>
 
 <script>
-  async function update(){
-    const response = await fetch("/update-log",{method:"GET"})
-    const logs = await response.json()
+  let logs = [];
+  let loadedLogs = 0;
+  const logsPerLoad = 100;
+  
+  async function fetchLogs() {
+    const response = await fetch("/update-log");
+    logs = (await response.json()).logs;
+    loadedLogs = 0;
+    document.querySelector("#logTable tbody").innerHTML = "";
+    loadMoreLogs();
+  }
+  
+  function loadMoreLogs() {
     const logsTableBody = document.querySelector("#logTable tbody");
     let color;
-    logsTableBody.innerHTML = "";
-    logs.logs.forEach((log) => {
-      if(log.output.includes("SUCESS") || log.output.includes("ONLINE")){
-        color = "green"
-      }
-      else if(log.output.includes("ERROR")){
+    let newLogs = logs.slice(loadedLogs, loadedLogs + logsPerLoad);
+    loadedLogs += newLogs.length;
+    newLogs.forEach((log) => {
+      if (log.output.includes("SUCESS") || log.output.includes("ONLINE")) {
+        color = "green";
+      } else if (log.output.includes("FATAL")) {
         color = "red";
-      }
-      else{
+      } else {
         color = "orange";
       }
-
       logsTableBody.innerHTML += `
         <tr>
           <td>${log.no}</td>
           <td>${log.user}</td>
           <td style="color:${color};">${log.output}</td>
           <td>${log.time}</td>
-        </tr>
-      `;
+        </tr>`;
     });
-    logsTableBody.scrollTop = logsTableBody.scrollHeight;
+  }
+
+  function removeTopLogs() {
+    const logsTableBody = document.querySelector("#logTable tbody");
+    while (logsTableBody.children.length > 200) {
+      logsTableBody.removeChild(logsTableBody.firstChild);
+    }
   }
 
   function clearLogs() {
-    const logsTableBody = document.querySelector("#logTable tbody");
-    logsTableBody.innerHTML = "";
+    logs = [];
+    loadedLogs = 0;
+    document.querySelector("#logTable tbody").innerHTML = "";
     fetch("/clear-logs", { method: "POST" });
   }
-
-  setInterval(update, 1000);
+  
+  document.querySelector("#logContainer").addEventListener("scroll", function() {
+    if (this.scrollTop + this.clientHeight >= this.scrollHeight) {
+      loadMoreLogs();
+    }
+    if (this.scrollTop > 100) {
+      removeTopLogs();
+    }
+  });
+  
+  fetchLogs();
+  setInterval(fetchLogs, 4000);
 </script>
 </body>
 </html>
