@@ -77,12 +77,17 @@
   let logs = [];
   let loadedLogs = 0;
   const logsPerLoad = 100;
+  let allLogsLoaded = false;
   
   async function fetchLogs() {
-    const response = await fetch("/update-log");
-    logs = (await response.json()).logs;
-    loadedLogs = 0;
-    document.querySelector("#logTable tbody").innerHTML = "";
+    const response = await fetch(`/update-log?start=${loadedLogs}&count=${logsPerLoad}`);
+    const newLogs = (await response.json()).logs;
+    
+    if (newLogs.length < logsPerLoad) {
+      allLogsLoaded = true;
+    }
+    
+    logs = logs.concat(newLogs);
     loadMoreLogs();
   }
   
@@ -91,6 +96,7 @@
     let color;
     let newLogs = logs.slice(loadedLogs, loadedLogs + logsPerLoad);
     loadedLogs += newLogs.length;
+    
     newLogs.forEach((log) => {
       if (log.output.includes("SUCESS") || log.output.includes("ONLINE")) {
         color = "green";
@@ -119,21 +125,23 @@
   function clearLogs() {
     logs = [];
     loadedLogs = 0;
+    allLogsLoaded = false;
     document.querySelector("#logTable tbody").innerHTML = "";
     fetch("/clear-logs", { method: "POST" });
   }
   
   document.querySelector("#logContainer").addEventListener("scroll", function() {
-    if (this.scrollTop + this.clientHeight >= this.scrollHeight) {
-      loadMoreLogs();
+    if (!allLogsLoaded && this.scrollTop + this.clientHeight >= this.scrollHeight - 50) {
+      fetchLogs();
     }
     if (this.scrollTop > 100) {
       removeTopLogs();
     }
   });
   
-  fetchLogs();
   setInterval(fetchLogs, 4000);
+  
+  fetchLogs();
 </script>
 </body>
 </html>
