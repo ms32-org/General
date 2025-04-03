@@ -78,26 +78,27 @@
   let loadedLogs = 0;
   const logsPerLoad = 100;
   let allLogsLoaded = false;
+  let firstLogIndex = 0;
   
-  async function fetchLogs() {
-    const response = await fetch(`/update-log?start=${loadedLogs}&count=${logsPerLoad}`);
+  async function fetchLogs(start = 0) {
+    const response = await fetch(`/update-log?start=${start}&count=${logsPerLoad}`);
     const newLogs = (await response.json()).logs;
     
     if (newLogs.length < logsPerLoad) {
       allLogsLoaded = true;
     }
     
-    logs = logs.concat(newLogs);
-    loadMoreLogs();
+    logs = newLogs;
+    loadedLogs = start + newLogs.length;
+    renderLogs();
   }
   
-  function loadMoreLogs() {
+  function renderLogs() {
     const logsTableBody = document.querySelector("#logTable tbody");
+    logsTableBody.innerHTML = "";
     let color;
-    let newLogs = logs.slice(loadedLogs, loadedLogs + logsPerLoad);
-    loadedLogs += newLogs.length;
     
-    newLogs.forEach((log) => {
+    logs.forEach((log) => {
       if (log.output.includes("SUCESS") || log.output.includes("ONLINE")) {
         color = "green";
       } else if (log.output.includes("FATAL")) {
@@ -115,13 +116,6 @@
     });
   }
 
-  function removeTopLogs() {
-    const logsTableBody = document.querySelector("#logTable tbody");
-    while (logsTableBody.children.length > 200) {
-      logsTableBody.removeChild(logsTableBody.firstChild);
-    }
-  }
-
   function clearLogs() {
     logs = [];
     loadedLogs = 0;
@@ -132,14 +126,15 @@
   
   document.querySelector("#logContainer").addEventListener("scroll", function() {
     if (!allLogsLoaded && this.scrollTop + this.clientHeight >= this.scrollHeight - 50) {
-      fetchLogs();
-    }
-    if (this.scrollTop > 100) {
-      removeTopLogs();
+      firstLogIndex += logsPerLoad;
+      fetchLogs(firstLogIndex);
+    } else if (this.scrollTop <= 50 && firstLogIndex > 0) {
+      firstLogIndex -= logsPerLoad;
+      fetchLogs(firstLogIndex);
     }
   });
   
-  setInterval(fetchLogs, 4000);
+  setInterval(() => fetchLogs(firstLogIndex), 4000);
   
   fetchLogs();
 </script>
