@@ -75,13 +75,18 @@
 <script>
   const logsPerLoad = 100;
   let currentStartIndex = 0;
+  let totalLogs = 0;
   const tableBody = document.querySelector("#logTable tbody");
   const container = document.getElementById("logContainer");
 
   async function fetchLogs(start) {
-    const response = await fetch(`/update-log?start=${start}&count=${logsPerLoad}`);
-    const result = await response.json();
-    return result.logs || [];
+    try {
+      const response = await fetch(`/update-log?start=${start}&count=${logsPerLoad}`);
+      const result = await response.json();
+      return result.logs || [];
+    } catch (e) {
+      return [];
+    }
   }
 
   function getColor(output) {
@@ -93,13 +98,12 @@
   function renderLogs(logs, direction) {
     const rows = logs.map(log => {
       const color = getColor(log.output);
-      return `
-        <tr>
-          <td>${log.no}</td>
-          <td>${log.user}</td>
-          <td style="color:${color};">${log.output}</td>
-          <td>${log.time}</td>
-        </tr>`;
+      return `<tr>
+        <td>${log.no}</td>
+        <td>${log.user}</td>
+        <td style="color:${color};">${log.output}</td>
+        <td>${log.time}</td>
+      </tr>`;
     }).join("");
 
     if (direction === "down") {
@@ -120,6 +124,7 @@
   async function loadInitialLogs() {
     const logs = await fetchLogs(0);
     currentStartIndex = 0;
+    totalLogs = logs.length;
     renderLogs(logs, "replace");
   }
 
@@ -127,24 +132,24 @@
     if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
       currentStartIndex += logsPerLoad;
       const logs = await fetchLogs(currentStartIndex);
-      renderLogs(logs, "down");
-
-      // remove top logs
-      while (tableBody.rows.length > 200) tableBody.deleteRow(0);
+      if (logs.length > 0) {
+        renderLogs(logs, "down");
+        while (tableBody.rows.length > 200) tableBody.deleteRow(0);
+      }
     } else if (container.scrollTop <= 10 && currentStartIndex >= logsPerLoad) {
       currentStartIndex -= logsPerLoad;
       const logs = await fetchLogs(currentStartIndex);
-      renderLogs(logs, "up");
-
-      // remove bottom logs
-      while (tableBody.rows.length > 200) tableBody.deleteRow(tableBody.rows.length - 1);
-      container.scrollTop = 10;
+      if (logs.length > 0) {
+        renderLogs(logs, "up");
+        while (tableBody.rows.length > 200) tableBody.deleteRow(tableBody.rows.length - 1);
+        container.scrollTop = 11;
+      }
     }
   });
 
   setInterval(async () => {
     const logs = await fetchLogs(currentStartIndex);
-    renderLogs(logs, "replace");
+    if (logs.length > 0) renderLogs(logs, "replace");
   }, 4000);
 
   loadInitialLogs();
