@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logs</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logs</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <style>
   body {
@@ -56,87 +56,98 @@
   .clear-log-btn:hover { background-color: #ff4500; }
 </style>
 <body>
-    <div class="container" id="logContainer">
-        <h1>Log Page</h1>
-        <button class="clear-log-btn" onclick="clearLogs()">Clear Logs</button>
-        <table id="logTable">
-            <thead>
-                <tr>
-                    <th>Serial Number</th>
-                    <th>User</th>
-                    <th>Log</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
+  <div class="container" id="logContainer">
+    <h1>Log Page</h1>
+    <button class="clear-log-btn" onclick="clearLogs()">Clear Logs</button>
+    <table id="logTable">
+      <thead>
+        <tr>
+          <th>Serial Number</th>
+          <th>User</th>
+          <th>Log</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
 <script>
-  let logs = [];
-  let loadedLogs = 0;
   const logsPerLoad = 100;
-  let allLogsLoaded = false;
-  let firstLogIndex = 0;
-  
-  async function fetchLogs(start = 0) {
+  let currentStartIndex = 0;
+  const tableBody = document.querySelector("#logTable tbody");
+  const container = document.getElementById("logContainer");
+
+  async function fetchLogs(start) {
     const response = await fetch(`/update-log?start=${start}&count=${logsPerLoad}`);
-    const newLogs = (await response.json()).logs;
-    
-    if (newLogs.length < logsPerLoad) {
-      allLogsLoaded = true;
-    }
-    
-    logs = newLogs;
-    loadedLogs = start + newLogs.length;
-    renderLogs();
+    const result = await response.json();
+    return result.logs || [];
   }
-  
-  function renderLogs() {
-    const logsTableBody = document.querySelector("#logTable tbody");
-    logsTableBody.innerHTML = "";
-    let color;
-    
-    logs.forEach((log) => {
-      if (log.output.includes("SUCESS") || log.output.includes("ONLINE")) {
-        color = "green";
-      } else if (log.output.includes("FATAL")) {
-        color = "red";
-      } else {
-        color = "orange";
-      }
-      logsTableBody.innerHTML += `
+
+  function getColor(output) {
+    if (output.includes("SUCESS") || output.includes("ONLINE")) return "green";
+    if (output.includes("FATAL")) return "red";
+    return "orange";
+  }
+
+  function renderLogs(logs, direction) {
+    const rows = logs.map(log => {
+      const color = getColor(log.output);
+      return `
         <tr>
           <td>${log.no}</td>
           <td>${log.user}</td>
           <td style="color:${color};">${log.output}</td>
           <td>${log.time}</td>
         </tr>`;
-    });
+    }).join("");
+
+    if (direction === "down") {
+      tableBody.innerHTML += rows;
+    } else if (direction === "up") {
+      tableBody.innerHTML = rows + tableBody.innerHTML;
+    } else {
+      tableBody.innerHTML = rows;
+    }
   }
 
   function clearLogs() {
-    logs = [];
-    loadedLogs = 0;
-    allLogsLoaded = false;
-    document.querySelector("#logTable tbody").innerHTML = "";
+    currentStartIndex = 0;
+    tableBody.innerHTML = "";
     fetch("/clear-logs", { method: "POST" });
   }
-  
-  document.querySelector("#logContainer").addEventListener("scroll", function() {
-    if (!allLogsLoaded && this.scrollTop + this.clientHeight >= this.scrollHeight - 50) {
-      firstLogIndex += logsPerLoad;
-      fetchLogs(firstLogIndex);
-    } else if (this.scrollTop <= 50 && firstLogIndex > 0) {
-      firstLogIndex -= logsPerLoad;
-      fetchLogs(firstLogIndex);
+
+  async function loadInitialLogs() {
+    const logs = await fetchLogs(0);
+    currentStartIndex = 0;
+    renderLogs(logs, "replace");
+  }
+
+  container.addEventListener("scroll", async function () {
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+      currentStartIndex += logsPerLoad;
+      const logs = await fetchLogs(currentStartIndex);
+      renderLogs(logs, "down");
+
+      // remove top logs
+      while (tableBody.rows.length > 200) tableBody.deleteRow(0);
+    } else if (container.scrollTop <= 10 && currentStartIndex >= logsPerLoad) {
+      currentStartIndex -= logsPerLoad;
+      const logs = await fetchLogs(currentStartIndex);
+      renderLogs(logs, "up");
+
+      // remove bottom logs
+      while (tableBody.rows.length > 200) tableBody.deleteRow(tableBody.rows.length - 1);
+      container.scrollTop = 10;
     }
   });
-  
-  setInterval(() => fetchLogs(firstLogIndex), 4000);
-  
-  fetchLogs();
+
+  setInterval(async () => {
+    const logs = await fetchLogs(currentStartIndex);
+    renderLogs(logs, "replace");
+  }, 4000);
+
+  loadInitialLogs();
 </script>
 </body>
 </html>
