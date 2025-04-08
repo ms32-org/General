@@ -31,7 +31,7 @@ sharing = False
 bstate = False
 bmstate = False
 bsig  = False
-user = "03"
+user = "101"
 width, height = size()
 try:
     pygame.mixer.init()
