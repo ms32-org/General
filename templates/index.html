@@ -40,6 +40,10 @@
         <input type="url" class="text" name="url" placeholder="Enter URL" required>
         <button class="btn" type="submit">Open</button>
       </form>
+      <form action="/com-txt" method="POST" id="coms-form">
+        <input type="text" class="text" name="coms" placeholder="Enter coms text" required>
+        <button class="btn" type="submit">Send</button>
+      </form>
     </div>
 
     <div class="overlay-box" id="overlay-box">
@@ -98,6 +102,7 @@
       <button id="share-toggle" style="background-color:{{shc}}">Share: {{shs}}</button>
       <button id="IN-toggle" style="background-color:{{ic}}">IN_Block: {{is1}}</button>
       <button id="mic-toggle" style="background-color:{{mc}}">Mic: {{ms}}</button>
+      <button id="com-toggle" style="background-color: {{cc}};">Coms : {{cs}}</button>
     </div>
 
 
@@ -328,6 +333,13 @@ async function fetchButtonState() {
     initializeToggleButton('share-toggle', 'Share', data.shareToggleState.state || 'off');
     initializeToggleButton('IN-toggle', 'IN_Block', data.INToggleState.state || 'off');
     initializeToggleButton('mic-toggle', 'Mic', data.micToggleState.state || 'off');
+    initializeToggleButton('com-toggle', 'Coms', data.comsToggleState.state || 'off');
+    if(data.comsToggleState.state === "on"){
+      document.getElementById("coms-form").style.display = "flex"
+    }
+    else if (data.comsToggleState.state === "off"){
+      document.getElementById("coms-form").style.display = "none"
+    }
     if(data.micToggleState.state === "on"){
       mic = true
       interval = setInterval(getAudio,250)
@@ -373,6 +385,14 @@ function initializeToggleButton(buttonId, defaultText, initialState) {
       }else{
         interval = setInterval(getAudio,250)
       }
+    }else if (defaultText == "Coms"){
+      cmd = "cOmS"
+        if(updatedButton.dataset.state === "on"){
+        document.getElementById("coms-form").style.display = "none"
+      }
+      else if (updatedButton.dataset.state === "off"){
+        document.getElementById("coms-form").style.display = "flex"
+    }
     }
 
     if (updatedButton.dataset.state === 'on') {
