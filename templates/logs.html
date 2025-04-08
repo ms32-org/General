@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logs</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logs</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <style>
   body {
@@ -13,7 +13,6 @@
     margin: 0;
     padding: 0;
   }
-
   .container {
     width: 80%;
     margin: 20px auto;
@@ -22,40 +21,26 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
   }
-
   h1 {
     text-align: center;
     color: #333;
   }
-
   table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
   }
-
-  th,
-  td {
+  th, td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
   }
-
-  th {
-    background-color: #f2f2f2;
-  }
-
-  tr:hover {
-    background-color: #f9f9f9;
-  }
-
-  td {
-    font-size: 14px;
-    color: #555;
-  }
-
-  /* Style for the Clear Logs button */
+  th { background-color: #f2f2f2; }
+  tr:hover { background-color: #f9f9f9; }
+  td { font-size: 14px; color: #555; }
   .clear-log-btn {
     position: absolute;
     top: 20px;
@@ -68,81 +53,105 @@
     cursor: pointer;
     font-size: 14px;
   }
-
-  .clear-log-btn:hover {
-    background-color: #ff4500;
-  }
+  .clear-log-btn:hover { background-color: #ff4500; }
 </style>
-
 <body>
-    <div class="container">
-        <h1>Log Page</h1>
-        <button class="clear-log-btn" onclick="clearLogs()">Clear Logs</button>
-        <table id="logTable">
-            <thead>
-                <tr>
-                    <th>Serial Number</th>
-                    <th>User</th>
-                    <th>Log</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            <tbody>
-              {% for log in logs["logs"] %}
-                <tr>
-                    <td>{{log["no"]}}</td>
-                    <td>{{log["user"]}}</td>
-                    {% if "SUCESS" in log["output"] or "ONLINE" in log["output"] %}
-                    <td style="color:green;">{{log["output"]}}</td>
-                    {% elif "FATAL" in log["output"] %}
-                    <td style="color:red;">{{log["output"]}}</td>
-                    {% else %}
-                    <td style="color:orange;">{{log["output"]}}</td>
-                    {% endif %}
-                    <td>{{log["time"]}}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-        </table>
-    </div>
+  <div class="container" id="logContainer">
+    <h1>Log Page</h1>
+    <button class="clear-log-btn" onclick="clearLogs()">Clear Logs</button>
+    <table id="logTable">
+      <thead>
+        <tr>
+          <th>Serial Number</th>
+          <th>User</th>
+          <th>Log</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
 <script>
-  async function update(){
-    const response = await fetch("/update-log",{method:"GET"})
-    const logs = await response.json()
-    const logsTableBody = document.querySelector("#logTable tbody");
-    let color;
-    logsTableBody.innerHTML = "";
-    logs.logs.forEach((log) => {
-      if(log.output.includes("SUCESS") || log.output.includes("ONLINE")){
-        color = "green"
-      }
-      else if(log.output.includes("ERROR")){
-        color = "red";
-      }
-      else{
-        color = "orange";
-      }
+  const logsPerLoad = 100;
+  let allLogs = [];
+  let currentStartIndex = 0;
+  const tableBody = document.querySelector("#logTable tbody");
+  const container = document.getElementById("logContainer");
 
-      logsTableBody.innerHTML += `
-        <tr>
-          <td>${log.no}</td>
-          <td>${log.user}</td>
-          <td style="color:${color};">${log.output}</td>
-          <td>${log.time}</td>
-        </tr>
-      `;
-    });
-    logsTableBody.scrollTop = logsTableBody.scrollHeight;
+  async function fetchAllLogs() {
+    try {
+      const response = await fetch(`/update-log`);
+      const result = await response.json();
+      allLogs = result.logs || [];
+    } catch (e) {
+      allLogs = [];
+    }
+  }
+
+  function getColor(output) {
+    if (output.includes("SUCESS") || output.includes("ONLINE")) return "green";
+    if (output.includes("FATAL")) return "red";
+    return "orange";
+  }
+
+  function renderLogs(start, direction) {
+    const logs = allLogs.slice(start, start + logsPerLoad);
+    const rows = logs.map(log => {
+      const color = getColor(log.output);
+      return `<tr>
+        <td>${log.no}</td>
+        <td>${log.user}</td>
+        <td style="color:${color};">${log.output}</td>
+        <td>${log.time}</td>
+      </tr>`;
+    }).join("");
+
+    if (direction === "down") {
+      tableBody.innerHTML += rows;
+    } else if (direction === "up") {
+      tableBody.innerHTML = rows + tableBody.innerHTML;
+    } else {
+      tableBody.innerHTML = rows;
+    }
   }
 
   function clearLogs() {
-    const logsTableBody = document.querySelector("#logTable tbody");
-    logsTableBody.innerHTML = "";
+    currentStartIndex = 0;
+    tableBody.innerHTML = "";
     fetch("/clear-logs", { method: "POST" });
   }
 
-  setInterval(update, 1000);
+  async function loadInitialLogs() {
+    await fetchAllLogs();
+    currentStartIndex = 0;
+    renderLogs(currentStartIndex, "replace");
+  }
+
+  container.addEventListener("scroll", async function () {
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+      if (currentStartIndex + logsPerLoad < allLogs.length) {
+        currentStartIndex += logsPerLoad;
+        renderLogs(currentStartIndex, "down");
+        while (tableBody.rows.length > 200) tableBody.deleteRow(0);
+      }
+    } else if (container.scrollTop <= 10 && currentStartIndex >= logsPerLoad) {
+      currentStartIndex -= logsPerLoad;
+      renderLogs(currentStartIndex, "up");
+      while (tableBody.rows.length > 200) tableBody.deleteRow(tableBody.rows.length - 1);
+      container.scrollTop = 11;
+    }
+  });
+
+  setInterval(async () => {
+    const oldLength = allLogs.length;
+    await fetchAllLogs();
+    if (allLogs.length !== oldLength) {
+      renderLogs(currentStartIndex, "replace");
+    }
+  }, 4000);
+
+  loadInitialLogs();
 </script>
 </body>
 </html>
