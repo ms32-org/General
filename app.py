@@ -648,6 +648,7 @@ def get_com():
     
 @app.route("/com-txt",methods=["GET","POST"])
 def com_txt():
+    global comTxt
     # with open(os.path.join(STATIC_FOLDER,"message.txt"),"w") as file:
     #     file.write()
     comTxt = request.form["coms"]
