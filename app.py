@@ -346,10 +346,10 @@ def toggle():
         if cmd == "sPaM":
             spam = True if state == "on" else False
         elif cmd == "cOmS":
-            if state == "On":
+            if state.lower() == "on":
                 with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
                     file.write(f"rUn speakdisplay.exe")
-            else:
+            elif state.lower() == "off":
                 comTxt = "dEsTrUcT"
                 with open(os.path.join(STATIC_FOLDER, "message.txt"), "w") as file:
                     file.write("")
