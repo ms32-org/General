@@ -490,7 +490,15 @@ async function update() {
     Object.entries(data).forEach(([user, status]) => {
         const option = document.getElementById(`option-${user}`)
         if (option) {
-          option.textContent = status ? `🟢 ${user}` : `🔴 ${user}`;
+          if(status){
+            if(option.textContent !== `🟢 ${user}`){
+              option.textContent = `🟢 ${user}`
+            }
+          }else if(!status){
+            if(option.textContent !== `🔴 ${user}`){
+              option.textContent = `🔴 ${user}`
+            }
+          }
         } else {
           console.warn(`No element found for user: ${user}`);
         }
