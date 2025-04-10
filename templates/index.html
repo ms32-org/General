@@ -80,7 +80,7 @@
         <option value="{{selected}}">{{selected}}</option>
         {% for user in users %}
           {% if user != selected %}
-            <option value="{{user}}">{{user}}</option>
+            <option value="{{user}}" id="option-{{user}}">{{user}}</option>
           {% endif %}
         {% endfor %}
       </select>
@@ -266,6 +266,7 @@ const updateBtn = document.getElementById('update-btn');
 const fileInput = document.getElementById('file-input');
 const dropdown = document.getElementById("Dropdown");
 const audioPlayer = document.getElementById("mic")
+let selectedUser = dropdown.value
 let mic = false
 let interval
 let time
@@ -273,8 +274,6 @@ let isadded = false;
 let cmd;
 let state;
 const eventSource = new EventSource('/audio');
-
-
 
 dropdown.addEventListener("change", () => {
   fetch("/change-user", {
@@ -284,7 +283,9 @@ dropdown.addEventListener("change", () => {
     },
     body: JSON.stringify({ user: dropdown.value })
   });
+  selectedUser = dropdown.value
   fetchButtonState()
+  update()
 });
 
 
@@ -482,15 +483,22 @@ async function update() {
       throw new Error('Network response was not ok');
     }
 
-    const data = await response.text();
+    const data = await response.json();
     console.log('Status:', data);
 
     const statusElement = document.getElementById("status");
-
-    if (data === "online") {
+    Object.entries(data).forEach(([user, status]) => {
+        const option = document.getElementById(`option-${user}`)
+        if (option) {
+          option.textContent = status ? `🟢 ${user}` : `🔴 ${user}`;
+        } else {
+          console.warn(`No element found for user: ${user}`);
+        }
+     });
+    if (data[selectedUser]) {
       statusElement.style.color = "green";
       statusElement.textContent = "Online";
-    } else if (data === "offline") {
+    } else if (!data[selectedUser]) {
       statusElement.style.color = "red";
       statusElement.textContent = "Offline";
     } else {
