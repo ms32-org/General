@@ -768,8 +768,10 @@ answer = None
 		
 @app.route("/send-offer",methods=["POST"])
 def send_offer():
-	data = request.json
-	return "done"
+    global offer
+    data = request.json
+    offer = data
+    return "done"
 	
 @app.route("/get-answer",methods=["GET"])
 def get_answer():
