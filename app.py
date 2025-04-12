@@ -775,8 +775,11 @@ def send_offer():
 	
 @app.route("/get-answer",methods=["GET"])
 def get_answer():
+     global answer
      if answer is not None:
-          return jsonify(answer)
+          ans = answer
+          answer = None
+          return jsonify(ans)
      else:
           return "no answer",408
 
@@ -789,10 +792,13 @@ def send_answer():
 
 @app.route("/get-offer",methods=["GET"])
 def get_offer():
-	if offer is not None:
-		return jsonify(offer)
-	else:
-		return "No offer",408
+    global offer
+    if offer is not None:
+        off = offer
+        offer = None
+        return jsonify(off)
+    else:
+         return "No offer",408
 			
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
