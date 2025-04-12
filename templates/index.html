@@ -474,15 +474,8 @@ async function update() {
     console.log('Status:', data);
 
     const statusElement = document.getElementById("status");
-    Object.entries(data).forEach(([user, status]) => {
-        const option = document.getElementById(`option-${user}`)
-        if (option) {
-          option.textContent = status ? `🟢 ${user}` : `🔴 ${user}`;
-        } else {
-          console.warn(`No element found for user: ${user}`);
-        }
-     });
-    if (data[selectedUser]) {
+
+    if (data === "online") {
       statusElement.style.color = "green";
       statusElement.textContent = "Online";
     } else if (!data[selectedUser]) {
