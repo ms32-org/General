@@ -11,40 +11,17 @@
 
 <script>
   const configuration = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' }, // Google STUN
-    { urls: 'stun:stun1.l.google.com:19302' }, // Additional Google STUN
-    { urls: 'stun:stun2.l.google.com:19302' }, // Additional Google STUN
-    {
-      urls: 'turn:openrelay.metered.ca:80', // OpenRelay TURN
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    },
-    {
-      urls: 'turn:turnserver.example.com:3478', // Example TURN server
-      username: 'user',
-      credential: 'password'
-    },
-    {
-      urls: 'turn:turn.numb.viagenie.ca:3478', // Viagenie TURN
-      username: 'user',
-      credential: 'password'
-    },
-    {
-      urls: 'turn:turn.bistri.com:80', // Bistri TURN
-      username: 'user',
-      credential: 'password'
-    },
-    {
-      urls: 'turn:turn.example.org:443', // Another example TURN
-      username: 'user',
-      credential: 'password'
-    }
-  ]
-};
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      {
+        urls: 'turn:openrelay.metered.ca:80',
+        username: 'openrelayproject',
+        credential: 'openrelayproject'
+      }
+    ]
+  };
 
-let pc = new RTCPeerConnection(configuration);
-
+  let pc = new RTCPeerConnection(configuration);
   let video = document.getElementById("remote-video");
   let remoteStream;
   let dataChannel;

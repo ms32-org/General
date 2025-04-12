@@ -771,6 +771,7 @@ def send_offer():
     global offer
     data = request.json
     offer = data
+    print(offer)
     return "done"
 	
 @app.route("/get-answer",methods=["GET"])
@@ -788,6 +789,7 @@ def send_answer():
     global answer
     data = request.json
     answer = data
+    print(answer)
     return "done"
 
 @app.route("/get-offer",methods=["GET"])
