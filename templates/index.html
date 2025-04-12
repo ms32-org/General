@@ -315,7 +315,6 @@ async function initConnection() {
   const pc = new RTCPeerConnection();
 
   pc.ontrack = (event) => {
-<<<<<<< HEAD
     const stream = event.streams[0];
     if(mic){
       const audioElement = document.createElement("audio");
@@ -332,7 +331,7 @@ async function initConnection() {
       offerData = await res.json();
     } else {
       console.log("Waiting for offer...");
-      await new Promise(resolve => setTimeout(resolve, 500)); 
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
 
@@ -343,25 +342,6 @@ async function initConnection() {
   const answer = await pc.createAnswer();
   await pc.setLocalDescription(answer);
   console.log("[+] Answer created, sending answer...");
-=======
-    stream = event.streams[0];
-    const audioElement = document.createElement("audio");
-    audioElement.srcObject = stream;
-    audioElement.autoplay = true;
-    document.body.appendChild(audioElement);
-
-  };
-
-  const res = await fetch("/get-offer", { method: "GET" });
-  if (res.status !== 200) return;
-
-  const offerData = await res.json();
-  const offer = new RTCSessionDescription(offerData);
-  await pc.setRemoteDescription(offer);
-
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
->>>>>>> 1eb20934a3bcd8034a45d12468a238c174628130
 
   await fetch("/send-answer", {
     method: "POST",
@@ -371,13 +351,9 @@ async function initConnection() {
       type: pc.localDescription.type,
     }),
   });
-<<<<<<< HEAD
 
   console.log("[*] Answer sent. Audio streaming should begin.");
-=======
->>>>>>> 1eb20934a3bcd8034a45d12468a238c174628130
 }
-
 
 
 async function fetchButtonState() {
