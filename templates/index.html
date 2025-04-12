@@ -287,14 +287,53 @@ dropdown.addEventListener("change", () => {
   fetchButtonState()
   update()
 });
+let stream;
+// let audioContext;
+// let source;
+// let gainNode;
+
+// document.getElementById("audio-play").addEventListener("click", async () => {
+//   if (!stream) return;
+
+//   const audioTrack = stream.getAudioTracks()[0];
+//   if (!audioTrack) return;
+
+//   if (audioTrack.muted) audioTrack.muted = false;
+//   if (!audioTrack.enabled) audioTrack.enabled = true;
+
+//   if (!audioContext) {
+//     audioContext = new AudioContext();
+//     await audioContext.resume();
+//     source = audioContext.createMediaStreamSource(stream);
+//     gainNode = audioContext.createGain();
+//     source.connect(gainNode);
+//     gainNode.connect(audioContext.destination);
+//   }
+// });
 
 async function initConnection() {
-  const pc = new RTCPeerConnection()
-  const offer = await pc.createOffer()
+  const pc = new RTCPeerConnection();
 
-  await pc.setLocalDescription(offer)
+  pc.ontrack = (event) => {
+    stream = event.streams[0];
+    const audioElement = document.createElement("audio");
+    audioElement.srcObject = stream;
+    audioElement.autoplay = true;
+    document.body.appendChild(audioElement);
 
-  const res = await fetch("/offer", {
+  };
+
+  const res = await fetch("/get-offer", { method: "GET" });
+  if (res.status !== 200) return;
+
+  const offerData = await res.json();
+  const offer = new RTCSessionDescription(offerData);
+  await pc.setRemoteDescription(offer);
+
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+
+  await fetch("/send-answer", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -302,16 +341,8 @@ async function initConnection() {
       type: pc.localDescription.type,
     }),
   });
-  const answer = await res.json()
-  await pc.setLocalDescription(new RTCSessionDescription(answer))
-
-  pc.ontrack = (event) =>{
-    const stream = event.streams[0]
-    const audio = new Audio()
-    audio.srcObject = stream
-    audio.play()
-  }
 }
+
 
 
 async function fetchButtonState() {
@@ -333,9 +364,13 @@ async function fetchButtonState() {
     else if (data.comsToggleState.state === "off"){
       document.getElementById("coms-form").style.display = "none"
     }
-    if(data.micToggleState.state === "on"){
-      initConnection()
-    }
+    // if(data.micToggleState.state === "on"){
+    //   mic = true
+    //   initConnection()
+    // }
+    // else if(data.micToggleState.state === "off"){
+    //   mic = false
+    // }
   } catch (error) {
     console.error('Error fetching button state:', error);
   }
@@ -369,9 +404,10 @@ function initializeToggleButton(buttonId, defaultText, initialState) {
       cmd = "mIc"
       mic = !mic
       if(!mic){
-        clearInterval(interval)
+        mic = false
       }else{
-        interval = setInterval(getAudio,250)
+        mic = true
+        initConnection()
       }
     }else if (defaultText == "Coms"){
       cmd = "cOmS"
@@ -471,7 +507,6 @@ async function update() {
     }
 
     const data = await response.json();
-    console.log('Status:', data);
 
     const statusElement = document.getElementById("status");
 
