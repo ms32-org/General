@@ -6,6 +6,7 @@ import base64
 import json
 import requests as rq
 import io
+import queue
 from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
@@ -139,8 +140,8 @@ def edit():
 @app.route("/command", methods=["GET", "POST"])
 def command():
     global startTime
-    global spam
     global selected_user
+    global spam
     message_file = os.path.join(STATIC_FOLDER, "message.txt")
     tasks_file = os.path.join(STATIC_FOLDER, "tasks.json")
     
@@ -762,5 +763,26 @@ def delete_file():
 def filesystem(user):
 	return render_template("filesystem.html")
 	
+offer = queue.Queue()
+answer = queue.Queue()
+		
+@app.route("/offer",methods=["POST"])
+def send_offer():
+	data = request.json
+	offer.put(data)
+	ans = answer.get()
+	return  jsonify(answer)
+	
+@app.route("/send_answer",methods=["POST"])
+def send_answer():
+	data = request.json
+	answer.put(data)
+	return "done"
+
+@app.route("/get-offer",methods=["GET"])
+def get_offer():
+	off = offer.get()
+	return jsonify(off)
+			
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
