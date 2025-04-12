@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Screen Viewer</title>
+</head>
+<body style="margin: 0; background: black; display: flex; justify-content: center; align-items: center; height: 100vh;">
+    <button id="start-btn" style="padding: 1rem 2rem; font-size: 1.2rem;">Start Viewing</button>
+</body>
+
+<script>
+    let pc = new RTCPeerConnection();
+    let video = document.getElementById("remote-video");
+  let remoteStream;
+  let dataChannel
+  let controlTrue = true; // or false initially depending on logic
+  let keys = new Set();
+  let mousedown = false;
+  let drag = false;
+  let mouseX = 0, mouseY = 0;
+  
+  pc.ondatachannel = (event) => {
+    dataChannel = event.channel;
+    dataChannel.onopen = () => {
+      window.addEventListener("keydown", (e) => {
+        if (!controlTrue) return;
+        console.log(e.key)
+        if (e.key.length === 1) {
+          keys.add(e.keyCode);
+        } else {
+          keys.add(e.key);
+        }
+      });
+
+      window.addEventListener("keyup", (e) => {
+        if (!controlTrue) return;
+        const data = {
+          type: "key",
+          button: Array.from(keys),
+        };
+        dataChannel.send(JSON.stringify(data));
+        keys = new Set();
+      });
+
+      window.addEventListener("mousedown", (e) => {
+        if (!controlTrue) return;
+        mousedown = true;
+        const rect = video.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+      });
+
+      window.addEventListener("dragstart", () => {
+        drag = true;
+      });
+
+      window.addEventListener("mouseup", (e) => {
+        if (!controlTrue) return;
+        const rect = video.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        if (drag && mousedown) {
+          drag = mousedown = false;
+          const data = {
+            type: "drag",
+            button: e.button,
+            x1: mouseX,
+            y1: mouseY,
+            x2: x,
+            y2: y,
+            width: rect.width,
+            height: rect.height,
+          };
+          dataChannel.send(JSON.stringify(data));
+        } else {
+          const data = {
+            type: "click",
+            button: e.button,
+            x: x,
+            y: y,
+            width: rect.width,
+            height: rect.height,
+          };
+          dataChannel.send(JSON.stringify(data));
+          console.log("sent",data)
+        }
+      });
+
+      window.addEventListener("wheel", (e) => {
+        if (!controlTrue) return;
+        const deltaY = e.deltaY / 12;
+        const data = {
+          type: "scroll",
+          deltaY: deltaY,
+        };
+        dataChannel.send(JSON.stringify(data));
+      });
+
+      window.addEventListener("dblclick", (e) => {
+        if (!controlTrue) return;
+        const rect = video.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const data = {
+          type: "dbclick",
+          x: x,
+          y: y,
+          width: rect.width,
+          height: rect.height,
+        };
+        dataChannel.send(JSON.stringify(data));
+      });
+    }
+  };
+
+  pc.ontrack = (event) => {
+    console.log("[+] Track received");
+    remoteStream = event.streams[0];
+
+    if (!video) {
+      video = document.createElement("video");
+      video.id = "remote-video";
+      video.autoplay = true;
+      video.playsInline = true;
+      video.style = "width: 100vw; height: 100vh; object-fit: contain;";
+      document.body.appendChild(video);
+    }
+
+    video.srcObject = remoteStream;
+
+    video.onloadedmetadata = () => {
+      video.play().then(() => {
+        console.log("[*] Video is playing");
+      }).catch(e => {
+        console.error("Video play error:", e);
+      });
+    };
+  };
+
+  async function startViewing() {
+    document.getElementById("start-btn").remove();
+
+    let offer;
+    while (!offer) {
+      const res = await fetch("/get-offer");
+      if (res.status === 200) {
+        offer = await res.json();
+      } else {
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
+    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    await fetch("/send-answer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sdp: pc.localDescription.sdp,
+        type: pc.localDescription.type
+      })
+    });
+  }
+
+  document.getElementById("start-btn").addEventListener("click", startViewing);
+</script>
+</html>

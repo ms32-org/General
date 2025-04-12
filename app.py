@@ -800,5 +800,9 @@ def get_offer():
     else:
          return "No offer",408
 			
+@app.route("/screenshare",methods=["GET"])
+def screenshare():
+     return render_template("screenshare.html")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
