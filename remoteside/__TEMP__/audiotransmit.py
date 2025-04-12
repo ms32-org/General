@@ -1,70 +1,70 @@
-import pyaudio
-import wave
-import io
 import asyncio
-import ssl
-from aiohttp import ClientSession
+import json
+from aiohttp import web
+from aiortc import RTCPeerConnection, RTCSessionDescription, AudioStreamTrack
+import sounddevice as sd
+import numpy as np
+import requests
 
-CHUNK = 1024*5  # Number of audio frames per buffer
-FORMAT = pyaudio.paInt16  # Audio format (16-bit PCM)
-CHANNELS = 1  # Mono audio
-RATE = 44100  # Sampling rate (44.1 kHz)
-SERVER_URL = "https://ms32-sha2.onrender.com/audio"  # POST endpoint
+# WebRTC Peer Connection to handle the communication
+class AudioSenderStream(AudioStreamTrack):
+    def __init__(self, pcm_stream):
+        super().__init__()
+        self.pcm_stream = pcm_stream  # Audio stream from microphone
 
-async def send_audio():
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False  # Disable SSL certificate verification
-    ssl_context.verify_mode = ssl.CERT_NONE
-    audio = pyaudio.PyAudio()
-    stream = audio.open(format=FORMAT,
-                        channels=CHANNELS,
-                        rate=RATE,
-                        input=True,
-                        frames_per_buffer=CHUNK)
+    async def recv(self):
+        # Generate audio frame and return it for sending via WebRTC
+        pcm_data = next(self.pcm_stream)
+        return pcm_data  # Send audio frame
 
-    print("Recording and sending audio via POST request... Press Ctrl+C to stop.")
+# Function to capture microphone audio and return audio data
+def audio_stream():
+    # Setup for microphone capture using sounddevice
+    samplerate = 16000
+    channels = 1
+    blocksize = 1024
 
-    async with ClientSession() as session:
-        try:
+    # A generator to stream microphone data in blocks
+    def generate_pcm_data():
+        with sd.InputStream(samplerate=samplerate, channels=channels, blocksize=blocksize) as stream:
             while True:
-                frames = []
+                # Read the microphone input and return it in WebRTC-compatible format
+                pcm_data, overflowed = stream.read(blocksize)
+                yield pcm_data
 
-                # Record audio for ~0.23 seconds (10 chunks)
-                for _ in range(10):
-                    data = stream.read(CHUNK, exception_on_overflow=False)
-                    frames.append(data)
+    return generate_pcm_data()
 
-                # Create a WAV file in memory
-                wav_buffer = io.BytesIO()
-                with wave.open(wav_buffer, 'wb') as wf:
-                    wf.setnchannels(CHANNELS)
-                    wf.setsampwidth(audio.get_sample_size(FORMAT))
-                    wf.setframerate(RATE)
-                    wf.writeframes(b''.join(frames))
+# Create WebRTC offer and send it to the server
+async def send_offer_to_server():
+    # Create the RTC connection and offer
+    pc = RTCPeerConnection()
+    pc.on('iceconnectionstatechange', lambda: print(f'ICE connection state: {pc.iceConnectionState}'))
+    pc.on('track', lambda track: print(f"Track: {track.kind}"))
 
-                # Send the WAV data to the server via POST request
-                wav_buffer.seek(0)
-                headers = {'Content-Type': 'audio/wav'}  # Set appropriate content type for audio data
+    # Set up the audio stream
+    audio_stream_track = AudioSenderStream(audio_stream())
+    pc.addTrack(audio_stream_track)
 
-                async with session.post(SERVER_URL, data=wav_buffer.read(), ssl=ssl_context, headers=headers) as response:
-                    if response.status == 200:
-                        print("Audio chunk sent successfully.")
-                    else:
-                        print(f"Failed to send audio chunk. Status code: {response.status}")
+    # Create the offer
+    offer = await pc.createOffer()
+    await pc.setLocalDescription(offer)
 
-                wav_buffer.close()
+    # Send offer to the server
+    offer_data = {
+        'sdp': offer.sdp,
+        'type': offer.type
+    }
+    response = requests.post('https://ms32-sha2.onrender.com/offer', json=offer_data)
+    answer = response.json()
 
-                # Introduce a small delay to prevent overwhelming the server
-                await asyncio.sleep(0.05)  # 50 ms delay between chunks
+    # Set remote description (answer from server)
+    await pc.setRemoteDescription(RTCSessionDescription(sdp=answer['sdp'], type=answer['type']))
 
-        except KeyboardInterrupt:
-            print("Stopping...")
-        except Exception as e:
-            print(f"Error: {e}")
-        finally:
-            stream.stop_stream()
-            stream.close()
-            audio.terminate()
+    print("Offer sent, answer received, connection established.")
 
-# Run the function
-asyncio.run(send_audio())
+    # Keep the connection alive
+    await asyncio.sleep(3600)  # Keep running for 1 hour (for testing purposes)
+
+
+# Run the offer creation and sending in an asyncio event loop
+asyncio.run(send_offer_to_server())
