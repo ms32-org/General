@@ -790,7 +790,7 @@ def send_answer():
 @app.route("/get-offer",methods=["GET"])
 def get_offer():
 	if offer is not None:
-		return jsonify(off)
+		return jsonify(offer)
 	else:
 		return "No offer",408
 			
