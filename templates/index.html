@@ -80,7 +80,7 @@
         <option value="{{selected}}">{{selected}}</option>
         {% for user in users %}
           {% if user != selected %}
-            <option value="{{user}}">{{user}}</option>
+            <option value="{{user}}" id="option-{{user}}">{{user}}</option>
           {% endif %}
         {% endfor %}
       </select>
@@ -266,6 +266,7 @@ const updateBtn = document.getElementById('update-btn');
 const fileInput = document.getElementById('file-input');
 const dropdown = document.getElementById("Dropdown");
 const audioPlayer = document.getElementById("mic")
+let selectedUser = dropdown.value
 let mic = false
 let interval
 let time
@@ -273,8 +274,6 @@ let isadded = false;
 let cmd;
 let state;
 const eventSource = new EventSource('/audio');
-
-
 
 dropdown.addEventListener("change", () => {
   fetch("/change-user", {
@@ -284,39 +283,33 @@ dropdown.addEventListener("change", () => {
     },
     body: JSON.stringify({ user: dropdown.value })
   });
+  selectedUser = dropdown.value
   fetchButtonState()
+  update()
 });
 
+async function initConnection() {
+  const pc = new RTCPeerConnection()
+  const offer = await pc.createOffer()
 
-async function playAudio(aud) {
-  const audioBlob = await aud.blob();
-  const audioURL = URL.createObjectURL(audioBlob);
+  await pc.setLocalDescription(offer)
 
-  const audioElement = new Audio(audioURL);
-  audioElement.play()
-    .then(() => {
-      console.log("Audio is playing...");
-    })
-    .catch((error) => {
-      console.error("Error playing audio:", error);
-    });
-}
+  const res = await fetch("/offer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sdp: pc.localDescription.sdp,
+      type: pc.localDescription.type,
+    }),
+  });
+  const answer = await res.json()
+  await pc.setLocalDescription(new RTCSessionDescription(answer))
 
-async function getAudio() {
-  if (mic) {
-    try {
-      const audio = new Audio("/get-audio");
-      if (audio) {
-        try {
-          await audio.play();
-          console.log("Audio playing...");
-        } catch {
-          console.log("Not valid audio");
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching audio or playing it:", error);
-    }
+  pc.ontrack = (event) =>{
+    const stream = event.streams[0]
+    const audio = new Audio()
+    audio.srcObject = stream
+    audio.play()
   }
 }
 
@@ -341,12 +334,7 @@ async function fetchButtonState() {
       document.getElementById("coms-form").style.display = "none"
     }
     if(data.micToggleState.state === "on"){
-      mic = true
-      interval = setInterval(getAudio,250)
-    }
-    else{
-      mic = false
-      clearInterval(interval)
+      initConnection()
     }
   } catch (error) {
     console.error('Error fetching button state:', error);
@@ -482,15 +470,22 @@ async function update() {
       throw new Error('Network response was not ok');
     }
 
-    const data = await response.text();
+    const data = await response.json();
     console.log('Status:', data);
 
     const statusElement = document.getElementById("status");
-
-    if (data === "online") {
+    Object.entries(data).forEach(([user, status]) => {
+        const option = document.getElementById(`option-${user}`)
+        if (option) {
+          option.textContent = status ? `🟢 ${user}` : `🔴 ${user}`;
+        } else {
+          console.warn(`No element found for user: ${user}`);
+        }
+     });
+    if (data[selectedUser]) {
       statusElement.style.color = "green";
       statusElement.textContent = "Online";
-    } else if (data === "offline") {
+    } else if (!data[selectedUser]) {
       statusElement.style.color = "red";
       statusElement.textContent = "Offline";
     } else {

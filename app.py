@@ -38,6 +38,9 @@ if not os.path.exists(UPLOAD_FOLDER):
 with open(os.path.join(STATIC_FOLDER,"users.json")) as file:
 	data = json.load(file)
 users = data["users"]
+user_status = {}
+for user in users:
+    user_status[user]= time()
 
 with open(state_file,"w") as file:
     states = {}
@@ -136,8 +139,8 @@ def edit():
 @app.route("/command", methods=["GET", "POST"])
 def command():
     global startTime
-    global selected_user
     global spam
+    global selected_user
     message_file = os.path.join(STATIC_FOLDER, "message.txt")
     tasks_file = os.path.join(STATIC_FOLDER, "tasks.json")
     
@@ -147,8 +150,8 @@ def command():
     if request.method == "POST":
         user = request.get_json().get("user")
 
+        user_status[user] = time()
         if selected_user == user:
-            startTime = time()
             cmd = ""
             if os.path.exists(message_file):
                 with open(message_file, "r") as file:
@@ -245,13 +248,10 @@ def url():
 @app.route("/status", methods=["POST", "GET"])
 def status():
     if request.method == "GET":
-        deltaTime = time() - startTime
-        if deltaTime >= 3:
-            redirect("/")
-            return "offline"
-        else:
-            redirect("/")
-            return "online"
+        user_state = {}
+        for user in user_status:
+            user_state[user] = True if time() - user_status[user] <= 3 else False
+    return jsonify(user_state)
 
 @app.route("/add-task", methods=["POST", "GET"])
 def schedule():
