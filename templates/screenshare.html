@@ -150,19 +150,6 @@
     };
   };
 
-  async function waitIceGatheringComplete() {
-    if (pc.iceGatheringState === "complete") return;
-    await new Promise(resolve => {
-      const check = () => {
-        if (pc.iceGatheringState === "complete") {
-          pc.removeEventListener("icegatheringstatechange", check);
-          resolve();
-        }
-      };
-      pc.addEventListener("icegatheringstatechange", check);
-    });
-  }
-
   async function startViewing() {
     document.getElementById("start-btn").remove();
 
