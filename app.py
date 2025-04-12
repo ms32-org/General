@@ -763,26 +763,34 @@ def delete_file():
 def filesystem(user):
 	return render_template("filesystem.html")
 	
-offer = queue.Queue()
-answer = queue.Queue()
+offer = None
+answer = None
 		
-@app.route("/offer",methods=["POST"])
+@app.route("/send-offer",methods=["POST"])
 def send_offer():
 	data = request.json
-	offer.put(data)
-	ans = answer.get()
-	return  jsonify(answer)
-	
-@app.route("/send_answer",methods=["POST"])
-def send_answer():
-	data = request.json
-	answer.put(data)
 	return "done"
+	
+@app.route("/get-answer",methods=["GET"])
+def get_answer():
+     if answer is not None:
+          return jsonify(answer)
+     else:
+          return "no answer",408
+
+@app.route("/send-answer",methods=["POST"])
+def send_answer():
+    global answer
+    data = request.json
+    answer = data
+    return "done"
 
 @app.route("/get-offer",methods=["GET"])
 def get_offer():
-	off = offer.get()
-	return jsonify(off)
+	if offer is not None:
+		return jsonify(off)
+	else:
+		return "No offer",408
 			
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
