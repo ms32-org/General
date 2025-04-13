@@ -25,11 +25,106 @@
     <script>
         const ws = new WebSocket("wss://screenshare-server.onrender.com");
         const imgElement = document.getElementById("screen");
+        let controlTrue = true; 
+        let keys = new Set();
+        let mousedown = false;
+        let drag = false;
+        let mouseX = 0, mouseY = 0;
 
         ws.onopen = () => {
             console.log("[Viewer] Connected");
             ws.send("viewer");
-        };
+            window.addEventListener("keydown", (e) => {
+              if (!controlTrue) return;
+              console.log(e.key)
+              if (e.key.length === 1) {
+                keys.add(e.keyCode);
+              } else {
+                keys.add(e.key);
+              }
+            });
+
+            window.addEventListener("keyup", (e) => {
+              if (!controlTrue) return;
+              const data = {
+                type: "key",
+                button: Array.from(keys),
+              };
+              ws.send(JSON.stringify(data))
+              keys = new Set();
+            });
+
+            window.addEventListener("mousedown", (e) => {
+              if (!controlTrue) return;
+              mousedown = true;
+              const rect = imgElement.getBoundingClientRect();
+              mouseX = e.clientX - rect.left;
+              mouseY = e.clientY - rect.top;
+            });
+
+            window.addEventListener("dragstart", () => {
+              drag = true;
+            });
+
+            window.addEventListener("mouseup", (e) => {
+              if (!controlTrue) return;
+              const rect = imgElement.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+
+              if (drag && mousedown) {
+                drag = mousedown = false;
+                const data = {
+                  type: "drag",
+                  button: e.button,
+                  x1: mouseX,
+                  y1: mouseY,
+                  x2: x,
+                  y2: y,
+                  width: rect.width,
+                  height: rect.height,
+                };
+                ws.send(JSON.stringify(data))
+              } else {
+                const data = {
+                  type: "click",
+                  button: e.button,
+                  x: x,
+                  y: y,
+                  width: rect.width,
+                  height: rect.height,
+                };
+                ws.send(JSON.stringify(data))
+                console.log("sent",data)
+              }
+            });
+
+            window.addEventListener("wheel", (e) => {
+              if (!controlTrue) return;
+              const deltaY = e.deltaY / 12;
+              const data = {
+                type: "scroll",
+                deltaY: deltaY,
+              };
+              ws.send(JSON.stringify(data))
+            });
+
+            window.addEventListener("dblclick", (e) => {
+              if (!controlTrue) return;
+              const rect = imgElement.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+              const data = {
+                type: "dbclick",
+                x: x,
+                y: y,
+                width: rect.width,
+                height: rect.height,
+              };
+              ws.send(JSON.stringify(data))
+            });
+    }
+
 
         ws.onmessage = (event) => {
             const base64Data = event.data;
