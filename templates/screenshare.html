@@ -165,7 +165,6 @@
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
 
-    await waitIceGatheringComplete();
 
     await fetch("/send-answer", {
       method: "POST",
