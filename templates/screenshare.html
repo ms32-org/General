@@ -126,9 +126,17 @@
     }
 
 
+        ws.binaryType = "blob"; 
+
         ws.onmessage = (event) => {
-            const base64Data = event.data;
-            imgElement.src = "data:image/jpeg;base64," + base64Data;
+            const blob = event.data;
+
+            const url = URL.createObjectURL(blob);
+            imgElement.src = url;
+
+            imgElement.onload = () => {
+                URL.revokeObjectURL(url);
+            };
         };
 
         ws.onerror = (err) => {
