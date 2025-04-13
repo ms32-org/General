@@ -765,6 +765,7 @@ def filesystem(user):
 	
 offer = None
 answer = None
+candidates = []
 		
 @app.route("/send-offer",methods=["POST"])
 def send_offer():
@@ -805,6 +806,24 @@ def get_offer():
 @app.route("/screenshare",methods=["GET"])
 def screenshare():
      return render_template("screenshare.html")
+
+@app.route("/get-candidates",methods=["GET"])
+def get_candidates():
+    global candidates
+    if candidates:
+        candidate = candidates
+        candidates = []
+        return jsonify(candidate)
+    else:
+        return "No candidates", 408
+
+@app.route("/send-candidates",methods=["POST"])
+def send_candidates():
+    global candidates
+    data = request.json
+    candidates.append(data)
+    print(candidates)
+    return "done"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

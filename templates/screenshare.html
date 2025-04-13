@@ -30,6 +30,19 @@ async function startViewing() {
   console.log("[ICE] Servers fetched:", config);
 
   pc = new RTCPeerConnection(config);
+  async function receiveRemoteCandidates() {
+  while (true) {
+    const res = await fetch("/get-candidates"); 
+    if (res.ok) {
+      const candidates = await res.json(); 
+      for (const c of candidates) {
+        console.log("[ICE] Receiving remote candidate:", c.candidate);
+        await pc.addIceCandidate(c);
+      }
+    }
+    await new Promise(r => setTimeout(r, 1000)); 
+  }
+}
 
 
   pc.onicecandidate = (event) => {
@@ -179,6 +192,8 @@ async function startViewing() {
 
   await pc.setRemoteDescription(new RTCSessionDescription(offer));
   console.log("[+] Remote description set");
+
+  receiveRemoteCandidates();
 
   const answer = await pc.createAnswer();
   await pc.setLocalDescription(answer);
