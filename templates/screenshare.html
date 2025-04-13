@@ -41,20 +41,33 @@ async function startViewing() {
       }
     }
     await new Promise(r => setTimeout(r, 1000)); 
+
   }
 }
 
 
   pc.onicecandidate = (event) => {
     if (event.candidate) {
-      console.log("[ICE] Candidate:", event.candidate.candidate);
+      console.log("[ICE] Candidate:", event.candidate);
+      console.log("[ICE] Sending candidate to server...");
 
-      // FIX: Send candidate to server
       fetch("/send-candidate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(event.candidate)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        console.log("[ICE] Candidate sent to server.");
+      })
+      .catch(err => {
+        console.error("[ICE] Failed to send candidate:", err);
       });
+    } else if (pc.iceGatheringState === "complete") {
+      console.log("[ICE] Gathering complete.");
+
     } else {
       console.log("[ICE] Candidate gathering complete.");
     }
