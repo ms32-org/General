@@ -48,10 +48,18 @@ async function startViewing() {
   pc.onicecandidate = (event) => {
     if (event.candidate) {
       console.log("[ICE] Candidate:", event.candidate.candidate);
+
+      // FIX: Send candidate to server
+      fetch("/send-candidate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(event.candidate)
+      });
     } else {
       console.log("[ICE] Candidate gathering complete.");
     }
   };
+
 
   pc.oniceconnectionstatechange = () => {
     console.log("[ICE] Connection state:", pc.iceConnectionState);
