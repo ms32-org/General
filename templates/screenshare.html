@@ -20,10 +20,11 @@
     </style>
 </head>
 <body>
-    <img id="screen" alt="No screen yet" />
-
-    <script>
-        const ws = new WebSocket("wss://screenshare-server.onrender.com");
+  <img id="screen" alt="No screen yet" />
+  
+  <script>
+        const ws = new WebSocket("ws://localhost:8765");
+        ws.binaryType = "blob"; 
         const imgElement = document.getElementById("screen");
         let controlTrue = true; 
         let keys = new Set();
@@ -34,6 +35,7 @@
         ws.onopen = () => {
             console.log("[Viewer] Connected");
             ws.send("viewer");
+            console.log("sent viewer")
             window.addEventListener("keydown", (e) => {
               if (!controlTrue) return;
               console.log(e.key)
@@ -95,7 +97,6 @@
                   height: rect.height,
                 };
                 ws.send(JSON.stringify(data))
-                console.log("sent",data)
               }
             });
 
@@ -125,16 +126,12 @@
             });
     }
 
-
-        ws.binaryType = "blob"; 
-
         ws.onmessage = (event) => {
             const blob = event.data;
-
             const url = URL.createObjectURL(blob);
             imgElement.src = url;
+            imgElement.onload = () => {3
 
-            imgElement.onload = () => {
                 URL.revokeObjectURL(url);
             };
         };
