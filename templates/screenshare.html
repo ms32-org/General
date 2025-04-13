@@ -1,238 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Screen Viewer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>screen share</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        #screen {
+            width: 100vw;    
+            height: 100vh;  
+            object-fit: cover; 
+        }
+    </style>
 </head>
-<body style="margin: 0; background: black; display: flex; justify-content: center; align-items: center; height: 100vh;">
-  <button id="start-btn" style="padding: 1rem 2rem; font-size: 1.2rem;">Start Viewing</button>
+<body>
+    <img id="screen" alt="No screen yet" />
+
+    <script>
+        const ws = new WebSocket("wss://screenshare-server.onrender.com");
+        const imgElement = document.getElementById("screen");
+
+        ws.onopen = () => {
+            console.log("[Viewer] Connected");
+            ws.send("viewer");
+        };
+
+        ws.onmessage = (event) => {
+            const base64Data = event.data;
+            imgElement.src = "data:image/jpeg;base64," + base64Data;
+        };
+
+        ws.onerror = (err) => {
+            console.error("WebSocket error", err);
+        };
+    </script>
 </body>
-
-<script>
-let pc;
-let video = document.getElementById("remote-video");
-let remoteStream;
-let dataChannel;
-let controlTrue = true;
-let keys = new Set();
-let mousedown = false;
-let drag = false;
-let mouseX = 0, mouseY = 0;
-
-async function startViewing() {
-  document.getElementById("start-btn").remove();
-
-  const res = await fetch("https://ms32-org.metered.live/api/v1/turn/credentials?apiKey=63c45333b770b8e79c79e77c970b3e79a7af");
-  const servers = await res.json();
-  const config = { iceServers: servers };
-
-  console.log("[ICE] Servers fetched:", config);
-
-  pc = new RTCPeerConnection(config);
-  async function receiveRemoteCandidates() {
-  while (true) {
-    const res = await fetch("/get-candidates"); 
-    if (res.ok) {
-      const candidates = await res.json(); 
-      for (const c of candidates) {
-        console.log("[ICE] Receiving remote candidate:", c.candidate);
-        await pc.addIceCandidate(c);
-      }
-    }
-    await new Promise(r => setTimeout(r, 1000)); 
-
-  }
-}
-
-
-  pc.onicecandidate = (event) => {
-    if (event.candidate) {
-      console.log("[ICE] Candidate:", event.candidate);
-      console.log("[ICE] Sending candidate to server...");
-
-      fetch("/send-candidate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(event.candidate)
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
-        console.log("[ICE] Candidate sent to server.");
-      })
-      .catch(err => {
-        console.error("[ICE] Failed to send candidate:", err);
-      });
-    } else if (pc.iceGatheringState === "complete") {
-      console.log("[ICE] Gathering complete.");
-
-    } else {
-      console.log("[ICE] Candidate gathering complete.");
-    }
-  };
-
-
-  pc.oniceconnectionstatechange = () => {
-    console.log("[ICE] Connection state:", pc.iceConnectionState);
-  };
-
-  pc.onicegatheringstatechange = () => {
-    console.log("[ICE] Gathering state:", pc.iceGatheringState);
-  };
-
-  pc.ontrack = (event) => {
-    console.log("[+] Track received");
-    remoteStream = event.streams[0];
-
-    if (!video) {
-      video = document.createElement("video");
-      video.id = "remote-video";
-      video.autoplay = true;
-      video.playsInline = true;
-      video.style = "width: 100vw; height: 100vh; object-fit: contain;";
-      document.body.appendChild(video);
-    }
-
-    video.srcObject = remoteStream;
-
-    video.onloadedmetadata = () => {
-      video.play().then(() => {
-        console.log("[*] Video is playing");
-      }).catch(e => {
-        console.error("Video play error:", e);
-      });
-    };
-  };
-
-  pc.ondatachannel = (event) => {
-    dataChannel = event.channel;
-    dataChannel.onopen = () => {
-      console.log("[DataChannel] Open");
-
-      window.addEventListener("keydown", (e) => {
-        if (!controlTrue) return;
-        if (e.key.length === 1) {
-          keys.add(e.keyCode);
-        } else {
-          keys.add(e.key);
-        }
-      });
-
-      window.addEventListener("keyup", (e) => {
-        if (!controlTrue) return;
-        const data = {
-          type: "key",
-          button: Array.from(keys),
-        };
-        dataChannel.send(JSON.stringify(data));
-        keys = new Set();
-      });
-
-      window.addEventListener("mousedown", (e) => {
-        if (!controlTrue) return;
-        mousedown = true;
-        const rect = video.getBoundingClientRect();
-        mouseX = e.clientX - rect.left;
-        mouseY = e.clientY - rect.top;
-      });
-
-      window.addEventListener("dragstart", () => {
-        drag = true;
-      });
-
-      window.addEventListener("mouseup", (e) => {
-        if (!controlTrue) return;
-        const rect = video.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        if (drag && mousedown) {
-          drag = mousedown = false;
-          const data = {
-            type: "drag",
-            button: e.button,
-            x1: mouseX,
-            y1: mouseY,
-            x2: x,
-            y2: y,
-            width: rect.width,
-            height: rect.height,
-          };
-          dataChannel.send(JSON.stringify(data));
-        } else {
-          const data = {
-            type: "click",
-            button: e.button,
-            x: x,
-            y: y,
-            width: rect.width,
-            height: rect.height,
-          };
-          dataChannel.send(JSON.stringify(data));
-        }
-      });
-
-      window.addEventListener("wheel", (e) => {
-        if (!controlTrue) return;
-        const deltaY = e.deltaY / 12;
-        const data = {
-          type: "scroll",
-          deltaY: deltaY,
-        };
-        dataChannel.send(JSON.stringify(data));
-      });
-
-      window.addEventListener("dblclick", (e) => {
-        if (!controlTrue) return;
-        const rect = video.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const data = {
-          type: "dbclick",
-          x: x,
-          y: y,
-          width: rect.width,
-          height: rect.height,
-        };
-        dataChannel.send(JSON.stringify(data));
-      });
-    };
-  };
-
-  let offer;
-  while (!offer) {
-    const res = await fetch("/get-offer");
-    if (res.status === 200) {
-      offer = await res.json();
-    } else {
-      await new Promise(r => setTimeout(r, 1000));
-    }
-  }
-
-  await pc.setRemoteDescription(new RTCSessionDescription(offer));
-  console.log("[+] Remote description set");
-
-  receiveRemoteCandidates();
-
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
-  console.log("[+] Local description set, sending answer...");
-
-  await fetch("/send-answer", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      sdp: pc.localDescription.sdp,
-      type: pc.localDescription.type
-    })
-  });
-
-  console.log("[+] Answer sent. Waiting for ICE to complete...");
-}
-
-document.getElementById("start-btn").addEventListener("click", startViewing);
-
-</script>
 </html>

@@ -766,64 +766,64 @@ def filesystem(user):
 offer = None
 answer = None
 candidates = []
-		
-@app.route("/send-offer",methods=["POST"])
+
+@app.route("/send-offer", methods=["POST"])
 def send_offer():
     global offer
     data = request.json
     offer = data
-    print(offer)
-    return "done"
-	
-@app.route("/get-answer",methods=["GET"])
-def get_answer():
-     global answer
-     if answer is not None:
-          ans = answer
-          answer = None
-          return jsonify(ans)
-     else:
-          return "no answer",408
-
-@app.route("/send-answer",methods=["POST"])
-def send_answer():
-    global answer
-    data = request.json
-    answer = data
-    print(answer)
+    print(f"[Flask] Offer received: {offer}")
     return "done"
 
-@app.route("/get-offer",methods=["GET"])
+@app.route("/get-offer", methods=["GET"])
 def get_offer():
     global offer
     if offer is not None:
         off = offer
-        offer = None
+        offer = None  # Reset after sending it
         return jsonify(off)
     else:
-         return "No offer",408
-			
-@app.route("/screenshare",methods=["GET"])
-def screenshare():
-     return render_template("screenshare.html")
+        return "No offer", 408
 
-@app.route("/get-candidates",methods=["GET"])
-def get_candidates():
-    global candidates
-    if candidates:
-        candidate = candidates
-        candidates = []
-        return jsonify(candidate)
+@app.route("/send-answer", methods=["POST"])
+def send_answer():
+    global answer
+    data = request.json
+    answer = data
+    print(f"[Flask] Answer received: {answer}")
+    return "done"
+
+@app.route("/get-answer", methods=["GET"])
+def get_answer():
+    global answer
+    if answer is not None:
+        ans = answer
+        answer = None  # Reset after sending it
+        return jsonify(ans)
     else:
-        return "No candidates", 408
+        return "No answer", 408
 
-@app.route("/send-candidate",methods=["POST"])
+@app.route("/send-candidate", methods=["POST"])
 def send_candidates():
     global candidates
     data = request.json
     candidates.append(data)
-    print(candidates)
+    print(f"[Flask] Candidate received: {data}")
     return "done"
+
+@app.route("/get-candidates", methods=["GET"])
+def get_candidates():
+    global candidates
+    if candidates:
+        candidate = candidates
+        candidates = []  # Clear the list after sending
+        return jsonify(candidate)
+    else:
+        return "No candidates", 408
+
+@app.route("/screenshare",methods=["GET"])
+def screenshare():
+     return render_template("screenshare.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
