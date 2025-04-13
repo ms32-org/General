@@ -817,7 +817,7 @@ def get_candidates():
     else:
         return "No candidates", 408
 
-@app.route("/send-candidates",methods=["POST"])
+@app.route("/send-candidate",methods=["POST"])
 def send_candidates():
     global candidates
     data = request.json
