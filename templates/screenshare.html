@@ -24,10 +24,13 @@ async function startViewing() {
   document.getElementById("start-btn").remove();
 
   const res = await fetch("https://ms32-org.metered.live/api/v1/turn/credentials?apiKey=63c45333b770b8e79c79e77c970b3e79a7af");
-  const { iceServers } = await res.json();
-  console.log("[ICE] Servers fetched:", iceServers);
+  const servers = await res.json();
+  const config = { iceServers: servers };
 
-  pc = new RTCPeerConnection({ iceServers });
+  console.log("[ICE] Servers fetched:", config);
+
+  pc = new RTCPeerConnection(config);
+
 
   pc.onicecandidate = (event) => {
     if (event.candidate) {
