@@ -478,10 +478,26 @@ async function update() {
     }
 
     const data = await response.json();
+    console.log('Status:', data);
 
     const statusElement = document.getElementById("status");
-
-    if (data === "online") {
+    Object.entries(data).forEach(([user, status]) => {
+        const option = document.getElementById(`option-${user}`)
+        if (option) {
+          if(status){
+            if(option.textContent !== `🟢 ${user}`){
+              option.textContent = `🟢 ${user}`
+            }
+          }else if(!status){
+            if(option.textContent !== `🔴 ${user}`){
+              option.textContent = `🔴 ${user}`
+            }
+          }
+        } else {
+          console.warn(`No element found for user: ${user}`);
+        }
+     });
+    if (data[selectedUser]) {
       statusElement.style.color = "green";
       statusElement.textContent = "Online";
     } else if (!data[selectedUser]) {
