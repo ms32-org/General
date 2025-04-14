@@ -287,73 +287,33 @@ dropdown.addEventListener("change", () => {
   fetchButtonState()
   update()
 });
-let stream;
-// let audioContext;
-// let source;
-// let gainNode;
-
-// document.getElementById("audio-play").addEventListener("click", async () => {
-//   if (!stream) return;
-
-//   const audioTrack = stream.getAudioTracks()[0];
-//   if (!audioTrack) return;
-
-//   if (audioTrack.muted) audioTrack.muted = false;
-//   if (!audioTrack.enabled) audioTrack.enabled = true;
-
-//   if (!audioContext) {
-//     audioContext = new AudioContext();
-//     await audioContext.resume();
-//     source = audioContext.createMediaStreamSource(stream);
-//     gainNode = audioContext.createGain();
-//     source.connect(gainNode);
-//     gainNode.connect(audioContext.destination);
-//   }
-// });
 
 async function initConnection() {
-  const pc = new RTCPeerConnection();
-
-  pc.ontrack = (event) => {
-    const stream = event.streams[0];
-    if(mic){
-      const audioElement = document.createElement("audio");
-      audioElement.srcObject = stream;
-      audioElement.autoplay = true;
-      document.body.appendChild(audioElement);
-    }
+  const socket = new WebSocket('ws://localhost:8765');
+  socket.binaryType = 'arraybuffer';
+  socket.onopen = () => {
+    console.log('WebSocket connection established');
+    socket.send('audioviewer');
   };
+  socket.onmessage = function (event) {
+    console.log('Received raw audio data:', event.data);  
 
-  let offerData = null;
-  while (!offerData) {
-    const res = await fetch("/get-offer", { method: "GET" });
-    if (res.status === 200) {
-      offerData = await res.json();
-    } else {
-      console.log("Waiting for offer...");
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
-  }
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    audioContext.decodeAudioData(event.data)
+        .then((audioBuffer) => {
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.destination);
+            source.start(0);
+        })
+        .catch((error) => {
+            console.error('Error decoding audio data:', error);
+        });
+};
+};
 
-  const offer = new RTCSessionDescription(offerData);
-  await pc.setRemoteDescription(offer);
-  console.log("[+] Offer received, setting remote description...");
 
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
-  console.log("[+] Answer created, sending answer...");
 
-  await fetch("/send-answer", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      sdp: pc.localDescription.sdp,
-      type: pc.localDescription.type,
-    }),
-  });
-
-  console.log("[*] Answer sent. Audio streaming should begin.");
-}
 
 
 async function fetchButtonState() {
