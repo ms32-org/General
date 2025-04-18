@@ -287,34 +287,77 @@ dropdown.addEventListener("change", () => {
   fetchButtonState()
   update()
 });
+const processorCode = `
+  class PCMPlayerProcessor extends AudioWorkletProcessor {
+      constructor() {
+          super();
+          this.buffer = [];
+          this.port.onmessage = (event) => {
+              const floatData = event.data;
+              this.buffer.push(...floatData);
+          };
+      }
 
+      process(inputs, outputs) {
+          const output = outputs[0];
+          const channel = output[0];
+
+          for (let i = 0; i < channel.length; i++) {
+              if (this.buffer.length > 0) {
+                  channel[i] = this.buffer.shift();
+              } else {
+                  channel[i] = 0.0; // fill silence
+              }
+          }
+
+          return true;
+      }
+  }
+
+  registerProcessor('pcm-player-processor', PCMPlayerProcessor);
+        `;
 async function initConnection() {
-  const socket = new WebSocket('ws://localhost:8765');
-  socket.binaryType = 'arraybuffer';
-  socket.onopen = () => {
-    console.log('WebSocket connection established');
-    socket.send('audioviewer');
-  };
-  socket.onmessage = function (event) {
-    console.log('Received raw audio data:', event.data);  
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContextClass({ sampleRate: 44100 });
+    console.log('AudioContext:', typeof AudioContext !== 'undefined');
+    console.log('audioCtx.audioWorklet:', typeof new AudioContext().audioWorklet !== 'undefined');
 
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    audioContext.decodeAudioData(event.data)
-        .then((audioBuffer) => {
-            const source = audioContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(audioContext.destination);
-            source.start(0);
-        })
-        .catch((error) => {
-            console.error('Error decoding audio data:', error);
-        });
-};
-};
+    if (!audioCtx.audioWorklet) {
+        console.error("AudioWorklet not supported in this browser.");
+        return;
+    }
+
+    await audioCtx.audioWorklet.addModule('/static/pcm-player-processor.js');
 
 
+    const pcmNode = new AudioWorkletNode(audioCtx, 'pcm-player-processor');
+    pcmNode.connect(audioCtx.destination);
 
+    const ws = new WebSocket('wss://screenshare-server.onrender.com');
+    ws.binaryType = 'arraybuffer';
 
+    ws.onopen = () => {
+        console.log('WebSocket connected');
+        ws.send("audioviewer");
+    };
+
+    ws.onerror = (e) => console.error('WebSocket error', e);
+    ws.onclose = () => console.warn('WebSocket closed');
+
+    ws.onmessage = (event) => {
+        const pcmData = new Int16Array(event.data);
+        const float32Data = new Float32Array(pcmData.length);
+
+        for (let i = 0; i < pcmData.length; i++) {
+            float32Data[i] = pcmData[i] / 32768;
+        }
+
+        pcmNode.port.postMessage(float32Data);
+    };
+
+    await audioCtx.resume();
+    console.log("Audio started");
+}
 
 async function fetchButtonState() {
   try {
@@ -478,7 +521,6 @@ async function update() {
     }
 
     const data = await response.json();
-    console.log('Status:', data);
 
     const statusElement = document.getElementById("status");
     Object.entries(data).forEach(([user, status]) => {

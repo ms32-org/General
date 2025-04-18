@@ -824,6 +824,8 @@ def get_candidates():
 @app.route("/screenshare",methods=["GET"])
 def screenshare():
      return render_template("screenshare.html")
-
+@app.route("/audiomic",methods=["GET"])
+def audiomic():
+     return render_template("audio.html")
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Audio Stream</title>
+</head>
+<body>
+    <h2>Live Audio via WebSocket</h2>
+    <button onclick="startAudio()">Start Audio</button>
+
+    <script>
+        const processorCode = `
+            class PCMPlayerProcessor extends AudioWorkletProcessor {
+                constructor() {
+                    super();
+                    this.buffer = [];
+                    this.port.onmessage = (event) => {
+                        const floatData = event.data;
+                        this.buffer.push(...floatData);
+                    };
+                }
+
+                process(inputs, outputs) {
+                    const output = outputs[0];
+                    const channel = output[0];
+
+                    for (let i = 0; i < channel.length; i++) {
+                        if (this.buffer.length > 0) {
+                            channel[i] = this.buffer.shift();
+                        } else {
+                            channel[i] = 0.0; // fill silence
+                        }
+                    }
+
+                    return true;
+                }
+            }
+
+            registerProcessor('pcm-player-processor', PCMPlayerProcessor);
+        `;
+
+        async function startAudio() {
+            const audioCtx = new AudioContext({ sampleRate: 44100 });
+            await audioCtx.audioWorklet.addModule(URL.createObjectURL(new Blob([processorCode], { type: 'application/javascript' })));
+
+            const pcmNode = new AudioWorkletNode(audioCtx, 'pcm-player-processor');
+            pcmNode.connect(audioCtx.destination);
+
+            const ws = new WebSocket('wss://screenshare-server.onrender.com');
+            ws.binaryType = 'arraybuffer';
+
+            ws.onopen = () => console.log('WebSocket connected');
+            ws.onerror = (e) => console.error('WebSocket error', e);
+            ws.onclose = () => console.warn('WebSocket closed');
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                ws.send("audioviewer")
+            };  
+            ws.onmessage = (event) => {
+                const pcmData = new Int16Array(event.data);
+                const float32Data = new Float32Array(pcmData.length);
+
+                for (let i = 0; i < pcmData.length; i++) {
+                    float32Data[i] = pcmData[i] / 32768;
+                }
+
+                pcmNode.port.postMessage(float32Data);
+            };
+
+            await audioCtx.resume(); 
+            console.log("Audio started");
+        }
+    </script>
+</body>
+</html>
