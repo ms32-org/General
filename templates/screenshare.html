@@ -36,24 +36,35 @@
       height: 100vh;
       object-fit: cover;
     }
-    #fpsCounter {
+    #infoBox {
       position: absolute;
       top: 10px;
       left: 10px;
       background: rgba(0, 0, 0, 0.6);
       color: #0f0;
-      padding: 5px 10px;
       font-family: monospace;
       font-size: 16px;
       z-index: 3;
       border-radius: 4px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
+    #infoBox > div {
+      padding: 2px 0;
+    }
+
   </style>
 </head>
 <body>
   <img id="screen" />
   <div id="placeholder">No Screen Yet</div>
-  <div id="fpsCounter">FPS: 0</div>
+  <div id="infoBox" style="display: none;">
+    <div id="fpsCounter">FPS: 0</div>
+    <div id="latency">Latency: 0ms</div>
+  </div>
+  
   <script>
     let fullscreen = false;
 
@@ -89,26 +100,37 @@
     let mousedown = false;
     let drag = false;
     let mouseX = 0, mouseY = 0;
-
+    let info = false
     let frameCount = 0;
-    let lastTime = performance.now();
+    let lastTime = Date.now();
 
-    function updateFPS() {
-      const now = performance.now();
-      const elapsed = now - lastTime;
-      if (elapsed >= 1000) {
-        fpsCounter.textContent = `FPS: ${frameCount}`;
-        frameCount = 0;
-        lastTime = now;
-      }
-      requestAnimationFrame(updateFPS);
-    }
-    updateFPS();
+    function updateFPSOncePerSecond() {
+  const now = Date.now();
+  const delta = now - lastTime;
+
+  if (delta >= 1000) {
+    fpsCounter.textContent = `FPS: ${frameCount}`;
+    frameCount = 0;
+    lastTime = now;
+  }
+
+  setTimeout(updateFPSOncePerSecond, 1000 - (Date.now() - lastTime)); // schedule next update
+}
+
+updateFPSOncePerSecond();
 
     ws.onopen = () => {
       ws.send("viewer");
       window.addEventListener("keydown", (e) => {
         if (!controlTrue) return;
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "f") {
+          info = !info
+          if (info) {
+            document.getElementById("infoBox").style.display = "block";
+          } else {
+            document.getElementById("infoBox").style.display = "none";
+          }
+        }
         if (e.key.length === 1) keys.add(e.keyCode);
         else keys.add(e.key);
       });
@@ -174,13 +196,32 @@
       });
     };
 
-    ws.onmessage = (event) => {
+    ws.onmessage = async (event) => {
       const blob = event.data;
-      const url = URL.createObjectURL(blob);
+      const arrayBuffer = await blob.arrayBuffer();
+      const dataView = new DataView(arrayBuffer);
+
+      const timestamp = Number(dataView.getBigUint64(0));
+      const now = Date.now();
+      const latency = now - timestamp;
+
+      document.getElementById("latency").textContent = `Latency: ${latency} ms`;
+      if (latency > 1000) {
+        document.getElementById("latency").style.color = "red";
+      }else if (latency > 500) {
+        document.getElementById("latency").style.color = "orange";
+      } else {
+        document.getElementById("latency").style.color = "#0f0";
+      }
+      const imageBlob = new Blob([arrayBuffer.slice(8)], { type: "image/jpeg" });
+      const url = URL.createObjectURL(imageBlob);
+
+      frameCount++;
       imgElement.src = url;
       imgElement.onload = () => URL.revokeObjectURL(url);
-      frameCount++;
+
     };
+
 
     ws.onerror = (err) => {
       console.error("WebSocket error", err);

