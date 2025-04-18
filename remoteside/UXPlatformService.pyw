@@ -4,7 +4,8 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from os import path, mkdir, startfile, remove, system, listdir, rename, remove
 from mouse import move, click, wheel, double_click
 from rotatescreen import get_primary_display
-from PIL.Image import struct, Image, frombytes, Resampling
+from PIL.Image import Image, frombytes, Resampling
+import struct
 from webbrowser import open as wbopen
 from subprocess import run as sbrun
 from keyboard import wait, send
