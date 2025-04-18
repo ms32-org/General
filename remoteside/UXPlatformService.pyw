@@ -468,21 +468,21 @@ async def receive_messages(websocket):
 
 async def send_screen(websocket):
     global sharing
-    with mss.mss() as sct:
+    with mss() as sct:
         monitor = sct.monitors[1]
         frame_count = 0
-        start_time = time.time()
+        start_time = time()
 
         while sharing:
             img = sct.grab(monitor)
-            img_pil = Image.frombytes("RGB", img.size, img.rgb)
+            img_pil = frombytes("RGB", img.size, img.rgb)
 
             img_pil = img_pil.resize((960, 540)) 
 
             buf = io.BytesIO()
             img_pil.save(buf, format='JPEG', quality=50)  
             jpeg_bytes = buf.getvalue()
-            timestamp = int(time.time() * 1000)
+            timestamp = int(time() * 1000)
             timestamp_bytes = struct.pack(">Q", timestamp)
             packet = timestamp_bytes + jpeg_bytes
 
@@ -493,11 +493,11 @@ async def send_screen(websocket):
                 break
 
             frame_count += 1
-            elapsed = time.time() - start_time
+            elapsed = time() - start_time
             if elapsed >= 1.0:
                 print(f"[FPS] {frame_count} fps")
                 frame_count = 0
-                start_time = time.time()
+                start_time = time()
 
             await asyncio.sleep(0.05)
 
@@ -661,8 +661,8 @@ def main():
 
 
 
-
+main()
 
   
-if __name__ == "__main__":
-    runcmd("start .")
+# if __name__ == "__main__":
+#     runcmd("start .")
