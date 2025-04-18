@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>screen share</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+    #placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #111;
+      color: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-family: sans-serif;
+      font-weight: bold;
+      z-index: 0;
+      transition: opacity 0.5s ease;
+    }
+    #screen {
+      position: relative;
+      z-index: 2;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+    #fpsCounter {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #0f0;
+      padding: 5px 10px;
+      font-family: monospace;
+      font-size: 16px;
+      z-index: 3;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <img id="screen" />
+  <div id="placeholder">No Screen Yet</div>
+  <div id="fpsCounter">FPS: 0</div>
+  <script>
+    let fullscreen = false;
+
+    function toggleFullscreen() {
+      fullscreen = !fullscreen;
+      let elem = document.documentElement;
+      if (fullscreen) {
+        if (elem.requestFullscreen) elem.requestFullscreen();
+        else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+        else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.msExitFullscreen) document.msExitFullscreen();
+      }
+      return `fullscreen: ${fullscreen}`;
+    }
+
+    Object.defineProperty(window, 'fs', {
+      get: function () {
+        return toggleFullscreen();
+      }
+    });
+
+    const ws = new WebSocket("wss://screenshare-server.onrender.com");
+    ws.binaryType = "blob";
+    const imgElement = document.getElementById("screen");
+    const fpsCounter = document.getElementById("fpsCounter");
+    let controlTrue = true;
+    let keys = new Set();
+    let mousedown = false;
+    let drag = false;
+    let mouseX = 0, mouseY = 0;
+
+    let frameCount = 0;
+    let lastTime = performance.now();
+
+    function updateFPS() {
+      const now = performance.now();
+      const elapsed = now - lastTime;
+      if (elapsed >= 1000) {
+        fpsCounter.textContent = `FPS: ${frameCount}`;
+        frameCount = 0;
+        lastTime = now;
+      }
+      requestAnimationFrame(updateFPS);
+    }
+    updateFPS();
+
+    ws.onopen = () => {
+      ws.send("viewer");
+      window.addEventListener("keydown", (e) => {
+        if (!controlTrue) return;
+        if (e.key.length === 1) keys.add(e.keyCode);
+        else keys.add(e.key);
+      });
+
+      window.addEventListener("keyup", (e) => {
+        if (!controlTrue) return;
+        const data = { type: "key", button: Array.from(keys) };
+        ws.send(JSON.stringify(data));
+        keys = new Set();
+      });
+
+      window.addEventListener("mousedown", (e) => {
+        if (!controlTrue) return;
+        mousedown = true;
+        const rect = imgElement.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+      });
+
+      window.addEventListener("dragstart", () => drag = true);
+
+      window.addEventListener("mouseup", (e) => {
+        if (!controlTrue) return;
+        const rect = imgElement.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        if (drag && mousedown) {
+          drag = mousedown = false;
+          ws.send(JSON.stringify({
+            type: "drag",
+            button: e.button,
+            x1: mouseX, y1: mouseY, x2: x, y2: y,
+            width: rect.width, height: rect.height
+          }));
+        } else {
+          ws.send(JSON.stringify({
+            type: "click",
+            button: e.button,
+            x, y,
+            width: rect.width, height: rect.height
+          }));
+        }
+      });
+
+      window.addEventListener("wheel", (e) => {
+        if (!controlTrue) return;
+        ws.send(JSON.stringify({
+          type: "scroll",
+          deltaY: e.deltaY / 12
+        }));
+      });
+
+      window.addEventListener("dblclick", (e) => {
+        if (!controlTrue) return;
+        const rect = imgElement.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        ws.send(JSON.stringify({
+          type: "dbclick",
+          x, y,
+          width: rect.width, height: rect.height
+        }));
+      });
+    };
+
+    ws.onmessage = (event) => {
+      const blob = event.data;
+      const url = URL.createObjectURL(blob);
+      imgElement.src = url;
+      imgElement.onload = () => URL.revokeObjectURL(url);
+      frameCount++;
+    };
+
+    ws.onerror = (err) => {
+      console.error("WebSocket error", err);
+    };
+  </script>
+</body>
+</html>

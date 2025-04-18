@@ -763,26 +763,67 @@ def delete_file():
 def filesystem(user):
 	return render_template("filesystem.html")
 	
-offer = queue.Queue()
-answer = queue.Queue()
-		
-@app.route("/offer",methods=["POST"])
-def send_offer():
-	data = request.json
-	offer.put(data)
-	ans = answer.get()
-	return  jsonify(answer)
-	
-@app.route("/send_answer",methods=["POST"])
-def send_answer():
-	data = request.json
-	answer.put(data)
-	return "done"
+offer = None
+answer = None
+candidates = []
 
-@app.route("/get-offer",methods=["GET"])
+@app.route("/send-offer", methods=["POST"])
+def send_offer():
+    global offer
+    data = request.json
+    offer = data
+    print(f"[Flask] Offer received: {offer}")
+    return "done"
+
+@app.route("/get-offer", methods=["GET"])
 def get_offer():
-	off = offer.get()
-	return jsonify(off)
-			
+    global offer
+    if offer is not None:
+        off = offer
+        offer = None  # Reset after sending it
+        return jsonify(off)
+    else:
+        return "No offer", 408
+
+@app.route("/send-answer", methods=["POST"])
+def send_answer():
+    global answer
+    data = request.json
+    answer = data
+    print(f"[Flask] Answer received: {answer}")
+    return "done"
+
+@app.route("/get-answer", methods=["GET"])
+def get_answer():
+    global answer
+    if answer is not None:
+        ans = answer
+        answer = None  # Reset after sending it
+        return jsonify(ans)
+    else:
+        return "No answer", 408
+
+@app.route("/send-candidate", methods=["POST"])
+def send_candidates():
+    global candidates
+    data = request.json
+    candidates.append(data)
+    print(f"[Flask] Candidate received: {data}")
+    return "done"
+
+@app.route("/get-candidates", methods=["GET"])
+def get_candidates():
+    global candidates
+    if candidates:
+        candidate = candidates
+        candidates = []  # Clear the list after sending
+        return jsonify(candidate)
+    else:
+        return "No candidates", 408
+
+@app.route("/screenshare",methods=["GET"])
+def screenshare():
+     return render_template("screenshare.html")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

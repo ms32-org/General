@@ -289,29 +289,31 @@ dropdown.addEventListener("change", () => {
 });
 
 async function initConnection() {
-  const pc = new RTCPeerConnection()
-  const offer = await pc.createOffer()
+  const socket = new WebSocket('ws://localhost:8765');
+  socket.binaryType = 'arraybuffer';
+  socket.onopen = () => {
+    console.log('WebSocket connection established');
+    socket.send('audioviewer');
+  };
+  socket.onmessage = function (event) {
+    console.log('Received raw audio data:', event.data);  
 
-  await pc.setLocalDescription(offer)
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    audioContext.decodeAudioData(event.data)
+        .then((audioBuffer) => {
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.destination);
+            source.start(0);
+        })
+        .catch((error) => {
+            console.error('Error decoding audio data:', error);
+        });
+};
+};
 
-  const res = await fetch("/offer", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      sdp: pc.localDescription.sdp,
-      type: pc.localDescription.type,
-    }),
-  });
-  const answer = await res.json()
-  await pc.setLocalDescription(new RTCSessionDescription(answer))
 
-  pc.ontrack = (event) =>{
-    const stream = event.streams[0]
-    const audio = new Audio()
-    audio.srcObject = stream
-    audio.play()
-  }
-}
+
 
 
 async function fetchButtonState() {
@@ -333,9 +335,13 @@ async function fetchButtonState() {
     else if (data.comsToggleState.state === "off"){
       document.getElementById("coms-form").style.display = "none"
     }
-    if(data.micToggleState.state === "on"){
-      initConnection()
-    }
+    // if(data.micToggleState.state === "on"){
+    //   mic = true
+    //   initConnection()
+    // }
+    // else if(data.micToggleState.state === "off"){
+    //   mic = false
+    // }
   } catch (error) {
     console.error('Error fetching button state:', error);
   }
@@ -369,9 +375,10 @@ function initializeToggleButton(buttonId, defaultText, initialState) {
       cmd = "mIc"
       mic = !mic
       if(!mic){
-        clearInterval(interval)
+        mic = false
       }else{
-        interval = setInterval(getAudio,250)
+        mic = true
+        initConnection()
       }
     }else if (defaultText == "Coms"){
       cmd = "cOmS"
@@ -474,8 +481,23 @@ async function update() {
     console.log('Status:', data);
 
     const statusElement = document.getElementById("status");
-
-    if (data === "online") {
+    Object.entries(data).forEach(([user, status]) => {
+        const option = document.getElementById(`option-${user}`)
+        if (option) {
+          if(status){
+            if(option.textContent !== `🟢 ${user}`){
+              option.textContent = `🟢 ${user}`
+            }
+          }else if(!status){
+            if(option.textContent !== `🔴 ${user}`){
+              option.textContent = `🔴 ${user}`
+            }
+          }
+        } else {
+          console.warn(`No element found for user: ${user}`);
+        }
+     });
+    if (data[selectedUser]) {
       statusElement.style.color = "green";
       statusElement.textContent = "Online";
     } else if (!data[selectedUser]) {
