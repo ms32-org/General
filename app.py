@@ -703,15 +703,16 @@ def post_folder():
 		folder_content = request.get_json()
 	return "done"
 	
-@app.route("/get-folder",methods=["GET","POST"])		
+@app.route("/get-folder", methods=["GET", "POST"])
 def get_folder():
-	global folder_content
-	if folder_content:
-		f = folder_content
-		folder_content = None
-		return jsonify(f)
-	elif folder_content is None:
-		return "data nahi aaya abhi baad me aao",400
+    global folder_content
+    if folder_content is not None:
+        f = folder_content
+        folder_content = None
+        return jsonify(f)
+    else:
+        return "data nahi aaya abhi baad me aao", 400
+
 						
 @app.route("/req-file",methods=["POST","GET"])
 def req_file():
