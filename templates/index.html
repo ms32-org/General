@@ -77,7 +77,7 @@
     <div class="dropdown-container">
       <label for="Dropdown" style="color:#238636">Select Target</label>
       <select id="Dropdown" class="dropdown">
-        <option value="{{selected}}">{{selected}}</option>
+        <option  id="option-{{selected}}" value="{{selected}}">{{selected}}</option>
         {% for user in users %}
           {% if user != selected %}
             <option value="{{user}}" id="option-{{user}}">{{user}}</option>
@@ -535,8 +535,6 @@ async function update() {
               option.textContent = `🔴 ${user}`
             }
           }
-        } else {
-          console.warn(`No element found for user: ${user}`);
         }
      });
     if (data[selectedUser]) {
