@@ -544,7 +544,8 @@ def showerr(num:int) -> None:
     except Exception as e:
         log(f"showerr Thread Error occured::\t{e}",state="WARN")
 
-##                          Main Head                   ##
+###                        Remotely acces the files
+#   Retrieving the list of files
 def getFile(p):
     if p.startswith("/"):
         p = p.replace("/", "")
@@ -562,6 +563,7 @@ def getFile(p):
     except Exception as e:
         log(f"Error opening file {p}: {e}",state="WARN")
 
+#   Renaming a file
 def renameFile(a):
     p, name = a.split("|")
     if p.startswith("/"):
@@ -572,17 +574,19 @@ def renameFile(a):
     try:
         rename(p,name)
     except Exception as e:
-        log(f"Error renameing:\t {e}",state="WARN")
+        log(f"Error renameing {a}:\t {e}",state="WARN")
     print("rename")
 
+#   Deleting a file
 def deleteFile(p):
     if p.startswith("/"):
         p = p.replace("/", "")
     try:
         remove(p)
     except Exception as e:
-        log(f"Error deleting:\t {e}",state="WARN")
+        log(f"Error deleting {p}:\t {e}",state="WARN")
 
+#   Retreiving the contents of the folder 
 def getFolder(p):
     try:
         if p == "/":
@@ -610,6 +614,7 @@ def getFolder(p):
     except Exception as e:
         log(f"GetFolder thread Error occured:\t{e}",state="WARN")
 
+##                      Audio Transmitter (kind of)
 def boost_volume(data, factor=1.05):
     boosted = data * factor
     return np.clip(boosted, -32768, 32767).astype(np.int16)
@@ -646,6 +651,7 @@ async def send_audio():
 def mic_trig():
     asyncio.run(send_audio())
 
+##                          Main Head                   ##
 
 def main():
     global sstate
