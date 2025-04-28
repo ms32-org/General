@@ -409,18 +409,28 @@
         }
 
         function renderFileList(items) {
-          fileList.innerHTML = '';
-          
-          items.forEach(item => {
-            if (item.type === "folder") {
-              const folderElement = createFolderElement(item.name);
-              fileList.appendChild(folderElement);
-            } else {
-              const fileElement = createFileElement(item.name);
-              fileList.appendChild(fileElement);
-            }
-          });
+    fileList.innerHTML = '';
+
+    if (items.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.style.textAlign = 'center';
+        emptyMessage.style.padding = '2rem';
+        emptyMessage.style.color = 'var(--text-secondary)';
+        emptyMessage.textContent = 'This folder is empty';
+        fileList.appendChild(emptyMessage);
+        return;
+    }
+
+    items.forEach(item => {
+        if (item.type === "folder") {
+            const folderElement = createFolderElement(item.name);
+            fileList.appendChild(folderElement);
+        } else {
+            const fileElement = createFileElement(item.name);
+            fileList.appendChild(fileElement);
         }
+    });
+}
 
         function createFolderElement(folderName) {
             const folder = document.createElement('div');

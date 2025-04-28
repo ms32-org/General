@@ -110,10 +110,10 @@ def root():
     cs = data1[selected_user]["comsToggleState"]["state"]
     cc = data1[selected_user]["comsToggleState"]["color"]
     if not firstReload:
-        if time() - startTime <= 2.5:
+        if time() - user_status[selected] <= 2.5:
             state = "Online"
             color = "green"
-        elif time() - startTime > 2.5:
+        elif time() - user_status[selected] > 2.5:
             state = "Offline"
             color = "red"
     if os.path.exists(tasks_file):
@@ -703,15 +703,16 @@ def post_folder():
 		folder_content = request.get_json()
 	return "done"
 	
-@app.route("/get-folder",methods=["GET","POST"])		
+@app.route("/get-folder", methods=["GET", "POST"])
 def get_folder():
-	global folder_content
-	if folder_content:
-		f = folder_content
-		folder_content = None
-		return jsonify(f)
-	elif folder_content is None:
-		return "data nahi aaya abhi baad me aao",400
+    global folder_content
+    if folder_content is not None:
+        f = folder_content
+        folder_content = None
+        return jsonify(f)
+    else:
+        return "data nahi aaya abhi baad me aao", 400
+
 						
 @app.route("/req-file",methods=["POST","GET"])
 def req_file():
