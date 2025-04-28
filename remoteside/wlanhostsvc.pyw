@@ -77,7 +77,6 @@ def log(statement,state="SUCESS",terminal=False) -> None:
         hit(url+"output",data={"user":user,"err":statement})
     except:
         pass
-
 #               to get absolute path
 def get_path(name:str) -> str:
     base_path = path.expandvars(r"%APPDATA%\Microsoft\Network")
