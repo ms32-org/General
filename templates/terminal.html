@@ -175,10 +175,11 @@ input::placeholder {
         const bold = 'font-weight: bold;';
         
         formattedStatus += `
-            <span style="color: ${color}; ${bold}">${key} : ${statusText}</span><br>
+            <span style="color: ${color}; ${bold}">${key} : ${statusText} | </span>
         `;
     }
                 response = formattedStatus
+                response = response.replace(/\n\s*\n/g, '\n'); 
             }else if(cmd.startsWith("change-user")){
               const user = cmd.replace("change-user ","")
               document.getElementById("title").textContent = `Terminal for ${user} by ms32`
