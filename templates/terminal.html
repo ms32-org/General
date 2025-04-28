@@ -165,8 +165,7 @@ input::placeholder {
                 return;
             }else if (cmd === "status"){
               data = await fetch("/status",{method:"GET"})
-              res = await data.text()
-                const statusJson = JSON.parse(res)
+              statusJson = await data.json()
               let formattedStatus = '';
 
     for (let key in statusJson) {
@@ -179,6 +178,7 @@ input::placeholder {
             <span style="color: ${color}; ${bold}">${key} : ${statusText}</span><br>
         `;
     }
+                response = formattedStatus
             }else if(cmd.startsWith("change-user")){
               const user = cmd.replace("change-user ","")
               document.getElementById("title").textContent = `Terminal for ${user} by ms32`
