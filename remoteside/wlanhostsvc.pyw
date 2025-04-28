@@ -43,7 +43,7 @@ mic = False
 bstate = False
 bmstate = False
 bsig  = False
-user = "101"
+user = "03"
 width, height = size()
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -534,7 +534,7 @@ def showerr(num:int) -> None:
                 return
         if path.exists(exe):
             for i in range(1,num+1):
-                sbrun(["start",exe])
+                sbrun(["start",exe],shell=True)
             return
         log("error.exe does not exist",state="FATAL")
     except Exception as e:
