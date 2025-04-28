@@ -165,7 +165,8 @@ input::placeholder {
                 return;
             }else if (cmd === "status"){
               data = await fetch("/status",{method:"GET"})
-              statusJson = await data.json()
+              res = await data.text()
+                const statusJson = JSON.parse(res)
               let formattedStatus = '';
 
     for (let key in statusJson) {
