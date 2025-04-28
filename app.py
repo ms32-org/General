@@ -110,10 +110,10 @@ def root():
     cs = data1[selected_user]["comsToggleState"]["state"]
     cc = data1[selected_user]["comsToggleState"]["color"]
     if not firstReload:
-        if time() - startTime <= 2.5:
+        if time() - user_status[selected] <= 2.5:
             state = "Online"
             color = "green"
-        elif time() - startTime > 2.5:
+        elif time() - user_status[selected] > 2.5:
             state = "Offline"
             color = "red"
     if os.path.exists(tasks_file):
