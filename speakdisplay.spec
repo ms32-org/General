@@ -5,7 +5,7 @@ a = Analysis(
     ['appdev\\speakdisplay.pyw'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('your_video.mp4', '.'), ('your_video_reverse.mp4', '.'), ('defender.ico', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

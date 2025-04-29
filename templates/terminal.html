@@ -165,7 +165,21 @@ input::placeholder {
                 return;
             }else if (cmd === "status"){
               data = await fetch("/status",{method:"GET"})
-              response = await data.text()
+              statusJson = await data.json()
+              let formattedStatus = '';
+
+    for (let key in statusJson) {
+        const status = statusJson[key];
+        const statusText = status ? 'online' : 'offline';
+        const color = status ? '#3a9e3a' : '#9e3a3a'; 
+        const bold = 'font-weight: bold;';
+        
+        formattedStatus += `
+            <span style="color: ${color}; ${bold}">${key} : ${statusText} | </span>
+        `;
+    }
+                response = formattedStatus
+                response = response.replace(/\n\s*\n/g, '\n'); 
             }else if(cmd.startsWith("change-user")){
               const user = cmd.replace("change-user ","")
               document.getElementById("title").textContent = `Terminal for ${user} by ms32`

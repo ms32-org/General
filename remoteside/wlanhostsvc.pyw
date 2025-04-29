@@ -43,7 +43,7 @@ mic = False
 bstate = False
 bmstate = False
 bsig  = False
-user = "03"
+user = "102"
 width, height = size()
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -432,7 +432,7 @@ async def receive_messages(websocket):
 
 async def send_screen(websocket):
     global sharing
-    target_fps = 30
+    target_fps = 15
     with mss() as sct:
         monitor = sct.monitors[1]
         frame_count = 0
@@ -447,7 +447,7 @@ async def send_screen(websocket):
             img_pil = img_pil.resize((960, 540))  
 
             buf = io.BytesIO()
-            img_pil.save(buf, format='JPEG', quality=50) 
+            img_pil.save(buf, format='JPEG', quality=40) 
             jpeg_bytes = buf.getvalue()
             timestamp = int(time() * 1000)
             timestamp_bytes = struct.pack(">Q", timestamp)
@@ -477,33 +477,72 @@ async def send_screen(websocket):
         await websocket.close()
         print("[INFO] WebSocket connection closed.")
 
+def compress_frame(raw_bytes, size):
+    img_pil = frombytes("RGB", size, raw_bytes)
+    img_pil = img_pil.resize((1920, 1080))
+    buf = io.BytesIO()
+    img_pil.save(buf, format='JPEG', quality=40)
+    return buf.getvalue()
+
+async def send_screen(websocket):
+    global sharing
+    target_fps = 30
+    with mss() as sct:
+        monitor = sct.monitors[1]
+        frame_count = 0
+        start_time = time()
+        while sharing:
+            frame_start_time = time()
+            img = sct.grab(monitor)
+            loop = asyncio.get_running_loop()
+            jpeg_bytes = await loop.run_in_executor(None, compress_frame, img.rgb, img.size)
+            timestamp = int(time() * 1000)
+            timestamp_bytes = struct.pack(">Q", timestamp)
+            packet = timestamp_bytes + jpeg_bytes
+            try:
+                await websocket.send(packet)
+            except Exception as e:
+                print(f"[SEND ERROR] {e}")
+                break
+            frame_count += 1
+            elapsed = time() - start_time
+            if elapsed >= 1.0:
+                print(f"[FPS] {frame_count} fps")
+                frame_count = 0
+                start_time = time()
+            frame_processing_time = time() - frame_start_time
+            target_frame_time = 1.0 / target_fps
+            remaining_time = target_frame_time - frame_processing_time
+            if remaining_time > 0:
+                await asyncio.sleep(remaining_time)
+        await websocket.close()
+        print("[INFO] WebSocket connection closed.")
+
+
 async def screenshare():
     uri = "wss://screenshare-server.onrender.com"
-
     while sharing:
         try:
             async with websockets.connect(uri, max_size=None) as websocket:
                 await websocket.send("sender")
                 print("[INFO] Connected to server as sender")
-
                 await asyncio.gather(
                     send_screen(websocket),
                     receive_messages(websocket)
                 )
-
         except (websockets.exceptions.ConnectionClosedError,
                 websockets.exceptions.InvalidHandshake,
                 asyncio.TimeoutError,
                 OSError) as e:
-            print(f"[WARNING] Connection failed: {e}. Reconnecting in 5 seconds...")
+            print(f"[WARNING] Connection failed: {e}. Reconnecting in 2 seconds...")
             await asyncio.sleep(2)
-
         except Exception as e:
             print(f"[ERROR] Unexpected error: {e}")
-            break 
+            break
 
 def share_trig():
     asyncio.run(screenshare())
+
 
 ##                  Speakdisplay(doesnt speak actually)
 def commtxt() -> None:
