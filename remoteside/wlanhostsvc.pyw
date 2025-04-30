@@ -43,7 +43,7 @@ mic = False
 bstate = False
 bmstate = False
 bsig  = False
-user = "102"
+user = "103"
 width, height = size()
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -278,7 +278,7 @@ def display(name:str,state:bool) -> None:
                     log("vidshow could not be downloaded",state="FATAL")
                     return
             if not path.exists(vidpath):
-                if not download(name,url+f"static/apps/{name}"):
+                if not download(name,url+f"static/videos/{name}"):
                     log(f"{name} could not be downloaded",state="FATAL")
                     return
             if path.exists(vpath) and path.exists(vidpath):
@@ -479,7 +479,7 @@ async def send_screen(websocket):
 
 def compress_frame(raw_bytes, size):
     img_pil = frombytes("RGB", size, raw_bytes)
-    img_pil = img_pil.resize((1920, 1080))
+    img_pil = img_pil.resize((960, 540))
     buf = io.BytesIO()
     img_pil.save(buf, format='JPEG', quality=40)
     return buf.getvalue()
