@@ -252,6 +252,7 @@ def status():
         user_state = {}
         for user in user_status:
             user_state[user] = True if time() - user_status[user] <= 3 else False
+        
     return jsonify(user_state)
 
 @app.route("/add-task", methods=["POST", "GET"])
