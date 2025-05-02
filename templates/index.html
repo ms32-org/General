@@ -524,7 +524,7 @@ async function update() {
 
     const data1 = await response.json();
     const data = data1["userState"]
-    if(toggleState !== data["state"]){
+    if(toggleState !== data["state"][dropdown.value]){
       fetchButtonState()
     }
     const statusElement = document.getElementById("status");
