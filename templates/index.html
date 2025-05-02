@@ -527,9 +527,7 @@ async function update() {
     if(toggleState !== data1["state"][dropdown.value]){
       fetchButtonState()
     }
-    console.log(data)
     
-    console.log(data1["state"][dropdown.value])
     const statusElement = document.getElementById("status");
     Object.entries(data).forEach(([user, status]) => {
         const option = document.getElementById(`option-${user}`)
