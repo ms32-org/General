@@ -274,6 +274,7 @@ let isadded = false;
 let cmd;
 let state;
 const eventSource = new EventSource('/audio');
+let toggleState
 
 dropdown.addEventListener("change", () => {
   fetch("/change-user", {
@@ -365,6 +366,7 @@ async function fetchButtonState() {
     const data1 = await response.json();
     const data = data1[dropdown.value]
     console.log(data)
+    toggleState = data
     initializeToggleButton('hide-toggle', 'Hide', data.hideToggleState.state || 'off');
     initializeToggleButton('spam-toggle', 'Spam', data.spamToggleState.state || 'off');
     initializeToggleButton('flip-toggle', 'Chaos', data.flipToggleState.state || 'off');
@@ -520,8 +522,11 @@ async function update() {
       throw new Error('Network response was not ok');
     }
 
-    const data = await response.json();
-
+    const data1 = await response.json();
+    const data = data1["userState"]
+    if(toggleState !== data["state"]){
+      fetchButtonState()
+    }
     const statusElement = document.getElementById("status");
     Object.entries(data).forEach(([user, status]) => {
         const option = document.getElementById(`option-${user}`)
