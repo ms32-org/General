@@ -250,12 +250,10 @@ def url():
 def status():
     if request.method == "GET":
         user_state = {}
-        with open(os.path.join(STATIC_FOLDER, "state.json"), "r") as file:
-        	state = json.load(file)
         for user in user_status:
             user_state[user] = True if time() - user_status[user] <= 3 else False
-        data = {"userState":user_state,"state":state}    
-    return jsonify(data)
+        
+    return jsonify(user_state)
 
 @app.route("/add-task", methods=["POST", "GET"])
 def schedule():
