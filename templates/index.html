@@ -522,12 +522,8 @@ async function update() {
       throw new Error('Network response was not ok');
     }
 
-    const data1 = await response.json();
-    const data = data1["userState"]
-    if(toggleState !== data1["state"][dropdown.value]){
-      fetchButtonState()
-    }
-    
+    const data = await response.json();
+
     const statusElement = document.getElementById("status");
     Object.entries(data).forEach(([user, status]) => {
         const option = document.getElementById(`option-${user}`)
