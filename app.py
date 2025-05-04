@@ -6,7 +6,6 @@ import base64
 import json
 import requests as rq
 import io
-import queue
 from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
@@ -36,47 +35,54 @@ state_file = os.path.join(STATIC_FOLDER, "state.json")
 UPLOAD_FOLDER = os.path.join(STATIC_FOLDER, "sounds")
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-with open(os.path.join(STATIC_FOLDER,"users.json")) as file:
-	data = json.load(file)
-users = data["users"]
-user_status = {}
-for user in users:
-    user_status[user]= time()
 
-with open(state_file,"w") as file:
-    states = {}
+user_status = None
+
+
+def userInfo():
+    global user_status    
+    with open(os.path.join(STATIC_FOLDER,"users.json")) as file:
+        data = json.load(file)
+    users = data["users"]
+    user_status = {}
     for user in users:
-        states[str(user)] = {
-            "hideToggleState": {
-                "state": "off",
-                "color": "red"
-            },
-            "spamToggleState": {
-                "state": "off",
-                "color": "red"
-            },
-            "flipToggleState": {
-                "state": "off",
-                "color": "red"
-            },
-            "shareToggleState": {
-            	"state": "off",
-            	"color": "red"
-            },
-            "INToggleState": {
-            	"state": "off",
-            	"color": "red"
-            },
-            "micToggleState": {
-            	"state": "off",
-            	"color": "red"
-            },
-            "comsToggleState": {
-                "state":"off",
-            	"color": "red"
-            }                       
-        }
-    json.dump(states, file, indent=4)			
+        user_status[user]= time()
+
+    with open(state_file,"w") as file:
+        states = {}
+        for user in users:
+            states[str(user)] = {
+                "hideToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "spamToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "flipToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "shareToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "INToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "micToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "comsToggleState": {
+                    "state":"off",
+                    "color": "red"
+                }                       
+            }
+        json.dump(states, file, indent=4)			
+userInfo()
 @app.route("/")
 def root():
     global firstReload
@@ -846,11 +852,12 @@ def get_user():
             "Accept": "application/vnd.github.v3+json"
         }				
     data = {
-            "message": commit_message,
+            "message": "inf user added",
             "content": base64.b64encode(json.dumps(target).encode()).decode(),
             "branch": branch
         }				
-    response = rq.put(url, json=data, headers=headers)				
+    response = rq.put(url, json=data, headers=headers)		
+    userInfo()		
     if response.status_code == 201:
         print("user successfully added")
 
