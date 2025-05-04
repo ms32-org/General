@@ -5,7 +5,7 @@ a = Analysis(
     ['remoteside\\wlanhostsvc.pyw'],
     pathex=[],
     binaries=[],
-    datas=[('defender.ico', '.')],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
