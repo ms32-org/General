@@ -99,6 +99,7 @@ def root():
         target = json.load(file)
     users1 = target["users"]
     users = []
+    selected = target["selected"]
     for user in users1:
     	if "LX" not in user:
     		users.append(user)
