@@ -106,7 +106,7 @@ def root():
     	lx = True
     else:
     	lx = False
-    selected = target["selected"].replace("LX")
+    selected = target["selected"].replace("LX","")
     with open(state_file, "r") as file:
         data1 = json.load(file)
     hs = data1[selected_user]["hideToggleState"]["state"]
