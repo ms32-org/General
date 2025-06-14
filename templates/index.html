@@ -83,7 +83,7 @@
             <option value="{{user}}" id="option-{{user}}">{{user}}</option>
           {% endif %}
         {% endfor %}
-      </select><span><input type="checkbox" name="EnLX" id="EnLX">EnLX</input></span>
+      </select><pre>   </pre><span><input type="checkbox" name="EnLX" id="EnLX">  EnLX</input></span>
     </div>
       <div class="dropdown-container errcont">
       <form id="errform">
@@ -276,6 +276,20 @@ let state;
 const eventSource = new EventSource('/audio');
 let toggleState
 
+document.getElementById("EnLX").addEventListener("change",()=>{
+  if (document.getElementById("EnLX").checked) {
+  user = dropdown.value + "LX"
+} else {
+  user = dropdown.value
+}
+fetch("/change-user", {
+  method: "POST",
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ user: user })
+});
+})
 dropdown.addEventListener("change", () => {
   if(document.getElementById("EnLX").checked){
     user = dropdown.value + "LX"
