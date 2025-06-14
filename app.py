@@ -106,7 +106,7 @@ def root():
     	lx = True
     else:
     	lx = False
-    selected = target["selected"].replace("LX","")
+    
     with open(state_file, "r") as file:
         data1 = json.load(file)
     hs = data1[selected_user]["hideToggleState"]["state"]
@@ -136,6 +136,7 @@ def root():
     else:
         data = {"tasks": []}
     firstReload = False       
+    selected = target["selected"].replace("LX","")
     return render_template("index.html", state=state if state else "Offline", lx=lx,files=files,images=images,videos=videos, exes=apps,tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,cc=cc,cs=cs,users=users,selected = selected_user)
 
 @app.route("/edit", methods=["POST", "GET"])
