@@ -97,16 +97,8 @@ def root():
     data1= None
     with open(os.path.join(STATIC_FOLDER, "users.json"), "r") as file:
         target = json.load(file)
-    users1 = target["users"]
-    users = []
+    users = target["users"]
     selected = target["selected"]
-    for user in users1:
-    	if "LX" not in user:
-    		users.append(user)
-    if "LX" in target["selected"]:
-    	lx = True
-    else:
-    	lx = False
     
     with open(state_file, "r") as file:
         data1 = json.load(file)
@@ -137,8 +129,7 @@ def root():
     else:
         data = {"tasks": []}
     firstReload = False       
-    selected = target["selected"].replace("LX","")
-    return render_template("index.html", state=state if state else "Offline", lx=lx,files=files,images=images,videos=videos, exes=apps,tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,cc=cc,cs=cs,users=users,selected = selected_user)
+    return render_template("index.html", state=state if state else "Offline",files=files,images=images,videos=videos, exes=apps,tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,cc=cc,cs=cs,users=users,selected = selected_user)
 
 @app.route("/edit", methods=["POST", "GET"])
 def edit():
