@@ -59,7 +59,7 @@
                 <option value="{{user}}">{{user}}</option>
               {% endif %}
             {% endfor %}
-          </select><span><input type="checkbox" name="EnLXS" id="EnLXS">EnLX</input></span>
+          </select>
         </div>
         <button class="btn" type="submit">Add Task</button>
       </form>
@@ -83,10 +83,7 @@
             <option value="{{user}}" id="option-{{user}}">{{user}}</option>
           {% endif %}
         {% endfor %}
-      </select><pre> </pre><span>
-  <input type="checkbox" name="EnLX" id="EnLX" {% if lx %}checked{% endif %}>
-  <label for="EnLX">EnLX</label>
-</span>
+      </select>
 
     </div>
       <div class="dropdown-container errcont">
@@ -271,11 +268,7 @@ const fileInput = document.getElementById('file-input');
 const dropdown = document.getElementById("Dropdown");
 const audioPlayer = document.getElementById("mic")
 let selectedUser
-if (document.getElementById("EnLX").checked) {
-  selectedUser = dropdown.value + "LX"
-} else {
-  selectedUser = dropdown.value
-}
+
 let mic = false
 let interval
 let time
@@ -285,26 +278,10 @@ let state;
 const eventSource = new EventSource('/audio');
 let toggleState
 
-document.getElementById("EnLX").addEventListener("change",()=>{
-  if (document.getElementById("EnLX").checked) {
-  user = dropdown.value + "LX"
-} else {
-  user = dropdown.value
-}
-fetch("/change-user", {
-  method: "POST",
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({ user: user })
-});
-})
+
+
 dropdown.addEventListener("change", () => {
-  if(document.getElementById("EnLX").checked){
-    user = dropdown.value + "LX"
-  }else{
-    user = dropdown.value
-  }
+  user = dropdown.value 
   fetch("/change-user", {
     method: "POST",
     headers: {
