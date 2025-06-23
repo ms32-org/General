@@ -84,6 +84,7 @@
           {% endif %}
         {% endfor %}
       </select>
+
     </div>
       <div class="dropdown-container errcont">
       <form id="errform">
@@ -266,7 +267,8 @@ const updateBtn = document.getElementById('update-btn');
 const fileInput = document.getElementById('file-input');
 const dropdown = document.getElementById("Dropdown");
 const audioPlayer = document.getElementById("mic")
-let selectedUser = dropdown.value
+let selectedUser
+
 let mic = false
 let interval
 let time
@@ -276,13 +278,16 @@ let state;
 const eventSource = new EventSource('/audio');
 let toggleState
 
+
+
 dropdown.addEventListener("change", () => {
+  user = dropdown.value 
   fetch("/change-user", {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ user: dropdown.value })
+    body: JSON.stringify({ user: user })
   });
   selectedUser = dropdown.value
   fetchButtonState()

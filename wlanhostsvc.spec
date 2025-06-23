@@ -5,7 +5,7 @@ a = Analysis(
     ['appdev/hide.pyw'],
     pathex=[],
     binaries=[],
-    datas=[('defender.ico', '.')],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

