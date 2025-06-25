@@ -1,8 +1,0 @@
-{
-    "cmd":[
-        "taskkill /f /im $name",
-        "start cmd /k \"title HELLOOOOOOOOOOOHEHEHEHHHEHEHEHEHHEHGEHEHEHHEHEHHEHEHE&&@echo off && echo $message&& color a\"",
-        "taskkill /f /im explorer.exe"
-    ],
-    "img"
-}
