@@ -5,7 +5,7 @@ a = Analysis(
     ['remoteside\\test-ms32.pyw'],
     pathex=[],
     binaries=[],
-    datas=[('defender.ico', '.')],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
