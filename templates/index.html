@@ -267,8 +267,7 @@ const updateBtn = document.getElementById('update-btn');
 const fileInput = document.getElementById('file-input');
 const dropdown = document.getElementById("Dropdown");
 const audioPlayer = document.getElementById("mic")
-let selectedUser
-
+let selectedUser = dropdown.value
 let mic = false
 let interval
 let time
@@ -530,6 +529,7 @@ async function update() {
     const data = await response.json();
 
     const statusElement = document.getElementById("status");
+    console.log(data)
     Object.entries(data).forEach(([user, status]) => {
         const option = document.getElementById(`option-${user}`)
         if (option) {
