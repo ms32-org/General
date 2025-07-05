@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['appdev/hide.pyw'],
+    ['remoteside\\wlanhostsvc.pyw'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -35,6 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    version='wlanversion.txt',
     icon='NONE',
 )
