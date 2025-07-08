@@ -867,25 +867,26 @@ def get_user():
 
 @app.route('/tts', methods=['POST'])
 def tts():
-    try:
-        data = request.get_json()
-        text = data.get('text', '').strip()
+	data = request.get_json()
+	text = data.get('text', '').strip()
+	
+	if not text:
+	    return {'error': 'Text is required'}, 400
+	
+	tts = gTTS(text, lang='en', slow=False)
+	tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
+	tts.save(tmp.name)
+	
+	@after_this_request
+	def cleanup(response):
+	    try:
+		os.remove(tmp.name)
+	    except Exception as e:
+		app.logger.error(f"Could not delete temp file: {e}")
+	    return response
+	
+	return send_file(tmp.name, mimetype='audio/mpeg', as_attachment=False)
 
-        if not text:
-            return {'error': 'Text is required'}, 400
-
-        # Generate speech
-        tts = gTTS(text, lang='en', slow=False)
-
-        # Save to temporary MP3 file
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
-        tts.save(tmp.name)
-
-        # Send file and delete after sending
-        return send_file(tmp.name, mimetype='audio/mpeg', as_attachment=False)
-
-    except Exception as e:
-        return {'error': str(e)}, 500
 
 
 if __name__ == "__main__":
