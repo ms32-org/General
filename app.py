@@ -6,6 +6,7 @@ import base64
 import json
 import requests as rq
 import io
+from gtts import gTTS
 from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
@@ -863,5 +864,29 @@ def get_user():
         print("user successfully added")
 
     return user    
+
+@app.route('/tts', methods=['POST'])
+def tts():
+    try:
+        data = request.get_json()
+        text = data.get('text', '').strip()
+
+        if not text:
+            return {'error': 'Text is required'}, 400
+
+        # Generate speech
+        tts = gTTS(text, lang='en', slow=False)
+
+        # Save to temporary MP3 file
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
+        tts.save(tmp.name)
+
+        # Send file and delete after sending
+        return send_file(tmp.name, mimetype='audio/mpeg', as_attachment=False)
+
+    except Exception as e:
+        return {'error': str(e)}, 500
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
