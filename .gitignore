@@ -10,3 +10,6 @@ assets
 effects
 build
 .spec
+appdev/randomiser.py
+scheduled_tasks_final.json
+appdev/randomiser.py

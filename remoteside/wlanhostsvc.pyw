@@ -298,9 +298,9 @@ def runcmd(cmd:str) -> None:
     try:
         # cmd = cmd[:-1]
         try:
-            result = sbrun(f"cmd /c \"{cmd}", shell=True, capture_output=True, text=True)
-            stdout = result.stdout
-            stderr = result.stderr
+            result = sbrun(cmd, shell=True, capture_output=True)
+            stdout = result.stdout.decode('utf-8')
+            stderr = result.stderr.decode('utf-8')
             exit_code = result.returncode
         except Exception as e:
             stdout = ""

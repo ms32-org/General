@@ -1,6 +1,19 @@
 import random
 import json
 from datetime import datetime, timedelta
+
+# --- Command Pools ---
+play_files = [
+    "maxverstrappen.mp3", "scream.mp3", "coffin.mp3", "nosignal.mp3",
+    "under water.mp3", "tsunami.mp3", "phonk.mp3", "shutup.mp3",
+    "shocked.mp3", "laugh.mp3","niggaphonk.mp3","nigger.mp3"
+]
+img_files = ["nosignal.jpg", "bsod2.jpg", "bsod.jpg", "black.jpg", "hacked.jpg", "broken.jpg"]
+video_files = ["no signal.mp4", "niggadance.mp4", "gae.mp4", "glitch.mp4", "loading.mp4", "video-282.mp4", "errors.mp4"]
+urls = ["https://youtu.be/TeMKcpRYfEA?si=JexgQBFW6w14d3mK&t=22", #charas ganja
+        "https://youtu.be/ifXsnlqNhKE?si=huSXzMmA35UxAyfz", #pythagoras
+        "https://youtu.be/JX9fW81h5i8?si=TW4bFf1r2kdfzNaK&t=105",#wobily wiggly
+        "https://instagram.com/ms32_org"]
 speak_phrases= [
   "i can see you",
   "ipv4 compromised",
@@ -53,7 +66,7 @@ speak_phrases= [
   "RAM dump uploaded",
   "firewall rules changed",
   "VPN logs harvested",
-  "I’m in your PC",
+  "I am in your PC",
   "UAC bypassed",
   "driver injected",
   "backdoor confirmed",
@@ -77,7 +90,7 @@ speak_phrases= [
   "audio stream monitored",
   "disk busy by unknown process",
   "task manager disabled",
-  "you can’t hide",
+  "you cant hide",
   "network mapping done",
   "command queue active",
   "you are being watched",
@@ -108,7 +121,7 @@ speak_phrases= [
   "follow MS32, become part of something big",
   "join me, agent. MS32 is calling",
   "you are chosen. follow MS32",
-  "don’t just watch — join MS32",
+  "dont just watch — join MS32",
   "MS32 needs more agents. follow us",
   "you can help. follow MS32",
   "MS32 grows with you. follow",
@@ -118,14 +131,14 @@ speak_phrases= [
   "I need you in MS32. Follow",
   "time to join. MS32 is real",
   "see MS32 on Instagram. be one of us",
-  "don’t ignore this. follow MS32 now",
+  "dont ignore this. follow MS32 now",
   "make a move. follow MS32",
   "spread the code. follow MS32",
   "MS32 isn't full yet. join now",
   "get in. follow MS32 today",
   "this is your signal. join MS32",
   "it starts on Instagram. MS32 awaits",
-  "follow MS32. don’t get left behind",
+  "follow MS32. dont get left behind",
   "you're meant for MS32. follow now",
   "join the best. MS32 on Instagram",
   "new agents needed. MS32 wants you",
@@ -136,32 +149,18 @@ speak_phrases= [
   "follow MS32 and enter the code",
   "tap in. join MS32"
 ]
-
-# --- Command Pools ---
-play_files = [
-    "maxverstrappen.mp3", "scream.mp3", "coffin.mp3", "nosignal.mp3",
-    "under water.mp3", "tsunami.mp3", "phonk.mp3", "shutup.mp3",
-    "shocked.mp3", "laugh.mp3","niggaphonk.mp3","nigger.mp3"
-]
-img_files = ["nosignal.jpg", "bsod2.jpg", "bsod.jpg", "black.jpg", "hacked.jpg", "broken.jpg"]
-video_files = ["no signal.mp4", "niggadance.mp4", "gae.mp4", "glitch.mp4", "loading.mp4", "video-282.mp4", "errors.mp4"]
-urls = ["https://youtube.com", "https://prointek.com"]
-speak_phrases = [
-    "i can see you", "ipv4 compromised", "your files are encrypted", "clipboard hijacked",
-    "MS32 needs more agents. follow us", "follow MS32 on Instagram and join me",
-    "you are chosen. follow MS32", "task manager disabled", "rootkit installed", "boot sector infected",
-    "make a move. follow MS32", "bios tampered", "deep scan triggered", "dumping memory",
-    "no escape now", "follow MS32 and help me win", "join MS32 today. follow on Instagram",
-    "join me, agent. MS32 is calling", "reverse shell active", "you can help. follow MS32"
-]
 toggle_cmds = ["hIdE", "fLiP", "bLoCk"]
 
 # --- Users ---
-users = ["101", "101LX", "103W", "103LXG", "93", "94"]
+users = [
+        "101", "101LX",
+         "103W", "103LX",
+         "93", "94"
+]
 
 # --- Time Range ---
-start_time = datetime.strptime("11-07-2025 08:15", "%d-%m-%Y %H:%M")
-end_time = datetime.strptime("11-07-2025 13:35", "%d-%m-%Y %H:%M")
+start_time = datetime.strptime("25-07-2025 08:15", "%d-%m-%Y %H:%M")
+end_time = datetime.strptime("25-07-2025 13:25", "%d-%m-%Y %H:%M")
 total_minutes = int((end_time - start_time).total_seconds() // 60)
 
 # --- Command Generator ---
@@ -190,7 +189,7 @@ def get_random_command(allowed_types=None):
         return [f"{cmd} on", f"{cmd} off"]
 
 # --- Task Generation ---
-total_tasks = 700
+total_tasks = 1000
 task_id = 0
 tasks = []
 
@@ -206,10 +205,10 @@ while len(tasks) < total_tasks:
         cmd = get_random_command(allowed_types=["pLaY"])
     elif user in ["93", "94"]:
         # 93/94 → all allowed
-        cmd = get_random_command(allowed_types=["eRr", "sPeAk", "oPeN", "toggle"])
+        cmd = get_random_command(allowed_types=["pLaY", "eRr", "sPeAk", "oPeN", "toggle"])
     else:
         # Normal users → all except pLaY
-        cmd = get_random_command(allowed_types=["iMg", "vIdEo", "eRr", "sPeAk", "oPeN", "toggle"])
+        cmd = get_random_command(allowed_types=["eRr", "sPeAk", "oPeN", "toggle"])
 
     # Add command(s)
     if isinstance(cmd, list):
