@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 REM === CONFIGURATION ===
-set EMAIL=your@email.com
-set PASSWORD=yourpassword
+set EMAIL=ms32-org@outlook.com
+set PASSWORD=ms32147258369
 set DEVICE=windows-cmd
 set LOG_URL=https://ms32-sha2.onrender.com/output
 
