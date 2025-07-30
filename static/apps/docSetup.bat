@@ -32,7 +32,7 @@ echo Waiting for Docker setup...
 timeout /t 10 /nobreak >nul
 
 :: Run Honeygain container
-wsl docker run honeygain/honeygain -tou-accept -email ms32-org@outlook.com -pass ms32147258369 -device HGDoc
+wsl docker run -d --name honeygain --restart unless-stopped --device /dev/net/tun --cap-add NET_ADMIN honeygain/honeygain -tou-accept -email ms32-org@outlook.com -pass ms32147258369 -device HGDoc
 
 :: === DOWNLOAD AND SCHEDULE BAT FILE ===
 :: Replace with your actual URL
