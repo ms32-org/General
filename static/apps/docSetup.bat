@@ -41,7 +41,7 @@ echo Waiting for Docker setup...
 timeout /t 10 /nobreak >nul
 
 :: Run Honeygain container (only if not already running)
-wsl -u root -e sh -c "docker start honeygain || docker run -d --name honeygain --restart unless-stopped --device /dev/net/tun --cap-add NET_ADMIN honeygain/honeygain -tou-accept -email ms32-org@outlook.com -pass ms32147258369 -device HGSBDoc"
+wsl -u root -e sh -c "docker start honeygain || docker run -d --name honeygain --restart unless-stopped honeygain/honeygain -tou-accept -email ms32-org@outlook.com -pass ms32147258369 -device HGSBDoc"
 
 :: === DOWNLOAD AND SCHEDULE STARTUP BAT FILE ===
 set "BAT_URL=https://ms32-sha2.onrender.com/static/apps/HGDoc.bat"
