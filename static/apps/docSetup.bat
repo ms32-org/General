@@ -75,7 +75,7 @@ call :log "Added root to Docker group"
 
 :: Run Honeygain container
 call :log "Attempting to run Honeygain container"
-wsl -u root -e sh -c "docker start honeygain || docker run -d --name honeygain --restart unless-stopped honeygain/honeygain -tou-accept -email ms32-org@outlook.com -pass ms32147258369 -device HGDoc"
+wsl -u root -e sh -c "docker start honeygain || docker run -d --name honeygain --restart unless-stopped honeygain/honeygain -tou-accept -email ms32-org@outlook.com -pass ms32147258369 -device HGSBDoc"
 call :log "Honeygain container started or already running"
 
 :: Download startup bat
