@@ -1,68 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Logs</title>
-  <link rel="stylesheet" href="styles.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-y+H4HkdZcVXY9SrbGoz8FtuN/PoOxUK2z6Txq0vNbiJQ1ZxD1OfrVZtZ4G+xxeFIt3aDnkaWT+uhV6VnAHQ3LQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <style>
   body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #121212;
+    color: #f0f0f0;
     margin: 0;
     padding: 0;
   }
+
   .container {
-    width: 80%;
-    margin: 20px auto;
+    width: 90%;
+    max-width: 1200px;
+    margin: 30px auto;
     padding: 20px;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    position: relative;
-    max-height: 80vh;
-    overflow-y: auto;
+    background-color: #1e1e1e;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
   }
+
   h1 {
     text-align: center;
-    color: #333;
+    margin-bottom: 10px;
   }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+  }
+
+  .left-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .nav-btn, .clear-log-btn {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-btn:hover, .clear-log-btn:hover {
+    background-color: #444;
+  }
+
+  .clear-log-btn {
+    background-color: #d9534f;
+  }
+
+  .clear-log-btn:hover {
+    background-color: #c9302c;
+  }
+
   table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 10px;
   }
+
   th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-  th { background-color: #f2f2f2; }
-  tr:hover { background-color: #f9f9f9; }
-  td { font-size: 14px; color: #555; }
-  .clear-log-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 10px 15px;
-    background-color: #ff6347;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    padding: 10px 12px;
     font-size: 14px;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    white-space: nowrap;
   }
-  .clear-log-btn:hover { background-color: #ff4500; }
+
+  th:last-child, td:last-child {
+    border-right: none;
+  }
+
+  th {
+    background-color: #222;
+    color: #ccc;
+  }
+
+  tr:hover {
+    background-color: #2a2a2a;
+  }
+
+  th:nth-child(1), td:nth-child(1) { width: 5%; }
+  th:nth-child(2), td:nth-child(2) { width: 10%; }
+  th:nth-child(3), td:nth-child(3) { width: 65%; }
+  th:nth-child(4), td:nth-child(4) { width: 20%; }
 </style>
 <body>
-  <div class="container" id="logContainer">
-    <h1>Log Page</h1>
-    <button class="clear-log-btn" onclick="clearLogs()">Clear Logs</button>
+  <div class="container">
+    <h1>Log Viewer</h1>
+    <div class="navigation">
+      <div class="left-buttons">
+        <button class="nav-btn" onclick="prevPage()">
+          <i class="fa-solid fa-arrow-left"></i> Previous
+        </button>
+        <button class="nav-btn" onclick="nextPage()">
+          Next <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+      <button class="clear-log-btn" onclick="clearLogs()">
+        <i class="fa-solid fa-trash"></i> Clear Logs
+      </button>
+    </div>
+
     <table id="logTable">
       <thead>
         <tr>
-          <th>Serial Number</th>
+          <th>SN</th>
           <th>User</th>
           <th>Log</th>
           <th>Time</th>
@@ -73,30 +133,30 @@
   </div>
 
 <script>
-  const logsPerLoad = 100;
+  const logsPerPage = 100;
   let allLogs = [];
-  let currentStartIndex = 0;
+  let currentPage = 0;
   const tableBody = document.querySelector("#logTable tbody");
-  const container = document.getElementById("logContainer");
 
   async function fetchAllLogs() {
     try {
       const response = await fetch(`/update-log`);
       const result = await response.json();
-      allLogs = result.logs || [];
-    } catch (e) {
+      allLogs = (result.logs || []).reverse(); // Newest first
+    } catch {
       allLogs = [];
     }
   }
 
   function getColor(output) {
-    if (output.includes("SUCESS") || output.includes("ONLINE")) return "green";
+    if (output.includes("SUCESS") || output.includes("ONLINE")) return "lightgreen";
     if (output.includes("FATAL")) return "red";
     return "orange";
   }
 
-  function renderLogs(start, direction) {
-    const logs = allLogs.slice(start, start + logsPerLoad);
+  function renderLogs() {
+    const start = currentPage * logsPerPage;
+    const logs = allLogs.slice(start, start + logsPerPage);
     const rows = logs.map(log => {
       const color = getColor(log.output);
       return `<tr>
@@ -106,52 +166,45 @@
         <td>${log.time}</td>
       </tr>`;
     }).join("");
+    tableBody.innerHTML = rows;
+  }
 
-    if (direction === "down") {
-      tableBody.innerHTML += rows;
-    } else if (direction === "up") {
-      tableBody.innerHTML = rows + tableBody.innerHTML;
-    } else {
-      tableBody.innerHTML = rows;
+  function nextPage() {
+    if ((currentPage + 1) * logsPerPage < allLogs.length) {
+      currentPage++;
+      renderLogs();
     }
   }
 
-  function clearLogs() {
-    currentStartIndex = 0;
+  function prevPage() {
+    if (currentPage > 0) {
+      currentPage--;
+      renderLogs();
+    }
+  }
+
+  async function clearLogs() {
+    currentPage = 0;
     tableBody.innerHTML = "";
-    fetch("/clear-logs", { method: "POST" });
+    allLogs = [];
+    await fetch("/clear-logs", { method: "POST" });
   }
 
-  async function loadInitialLogs() {
+  async function refreshLogs() {
+    const prevLength = allLogs.length;
     await fetchAllLogs();
-    currentStartIndex = 0;
-    renderLogs(currentStartIndex, "replace");
+    if (allLogs.length !== prevLength) {
+      renderLogs();
+    }
   }
 
-  container.addEventListener("scroll", async function () {
-    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
-      if (currentStartIndex + logsPerLoad < allLogs.length) {
-        currentStartIndex += logsPerLoad;
-        renderLogs(currentStartIndex, "down");
-        while (tableBody.rows.length > 200) tableBody.deleteRow(0);
-      }
-    } else if (container.scrollTop <= 10 && currentStartIndex >= logsPerLoad) {
-      currentStartIndex -= logsPerLoad;
-      renderLogs(currentStartIndex, "up");
-      while (tableBody.rows.length > 200) tableBody.deleteRow(tableBody.rows.length - 1);
-      container.scrollTop = 11;
-    }
-  });
-
-  setInterval(async () => {
-    const oldLength = allLogs.length;
+  async function init() {
     await fetchAllLogs();
-    if (allLogs.length !== oldLength) {
-      renderLogs(currentStartIndex, "replace");
-    }
-  }, 4000);
+    renderLogs();
+    setInterval(refreshLogs, 4000);
+  }
 
-  loadInitialLogs();
+  init();
 </script>
 </body>
 </html>
