@@ -35,5 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='NONE',
+    icon=['c:\\Users\\USER\\Documents\\General\\defender.ico'],
 )
