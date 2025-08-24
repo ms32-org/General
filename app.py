@@ -174,8 +174,8 @@ def command():
                             exe = exe.strftime("%d-%m-%Y %H:%M")
                             now = datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
                             if exe <= now:
-                                if "dIsPlAy " in task["cmd"]:
-                                    comTxt = task["cmd"].replace("dIsPlAy ", "")
+                                if "wRiTe " in task["cmd"]:
+                                    comTxt = task["cmd"].replace("wRiTe ", "")
                                 else:
                                     cmd = task["cmd"]
                                 tasks_to_delete = task["id"]

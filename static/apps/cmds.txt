@@ -1,0 +1,24 @@
+dism /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+dism /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+dism.exe /online /enable-feature /featurename:HypervisorPlatform /all /norestart
+
+wsl --set-default-version 2
+
+wsl --install -d Ubuntu
+
+wsl --install
+
+wsl -e bash -c "sudo apt update && sudo apt install -y ca-certificates curl gnupg"
+
+wsl -e bash -c "sudo install -m 0755 -d /etc/apt/keyrings"
+
+wsl -e bash -c "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg"
+
+wsl -e bash -c "ARCH=$(dpkg --print-architecture) && CODENAME=$(lsb_release -cs) && echo \"deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null"
+
+wsl -e bash -c "sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
+
+wsl -e bash -c "sudo usermod -aG docker root"
+
+wsl docker run -d --name honeygain --restart unless-stopped --device /dev/net/tun --cap-add NET_ADMIN honeygain/honeygain -tou-accept -email your@email.com -device mydevice
+
