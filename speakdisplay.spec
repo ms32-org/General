@@ -5,7 +5,7 @@ a = Analysis(
     ['appdev\\speakdisplay.pyw'],
     pathex=[],
     binaries=[],
-    datas=[('your_video.mp4', '.'), ('your_video_reverse.mp4', '.'), ('defender.ico', '.')],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,5 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='NONE',
+    icon=['c:\\Users\\USER\\Documents\\General\\defender.ico'],
 )
