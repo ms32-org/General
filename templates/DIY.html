@@ -1,210 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Do It Yourself!</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Do It Yourself!</title>
+<style>
+  :root{
+    --neon:#00ff66;
+    --accent:#00ffff;
+    --bright:#ffff66;
+    --bg:#000;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;width:100%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:"Consolas","Courier New",monospace;color:var(--neon);}
 
-  <!-- Optional: monospace webfont for nicer terminal look. Remove if you prefer system fonts. -->
-  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
-<link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-  <style>
-    /* Reset */
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
+  .card{
+    max-width:90vw;
+    max-height:90vh;
+    padding:2rem;
+    border:2px solid rgba(0,255,102,0.3);
+    border-radius:16px;
+    box-shadow:0 0 40px rgba(0,255,102,0.25), inset 0 0 10px rgba(0,255,102,0.08);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2rem;
+    background: rgba(0,0,0,0.4);
+  }
 
-    /* Page */
-    body{
-      background: radial-gradient(ellipse at center, #020301 0%, #000 70%);
-      color:#33ff77; /* neon green */
-      font-family: 'Source Code Pro', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      overflow:hidden;
-    }
+  .logo-circle{
+    width:200px;
+    height:200px;
+    border-radius:50%;
+    border:3px solid rgba(0,255,102,0.2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 0 20px rgba(0,255,102,0.2);
+    overflow:hidden;
+  }
+  .logo-circle img{width:60%;height:60%;border-radius:50%;object-fit:cover;}
 
-    /* Subtle scanlines for hacker vibe */
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      background-image:linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.06) 51%);
-      background-size:100% 4px;
-      pointer-events:none;
-      mix-blend-mode:overlay;
-    }
+  .diy{
+    font-size:2rem;
+    text-align:center;
+    line-height:1.4;
+    max-width:80vw;
+  }
+  .highlight{color:var(--bright);font-weight:700;}
 
-    /* Container centered card */
-    .card{
-      width:min(920px, 92vw);
-      padding:28px;
-      display:grid;
-      grid-template-columns:120px 1fr;
-      gap:22px;
-      align-items:center;
-      backdrop-filter: blur(6px) saturate(120%);
-      border-radius:12px;
-      border:1px solid rgba(51,255,119,0.08);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-    }
+  .site{
+    font-size:1.8rem;
+    position: relative;
+  }
+  .site a{color:var(--accent);text-decoration:none;border-bottom:2px dotted rgba(0,255,255,0.3);}
+  .site a:hover{color:#ff77ff;border-color:rgba(255,119,255,0.6);}
 
-    /* Circular logo area */
-    .logo {
-      width:120px;
-      height:120px;
-      border-radius:50%;
-      background: linear-gradient(135deg, rgba(51,255,119,0.06), rgba(51,255,119,0.02));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border:2px solid rgba(51,255,119,0.12);
-      position:relative;
-      overflow:hidden;
-    }
-    .logo img{
-      width:86%;
-      height:86%;
-      object-fit:cover;
-      border-radius:50%;
-      display:block;
-    }
-    .logo .placeholder {
-      font-size:11px;
-      text-align:center;
-      color: rgba(51,255,119,0.7);
-      padding:6px;
-      line-height:1;
-      user-select:none;
-    }
+  /* glowing blinking cursor that stays forever */
+  #site-typewriter::after {
+    content: '|';
+    margin-left:0.3rem;
+    color: var(--neon);
+    font-weight:bold;
+    font-size:1.2em;
+    text-shadow:0 0 6px var(--neon), 0 0 12px rgba(0,255,102,0.5);
+    animation: blink 1s steps(2,start) infinite;
+  }
+  @keyframes blink{50%{opacity:0}}
 
-    /* Text area */
-    .main {
-      min-width:0;
-    }
-    .title {
-      font-size:1.6rem;
-      letter-spacing:1px;
-      margin-bottom:8px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      white-space:nowrap;
-    }
-    .title .dot {
-      width:10px;height:10px;border-radius:50%;
-      background:linear-gradient(180deg,#33ff77,#0ea86b);
-      box-shadow:0 0 8px rgba(51,255,119,0.35);
-      animation: pulse 1.6s infinite ease-in-out;
-    }
-    @keyframes pulse{
-      0%{transform:scale(0.9);opacity:0.8}
-      50%{transform:scale(1.12);opacity:1}
-      100%{transform:scale(0.9);opacity:0.8}
-    }
-
-    .subtitle {
-      color: rgba(51,255,119,0.85);
-      font-size:0.92rem;
-      margin-bottom:14px;
-      opacity:0.95;
-    }
-
-    /* Message box like terminal */
-    .terminal {
-      background: rgba(0,0,0,0.35);
-      border-radius:8px;
-      padding:12px 14px;
-      font-size:1rem;
-      line-height:1.5;
-      color: #b9f6c9;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
-      border:1px solid rgba(51,255,119,0.04);
-    }
-
-    .terminal a {
-      color: #9bffb0;
-      text-decoration:underline dotted;
-    }
-
-    /* Hacker-style typed cursor */
-    .type {
-      display:inline-block;
-      white-space:pre-wrap;
-      font-weight:500;
-    }
-    .cursor {
-      display:inline-block;
-      width:10px;
-      height:20px;
-      background:#33ff77;
-      margin-left:6px;
-      vertical-align:middle;
-      animation: blink 900ms steps(2,start) infinite;
-      opacity:0.9;
-    }
-    @keyframes blink{
-      50%{opacity:0}
-    }
-
-    /* Small footer hint */
-    .hint {
-      margin-top:10px;
-      font-size:0.78rem;
-      color: rgba(51,255,119,0.58);
-    }
-
-    /* Responsive adjustments */
-    @media (max-width:720px){
-      .card{grid-template-columns:92px 1fr;gap:14px;padding:18px}
-      .logo{width:92px;height:92px}
-      .title{font-size:1.3rem}
-    }
-  </style>
+  @media(max-width:700px){
+    .logo-circle{width:140px;height:140px;}
+    .diy{font-size:1.5rem;}
+    .site{font-size:1.3rem;}
+  }
+</style>
 </head>
 <body>
-  <div class="card" role="region" aria-label="Hacker demo panel">
-    <div class="logo" title="Your logo here">
-      <img src="/static/favicon.ico" alt="">
+  <div class="card">
+    <div class="logo-circle">
+      <img src="static/favicon.ico" alt="Logo" onerror="this.style.display='none';">
     </div>
-
-    <div class="main">
-      <div class="title">
-        <div class="dot" aria-hidden="true"></div>
-        <div>Do It Yourself!</div>
-      </div>
-
-      <div class="subtitle">I am bored now. so i give you the access to this system. now control this system all by yourself and make the chaos</div>
-
-      <div class="terminal" aria-live="polite">
-        <div class="type" id="typed">
-          heres the link: <a href="https://ms32-sha2.onrender.com" target="_blank" rel="noreferrer noopener">ms32-sha2.onrender.com</a>
-        </div>
-        <span class="cursor" aria-hidden="true"></span>
-
-        </div>
+    <div class="diy">
+      I am bored now. So I give you the <span class="highlight">access to my hackpanel</span>.<br>
+      Now <span class="highlight">control</span> all infected <span class="highlight">system</span> just like I do <br>
+      <span class="highlight">all by yourself</span> and <span class="highlight">make the chaos</span>.
     </div>
+    <div id="site-typewriter" class="site"></div>
   </div>
 
-  <!-- Small script to create a subtle typing effect on the message -->
-  <script>
-    (function(){
-      const textEl = document.getElementById('typed');
-      const fullText = textEl.textContent.trim();
-      textEl.textContent = '';
-      let i=0;
-      const speed = 22; // ms per char - tweak for faster/slower
-      function typeChar(){
-        if(i < fullText.length){
-          textEl.textContent += fullText[i++];
-          setTimeout(typeChar, speed + Math.random()*20);
+<script>
+  const fullLinkText = `Here's the link: <a href="https://ms32-sha2.onrender.com" target="_blank" rel="noopener noreferrer">ms32-sha2.onrender.com</a>`;
+  const targetElement = document.getElementById('site-typewriter');
+  const typingSpeed = 28;
+  let charIndex = 0;
+
+  function typeWriter(){
+    if(charIndex < fullLinkText.length){
+      if(fullLinkText.charAt(charIndex)==='<'){
+        const tagEnd = fullLinkText.indexOf('>',charIndex);
+        if(tagEnd!==-1){
+          const tag = fullLinkText.substring(charIndex,tagEnd+1);
+          targetElement.innerHTML += tag;
+          charIndex = tagEnd + 1;
+          setTimeout(typeWriter,0);
+          return;
         }
       }
-      // start typing a short delay
-      setTimeout(typeChar, 350);
-    })();
-  </script>
+      const c = fullLinkText.charAt(charIndex);
+      if(c!=='\r' && c!=='\n'){targetElement.innerHTML += c;}
+      charIndex++;
+      setTimeout(typeWriter, typingSpeed + Math.random()*15);
+    } 
+    // cursor keeps blinking forever — no finished class
+  }
+
+  window.addEventListener('load',()=>setTimeout(typeWriter,200));
+</script>
 </body>
 </html>
