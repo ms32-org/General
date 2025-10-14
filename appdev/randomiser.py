@@ -3,17 +3,6 @@ import json
 from datetime import datetime, timedelta
 
 # --- Command Pools ---
-play_files = [
-    "maxverstrappen.mp3", "scream.mp3", "coffin.mp3", "nosignal.mp3",
-    "under water.mp3", "tsunami.mp3", "phonk.mp3", "shutup.mp3",
-    "shocked.mp3", "laugh.mp3","niggaphonk.mp3","nigger.mp3"
-]
-img_files = ["nosignal.jpg", "bsod2.jpg", "bsod.jpg", "black.jpg", "hacked.jpg", "broken.jpg"]
-video_files = ["no signal.mp4", "niggadance.mp4", "gae.mp4", "glitch.mp4", "loading.mp4", "video-282.mp4", "errors.mp4"]
-urls = ["https://youtu.be/TeMKcpRYfEA?si=JexgQBFW6w14d3mK&t=22", #charas ganja
-        "https://youtu.be/ifXsnlqNhKE?si=huSXzMmA35UxAyfz", #pythagoras
-        "https://youtu.be/JX9fW81h5i8?si=TW4bFf1r2kdfzNaK&t=105",#wobily wiggly
-        "https://instagram.com/ms32_org"]
 speak_phrases= [
   "i can see you",
   "ipv4 compromised",
@@ -149,68 +138,177 @@ speak_phrases= [
   "follow MS32 and enter the code",
   "tap in. join MS32"
 ]
+play_files = [
+    "maxverstrappen.mp3", "scream.mp3", "coffin.mp3", "nosignal.mp3",
+    "under water.mp3","niggaphonk.mp3", "tsunami.mp3","bell.mp3", 
+    "charas.mp3", "siren.mp3", "phonk.mp3", "shutup.mp3",
+    "shocked.mp3", "laugh.mp3","nigger.mp3", 
+    
+]
+img_files = ["nosignal.jpg", "bsod2.jpg", "bsod.jpg", "black.jpg", "hacked.jpg", "broken.jpg"]
+video_files = ["no signal.mp4", "niggadance.mp4", "gae.mp4", "glitch.mp4", "loading.mp4", "video-282.mp4", "errors.mp4"]
+urls = ["https://youtu.be/ifXsnlqNhKE?si=huSXzMmA35UxAyfz",
+        "https://youtu.be/JX9fW81h5i8?si=TW4bFf1r2kdfzNaK&t=105",
+        "https://instagram.com/ms32_org"]
 toggle_cmds = ["hIdE", "fLiP", "bLoCk"]
 
-# --- Users ---
+# --- Users (list only, as you asked) ---
 users = [
-        "101", "101LX",
-         "103W", "103LX",
-         "93", "94"
+    "103W",
+    "93", "94"
 ]
 
 # --- Time Range ---
-start_time = datetime.strptime("25-07-2025 08:15", "%d-%m-%Y %H:%M")
-end_time = datetime.strptime("25-07-2025 13:25", "%d-%m-%Y %H:%M")
+start_time = datetime.strptime("10-10-2025 08:05", "%d-%m-%Y %H:%M")
+end_time = datetime.strptime("10-10-2025 13:25", "%d-%m-%Y %H:%M")
 total_minutes = int((end_time - start_time).total_seconds() // 60)
 
-# --- Command Generator ---
+# --- GLOBAL COMMAND PROBABILITIES (percent weights) ---
+# Use a list of tuples (no dict needed). Tune these freely.
+# Note: weights are relative; they don't have to sum to 100.
+COMMAND_PROBS = [
+    ("pLaY", 30),
+    # ("iMg", 15),
+    # ("vIdEo", 15),
+    ("eRr", 13),
+    ("sPeAk", 10),
+    ("oPeN", 20),
+    ("toggle", 15),
+    ("cRaSh", 12),
+    ("rUn rename.ps1",40),
+    ("cMd rename.ps1",40)
+]
+
+
+
+# --- QUIET WINDOWS (per-user command blackout) ---
+# List of (username, [(startHH:MM,endHH:MM), ...])
+# Leave empty or add lines like:
+# ("101", [("09:00","10:00")]),
+# ("103LXG", [("12:00","12:30")]),
+    # ("101", [("09:00","10:00")]),
+QUIET_WINDOWS = [
+
+]
+
+# --- Helpers ---
+
 def get_random_timestamp():
     rand_minutes = random.randint(0, total_minutes)
     return start_time + timedelta(minutes=rand_minutes)
 
-def get_random_command(allowed_types=None):
-    if allowed_types is None:
-        allowed_types = ["pLaY", "iMg", "vIdEo", "eRr", "sPeAk", "oPeN", "toggle"]
-    choice = random.choice(allowed_types)
-    if choice == "pLaY":
+def is_quiet(user: str, when: datetime) -> bool:
+    """Return True if 'when' falls inside any quiet window for 'user'."""
+    if not QUIET_WINDOWS:
+        return False
+    t = when.time()
+    for uname, windows in QUIET_WINDOWS:
+        if uname == user:
+            for start_str, end_str in windows:
+                s = datetime.strptime(start_str, "%H:%M").time()
+                e = datetime.strptime(end_str, "%H:%M").time()
+                if s <= t <= e:
+                    return True
+    return False
+
+def weighted_choice(allowed_types):
+    """Pick a command type using global weights, restricted to allowed_types."""
+    pool, weights = [], []
+    for cmd, w in COMMAND_PROBS:
+        if cmd in allowed_types and w > 0:
+            pool.append(cmd)
+            weights.append(w)
+    if not pool:  # fallback
+        return random.choice(allowed_types)
+    return random.choices(pool, weights=weights, k=1)[0]
+
+def build_command(cmd_type: str):
+    """Render a concrete command string or list from a cmd_type."""
+    if cmd_type == "pLaY":
         return f"pLaY {random.choice(play_files)}"
-    elif choice == "iMg":
+    if cmd_type == "iMg":
         return f"iMg {random.choice(img_files)}"
-    elif choice == "vIdEo":
+    if cmd_type == "vIdEo":
         return f"vIdEo {random.choice(video_files)}"
-    elif choice == "eRr":
+    if cmd_type == "rUn rename.ps1":
+        return "rUn rename.ps1"
+    if cmd_type == "cMd rename.ps1":
+        return "cMd rename.ps1"
+    if cmd_type == "eRr":
         return f"eRr {random.randint(1, 15)}"
-    elif choice == "sPeAk":
+    if cmd_type == "sPeAk":
         return f"sPeAk {random.choice(speak_phrases)}"
-    elif choice == "oPeN":
-        return [f"oPeN {random.choice(urls)}", "bLoCk on", "bLoCk off"]
-    elif choice == "toggle":
-        cmd = random.choice(toggle_cmds)
-        return [f"{cmd} on", f"{cmd} off"]
+    if cmd_type == "oPeN":
+        return f"oPeN {random.choice(urls)}"
+    if cmd_type == "toggle":
+        tcmd = random.choice(toggle_cmds)
+        return [f"{tcmd} on", f"{tcmd} off"]  # on now, off +1 minute
+    if cmd_type == "cRaSh":
+        return "cRaSh"
+    # fallback (shouldn't hit)
+    return "eRr 1"
 
 # --- Task Generation ---
-total_tasks = 1000
+total_tasks = 1450
 task_id = 0
 tasks = []
 
 while len(tasks) < total_tasks:
     exec_time = get_random_timestamp()
-
-    # Randomly choose a user first
     user = random.choice(users)
 
-    # Apply command restrictions based on user type
-    if user.endswith("LX"):
-        # LX users → only pLaY
-        cmd = get_random_command(allowed_types=["pLaY"])
-    elif user in ["93", "94"]:
-        # 93/94 → all allowed
-        cmd = get_random_command(allowed_types=["pLaY", "eRr", "sPeAk", "oPeN", "toggle"])
-    else:
-        # Normal users → all except pLaY
-        cmd = get_random_command(allowed_types=["eRr", "sPeAk", "oPeN", "toggle"])
+    # Skip if user is in a quiet window at this time
+    if is_quiet(user, exec_time):
+        continue
 
-    # Add command(s)
+    # Decide allowed types by user kind
+    if user.endswith("LXG"):
+        # previously: ["toggle","oPeN","eRr","pLaY"] → now also iMg, vIdEo
+        allowed_types = ["toggle", "oPeN", "eRr", "pLaY"]
+    elif user.endswith("LX"):
+        # LX → audio only (as per earlier rule)
+        allowed_types = ["pLaY"]
+    elif user in ["93", "94"]:
+        # 93/94 → everything allowed
+        allowed_types = ["pLaY", "iMg", "vIdEo", "eRr", "sPeAk", "oPeN", "toggle", "cRaSh","rUn rename.ps1","cMd rename.ps1"]
+    else:
+        # Normal users → system-only + cRaSh; no pLaY/iMg/vIdEo
+        allowed_types = ["pLaY", "eRr", "sPeAk", "oPeN", "toggle", "cRaSh","rUn rename.ps1","cMd rename.ps1"]
+
+    cmd = build_command(weighted_choice(allowed_types))
+
+    # --- Special handling for oPeN: wrap with bLoCk on/off ---
+    # bLoCk on at T, oPeN at T+1 min, bLoCk off at T+3 min  (>=2 min window)
+    if isinstance(cmd, str) and cmd.startswith("oPeN "):
+        # bLoCk on
+        tasks.append({
+            "id": task_id,
+            "cmd": "bLoCk on",
+            "execution_time": exec_time.strftime("%d-%m-%Y %H:%M"),
+            "user": user
+        })
+        task_id += 1
+
+        # oPeN
+        tasks.append({
+            "id": task_id,
+            "cmd": cmd,
+            "execution_time": (exec_time + timedelta(minutes=1)).strftime("%d-%m-%Y %H:%M"),
+            "user": user
+        })
+        task_id += 1
+
+        # bLoCk off (after ≥2 minutes of block on)
+        tasks.append({
+            "id": task_id,
+            "cmd": "bLoCk off",
+            "execution_time": (exec_time + timedelta(minutes=3)).strftime("%d-%m-%Y %H:%M"),
+            "user": user
+        })
+        task_id += 1
+        continue  # done with this iteration
+
+    # --- Normal add: list => spaced by +1 minute; single => exact time ---
     if isinstance(cmd, list):
         for j, c in enumerate(cmd):
             tasks.append({
