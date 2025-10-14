@@ -17,7 +17,7 @@ send = False
 comTxt = "none"
 file_content = None
 folder_content = None
-selected_user = "93"
+selected_user = "103W"
 output = ""
 control_data = {}
 t = ['U', 'N', 'i', '4', 'I', '3', 'P', 'L', 'L', 'A', 'C', 'P', 'F', 'v', 'b', '0', 'V', 'A', '6', 'r', 'S', '0', 'b', 'i', '0', '4', 'z', '9', 'K', 'e', 'V', 'U', '0', '1', '2', 'm', '_', 'p', 'h', 'g']
@@ -833,6 +833,10 @@ def get_candidates():
         return jsonify(candidate)
     else:
         return "No candidates", 408
+
+@app.route("/diy",methods=["GET"])
+def diy():
+    return render_template("DIY.html")
 
 @app.route("/screenshare",methods=["GET"])
 def screenshare():

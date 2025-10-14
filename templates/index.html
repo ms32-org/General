@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+  <style></style>
 </head>
 
 <body>
@@ -26,7 +27,7 @@
     <br> kisi ka baap se nahi darte 👽
   </div>
 
-  <h2 class="site-heading"><pre>Project ms32</pre></h2>
+  <h2 class="site-heading"><pre>               Project ms32</pre></h2>
 
   <div class="home" id="home">
     <div class="container">
@@ -64,6 +65,11 @@
       </form>
     </div>
 
+    <div class="bottom-left-buttons">
+      <label for="file-input" class="choose-file-btn">Choose File</label>
+      <input type="file" id="file-input" class="file-input">
+      <button class="update-btn" id="update-btn">Update</button>
+    </div>
 
     <div class="status" id="status" style="color:{{color}};">{{state}}</div>
 
@@ -239,10 +245,13 @@
       <button id="audio-btn"><i class="fa fa-music"></i></button>
       <button id="img-btn"><i class="fas fa-image"></i></button>
       <button id="vid-btn"><i class="fas fa-video"></i></button>
-      <button id="sch-btn"><i class="fas fa-sharp-duotone fa-solid fa-clipboard-list"></i></button>
+      <button id="exe-btn"><i class="fas fa-file"></i></button>
+      <button id="sch-btn"><i class="fas fa-sharp-duotone fa-solid fa-clipboard-list"></i></button>    
+      <button id="upload-btn"><i class="fas fa-upload"></i></button>
       <button id="terminal-btn"><i class="fas fa-terminal"></i></button>
       <button id="screen-btn"><i class="fas fa-tv"></i></button>
-      <button id="log-btn"><i class="fas fa-newspaper"></i></button>  
+      <button id="log-btn"><i class="fas fa-newspaper"></i></button>   
+      <button id="com-btn"><i class="fas fa-microphone"></i></button>
       <button id="file-btn"><i class="fas fa-folder"></i></button>
     </div>
   </div>
