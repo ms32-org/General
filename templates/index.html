@@ -8,7 +8,39 @@
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-  <style></style>
+  <style>
+    .contact-links-container {
+      /* Positioning near site heading, top right corner */
+      position: absolute; 
+      top: 85%;
+      right: 35%; 
+      display: flex;
+      flex-direction: column; /* Horizontal layout */
+      gap: 15px;
+      z-index: 1000;
+    }
+    .contact-link-btn {
+      padding: 4px 8px; /* Reduced padding for a 'stripped' look */
+      /* Using the green color found in other elements */
+      background-color: #238636; 
+      color: white;
+      text-decoration: none;
+      border-radius: 4px; /* Slightly smaller radius */
+      font-family: 'Silkscreen', sans-serif;
+      font-size: 10px; /* Reduced font size */
+      border: 1px solid #1a5e2a;
+      /* Reduced shadow for 'stripped' look */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+      transition: background-color 0.2s, transform 0.1s;
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap; /* Prevent wrapping in the strip format */
+    }
+    .contact-link-btn:hover {
+      background-color: #30a14e;
+      transform: translateY(-1px);
+    }
+  </style>
 </head>
 
 <body>
@@ -28,6 +60,11 @@
   </div>
 
   <h2 class="site-heading"><pre>               Project ms32</pre></h2>
+
+  <div class="contact-links-container">
+    <a href="https://discord.gg/ebnahV5N5G" class="contact-link-btn">Contact for any help (Discord Server)</a>
+    <a href="https://www.instagram.com/ms32_org/" class="contact-link-btn">Instagram Bio</a>
+  </div>
 
   <div class="home" id="home">
     <div class="container">
